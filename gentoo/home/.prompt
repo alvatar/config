@@ -1,0 +1,145 @@
+#########################################################################
+# PROMPT_CONFIG holds all the default colors and thresholds for the	#
+# spiffy features.  It also contains the feature flags to enable stuff	#
+#########################################################################
+
+#########################################################################
+# PROMPT_FUNCTIONS holds all the code features that make this prompt so	#
+# spiffy.  Feel free to look under the hood and suggest bug reports.	#
+#########################################################################
+
+precmd()
+{
+#################################
+#################################
+#################################
+# Everything in this function	#
+# is dynamically updated	#
+# before every prompt display	#
+#################################
+#################################
+#################################
+
+# Set PS1 local variables so we don't pollute
+# our environment with excess prompt variables
+local PROMPT_STATUS=$? # Must be first to get exit status of last app
+local PROMPT_INFO_WINDOW
+local PROMPT_INFO_PROMPT
+local PROMPT_INFO_TTY
+local PROMPT_INFO_USER
+local PROMPT_INFO_HOST
+local PROMPT_INFO_PWD
+local PROMPT_INFO_PROC
+local PROMPT_INFO_LOAD
+local PROMPT_INFO_BASE
+local PROMPT_INFO_EXTRA
+local TMP
+local ALARM
+local CWD
+
+
+local PROMPT_CONFIG=$HOME/.prompt_config
+[ -r "$PROMPT_CONFIG" ] && . "$PROMPT_CONFIG"
+prompt_path_set
+
+
+# Call all of our functions, they have logic 
+# to return early if you don't want them
+prompt_exit_status
+prompt_terminal_title
+prompt_timer
+prompt_tty_type
+prompt_path_status
+prompt_proc_load_info
+prompt_directory_info
+prompt_acpi_info
+prompt_emerge_info
+prompt_set_alarm # should be last as the others may set an alarm trigger (high load, high temperature, low battery, etc.)
+
+
+
+
+
+
+
+#######
+#######
+#######
+# Setup extra information in format of " [ INFO_SWAP | INFO_PROC INFO_DIR | INFO_ACPI ]"
+#######
+#######
+#######
+	if [ ${USE_COMPACT:-0} -ne 0 ] && ([ ${USE_DIR:-0} -ne 0 ] || [ ${USE_EMERGE:-0} -ne 0 ]) ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${PROMPT_INFO_SWAP}"
+	elif [ ${USE_DIR:-0} -ne 0 ] ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${PROMPT_INFO_DIR}"
+	elif [ ${USE_EMERGE:-0} -ne 0 ] ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${PROMPT_INFO_EMERGE}"
+	fi
+
+	if [ ${USE_PROC:-0} -ne 0 ] ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${SEPERATOR}${PROMPT_INFO_PROC}"
+	fi
+
+	if [ ${USE_LOAD:-0} -ne 0 ] ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${PROMPT_INFO_LOAD}"
+	fi
+
+	if [ ${USE_ACPI:-0} -ne 0 ] ; then
+		PROMPT_INFO_EXTRA="${PROMPT_INFO_EXTRA}${SEPERATOR}${PROMPT_INFO_ACPI}"
+	fi
+
+
+# Final PS1 variables (we assign these to PS1)
+# These intermediate variables are populated by the functions above and are for ease of use
+PROMPT_INFO_PROMPT="${SPACER}${COLOR_PROMPT}\\\$${SPACER}"
+PROMPT_INFO_PWD="${SPACER}${COLOR_PWD}${CWD}"
+PROMPT_INFO_USER="${COLOR_USER}${USERNAME}"
+PROMPT_INFO_HOST="${COLOR_HOST}${HOST}"
+PROMPT_INFO_BASE="${ALARM}${PROMPT_INFO_WINDOW}${PROMPT_INFO_TTY}\
+${PROMPT_INFO_USER}${DEFAULT}@${PROMPT_INFO_HOST}${PROMPT_INFO_PWD}"
+PROMPT_INFO_EXTRA="${SPACER}[${PROMPT_INFO_EXTRA}${SPACER}]"
+
+
+if [ ${UID:-0} -ne 0 ] ; then
+	# USER prompt format (1 line):
+	# user@host:short_path $
+
+	PS1="${PROMPT_INFO_BASE}${PROMPT_INFO_PROMPT}"
+else
+	# ROOT prompt format (2 lines):
+	# tty user@host full_path [ swap_info | procs load | acpi ]
+	# [history] $
+	PS1="${PROMPT_INFO_BASE}${PROMPT_INFO_EXTRA}${NEWLINE}${DEFAULT}[${PROMPT_COMMAND_NUMBER}]${PROMPT_INFO_PROMPT}"
+
+#	PS1="${PROMPT_INFO_BASE}${SPACER}[${PROMPT_INFO_SWAP}${SEPERATOR}${PROMPT_INFO_PROCS}${PROMPT_INFO_LOAD}${SPACER}]${NEWLINE}${DEFAULT}[${PROMPT_COMMAND_NUMBER}]${PROMPT_INFO_PROMPT}"
+fi
+}
+
+prompt_get_functions()
+{
+	local PROMPT_FUNCTIONS=$HOME/.prompt_functions
+	[ -r "$PROMPT_FUNCTIONS" ] && . "$PROMPT_FUNCTIONS"
+
+	# Please note that PROMPT_CONFIG is defined TWICE - Make these the same file.
+	# This definition allows feature dependency checking
+	# Essentially certain system apps are required for some features
+	# This will notify you if you are missing those dependencies
+	local PROMPT_CONFIG=$HOME/.prompt_config
+	[ -r "$PROMPT_CONFIG" ] && . "$PROMPT_CONFIG"
+	prompt_depend_check
+}
+
+# Set some sane shell environment variables if they aren't set
+[ ! "$HOME" ] && export HOME=$PWD
+[ ! "$HOSTNAME" ] && export HOSTNAME=$(hostname)
+[ ! "$USER" ] && export USER=$(id -un)
+[ ! "$UID" ] && export UID=$(id -u $USER)
+prompt_get_functions
+prompt_init
+
+# SET DEFAULT PROMPT
+# End of PROMPT_CONFIG has
+# escape sequences that
+# can be used for this
+PS1="${PROMPT_DEFAULT} "

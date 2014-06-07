@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/.bin
+./xmacroplay :0 < ./xmacros/rails-fourthbit

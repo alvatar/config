@@ -1,0 +1,331 @@
+# Questions and comments should be directed to pagerc@gmail.com
+# Further reading may be conducted at http://www.gilesorr.com/bashprompt/
+
+#########################################################################
+# PROMPT_FUNCTIONS holds all the code features that make this prompt so	#
+# spiffy.  Feel free to look under the hood and suggest bug reports.	#
+#########################################################################
+
+###############################################
+###############################################
+###############################################
+# BOTTOM OF FILE HAS FLAGS TO TOGGLE FEATURES #
+###############################################
+###############################################
+###############################################
+
+
+local NEWLINE="\n"
+local IGNORE_ESCAPE_START="\["
+local IGNORE_ESCAPE_END="\]"
+local PROMPT_COMMAND_NUMBER="\!"
+local PROMPT_DEFAULT="\$"
+
+if [ "$0" == "zsh" ] ; then
+	IGNORE_ESCAPE_START="%{"
+	IGNORE_ESCAPE_END="%}"
+	PROMPT_COMMAND_NUMBER="%!"
+	PROMPT_DEFAULT="%#"
+	NEWLINE=$prompt_newline
+fi
+
+
+#############
+#COLOR CODES#
+#############
+local DEFAULT="${IGNORE_ESCAPE_START}\e[0m${IGNORE_ESCAPE_END}"
+local BOLD="${IGNORE_ESCAPE_START}\e[1m${IGNORE_ESCAPE_END}"
+local HIDDEN="${IGNORE_ESCAPE_START}\e[8m${IGNORE_ESCAPE_END}"
+local BLACK="${IGNORE_ESCAPE_START}\e[00;30m${IGNORE_ESCAPE_END}"
+local GRAY="${IGNORE_ESCAPE_START}\e[01;30m${IGNORE_ESCAPE_END}"
+local RED="${IGNORE_ESCAPE_START}\e[00;31m${IGNORE_ESCAPE_END}"
+local LRED="${IGNORE_ESCAPE_START}\e[01;31m${IGNORE_ESCAPE_END}"
+local GREEN="${IGNORE_ESCAPE_START}\e[00;32m${IGNORE_ESCAPE_END}"
+local LGREEN="${IGNORE_ESCAPE_START}\e[01;32m${IGNORE_ESCAPE_END}"
+local BROWN="${IGNORE_ESCAPE_START}\e[00;33m${IGNORE_ESCAPE_END}"
+local YELLOW="${IGNORE_ESCAPE_START}\e[01;33m${IGNORE_ESCAPE_END}"
+local BLUE="${IGNORE_ESCAPE_START}\e[00;34m${IGNORE_ESCAPE_END}"
+local LBLUE="${IGNORE_ESCAPE_START}\e[01;34m${IGNORE_ESCAPE_END}"
+local PURPLE="${IGNORE_ESCAPE_START}\e[00;35m${IGNORE_ESCAPE_END}"
+local LPURPLE="${IGNORE_ESCAPE_START}\e[01;35m${IGNORE_ESCAPE_END}"
+local CYAN="${IGNORE_ESCAPE_START}\e[00;36m${IGNORE_ESCAPE_END}"
+local LCYAN="${IGNORE_ESCAPE_START}\e[01;36m${IGNORE_ESCAPE_END}"
+local LGRAY="${IGNORE_ESCAPE_START}\e[00;37m${IGNORE_ESCAPE_END}"
+local WHITE="${IGNORE_ESCAPE_START}\e[01;37m${IGNORE_ESCAPE_END}"
+
+
+####################
+#CORE PROMPT COLORS#
+####################
+local COLOR_TTY=$DEFAULT
+local COLOR_ROOT=$LRED
+local COLOR_USER=$LGREEN
+local COLOR_HOST=$LGREEN
+local COLOR_PWD=$DEFAULT
+local COLOR_PROMPT=$DEFAULT
+
+
+##############
+#EVENT COLORS#
+##############
+local COLOR_GOOD=$LGREEN
+local COLOR_OKAY=$LBLUE
+local COLOR_BAD=$YELLOW
+local COLOR_CRIT=$LRED
+local COLOR_SUCCESS=$LCYAN
+local COLOR_FAILURE=$COLOR_CRIT
+
+
+##########
+#TTY TYPE#
+##########
+# TTY login type
+local COLOR_TTY_LOC=$DEFAULT
+local COLOR_TTY_SSH=$LGREEN
+local COLOR_TTY_TEL=$CYAN
+
+
+##################################
+#PRESENT WORKING DIRECTORY STATUS#
+##################################
+local COLOR_OWNER=$LGREEN
+local COLOR_RW=$GREEN
+local COLOR_NOR=$YELLOW
+local COLOR_NOW=$LRED
+local COLOR_NORW=$LRED
+
+
+###############
+#PROCCESS INFO#
+###############
+local COLOR_PROC=$LGREEN
+
+
+###########
+#LOAD INFO#
+###########
+# Select LOAD_AVG for 1, 5, or 15 minutes
+local LOAD_AVG=1
+local CRIT_LOAD=10
+local HIGH_LOAD=7
+local MED_LOAD=5
+local LOW_LOAD=2
+local COLOR_LOAD=$COLOR_GOOD
+local COLOR_CRIT_LOAD=$COLOR_CRIT
+local COLOR_HIGH_LOAD=$COLOR_BAD
+local COLOR_MED_LOAD=$COLOR_OKAY
+local COLOR_LOW_LOAD=$COLOR_LOAD
+
+
+################
+#DIRECTORY INFO#
+################
+local COLOR_DISK_USED=$DEFAULT
+local COLOR_FILE=$DEFAULT
+local COLOR_HIDDEN_FILE=$DEFAULT
+local COLOR_EXEC=$LGREEN
+local COLOR_DIR=$LBLUE
+local COLOR_HIDDEN_DIR=$COLOR_DIR
+local COLOR_LINK=$LCYAN
+local COLOR_DEV=$YELLOW
+local COLOR_BIN=$YELLOW
+local COLOR_CHAR=$YELLOW
+local COLOR_PIPE=$BROWN
+local COLOR_SOCKET=$LPURPLE
+local COLOR_DENIED=$COLOR_CRIT
+
+
+##################
+#TEMPERATURE INFO#
+##################
+# Temperature in Celcius
+local TEMP_CRIT=68
+local TEMP_HIGH=60
+local TEMP_MED=58
+local TEMP_LOW=55
+local COLOR_TEMP=$COLOR_GOOD
+local COLOR_TEMP_CRIT=$COLOR_CRIT
+local COLOR_TEMP_HIGH=$COLOR_BAD
+local COLOR_TEMP_MED=$COLOR_OKAY
+local COLOR_TEMP_LOW=$COLOR_TEMP
+
+
+##############
+#BATTERY INFO#
+##############
+# Battery percentage
+local BAT_HIGH_BAT=75
+local BAT_MED=50
+local BAT_LOW=25
+local BAT_CRIT=10
+local COLOR_BAT=$COLOR_GOOD
+local COLOR_BAT_HIGH=$COLOR_BAT
+local COLOR_BAT_MED=$COLOR_OKAY
+local COLOR_BAT_LOW=$COLOR_BAD
+local COLOR_BAT_CRIT=$COLOR_CRIT
+# Dark colors for no ac power
+local COLOR_BAT_HIGH_NOAC=$GREEN
+local COLOR_BAT_MED_NOAC=$BLUE
+local COLOR_BAT_LOW_NOAC=$BROWN
+local COLOR_BAT_CRIT_NOAC=$RED
+
+
+#############
+#EMERGE INFO#
+#############
+local COLOR_EMERGE=$COLOR_GOOD
+
+
+####################
+# FORMATTING BASICS#
+####################
+# Default to 80 columns if not set by terminal
+# and use a fourth of terminal for path
+local PATH_WIDTH=$((${COLUMNS:-80} / 4))
+local SPACER="$DEFAULT "
+local SEPERATOR="$SPACER|"
+
+
+###########
+#BEEP TIME#
+###########
+# Time is in seconds
+local BEEP_TIME=300
+
+
+
+########################################
+########################################
+########################################
+# EDIT THIS -- ENABLE/DISABLE FEATURES #
+########################################
+########################################
+########################################
+
+# Addon features/colors
+# EUID? effective user identifier
+if [ ${UID:-0} -ne 0 ] ; then
+	#########################
+	# USER addons to enable #
+	#########################
+	# Set this for compact information
+	local USE_COMPACT=1
+
+	# Set this to use the current directory name for path
+	local USE_PATH_LAST_DIR=1
+
+	# Set this for absolute path not link relative
+	local USE_PATH_ABSOLUTE=0
+
+	# Set this to always update data
+	local USE_ALWAYS_UPDATE=1
+
+	# Set this to beep on long run completion
+	local USE_BEEP_ON_TIMER=1
+
+	# Set this to beep on fail of last app
+	local USE_BEEP_ON_FAIL=1
+
+	# Set this to colorize tty based on
+	# session type (local/remote/screen)
+	local USE_TTY=0
+
+	# Set this to colorize pwd based on
+	# permissions
+	local USE_PWD=1
+
+	# Set this to display process information
+	local USE_PROC=1
+
+	# Set this to display load information
+	local USE_LOAD=1
+
+	# Set this to display directory information
+	local USE_DIR=1
+		local USE_DISK_USED=1
+		local USE_VISIBLE=1
+		local USE_HIDDEN=0
+
+	# Set this for ACPI/APM
+	local USE_ACPI=0
+		local USE_BAT=0
+		local USE_TEMP=0
+
+	# Set this to display current emerge
+	local USE_EMERGE=0
+
+	# Format user and host
+	# Escape sequences that can be used
+	# are at the bottom of this file
+	# Could use escapes \u@\h but breaks
+	# compact support *for now*
+	local USERNAME=$USER
+	local HOST=$HOSTNAME
+
+	# Title is the window title
+	# Icon is the task bar title
+	local WINDOW_TITLE="\u@\h:\w"
+	local WINDOW_ICON="\u@\h:\W"
+
+else
+	#########################
+	# ROOT addons to enable #
+	#########################
+	local USE_COMPACT=1
+	local USE_PATH_LAST_DIR=0
+	local USE_PATH_ABSOLUTE=1
+	local USE_ALWAYS_UPDATE=0
+	local USE_BEEP_ON_TIMER=1
+	local USE_BEEP_ON_FAIL=1
+	local USE_TTY=1
+	local USE_PWD=1
+	local USE_PROC=1
+	local USE_LOAD=1
+	local USE_DIR=1
+		local USE_DISK_USED=1
+		local USE_VISIBLE=1
+		local USE_HIDDEN=1
+	local USE_ACPI=0
+		local USE_BAT=0
+		local USE_TEMP=0
+	local USE_EMERGE=1
+
+	# Format user, host, and current
+	# working directory end of file
+	# has escape sequences
+	local USERNAME=$USER
+	local HOST=$HOSTNAME
+	local WINDOW_TITLE="\u@\h:\w"
+	local WINDOW_ICON="\u@\h:\W"
+
+	COLOR_USER=$COLOR_ROOT
+fi
+
+# Bash Prompt howto: http://www.gilesorr.com/bashprompt/howto/book1.html
+# Bash builtin escape sequences and descriptions
+# ESC	DESCRIPTION
+# \a	an ASCII bell character (07)
+# \d	the date in "Weekday Month Date" format (e.g., "Tue May 26")
+# \e	an ASCII escape character (033)
+# \h	the hostname up to the first `.'
+# \H	the hostname
+# \j	the number of jobs currently managed by the shell
+# \l	the basename of the shell's terminal device name
+# \n	newline
+# \r	carriage return
+# \s	the name of the shell, the basename of $0 (the portion following the final slash)
+# \t	the current time in 24-hour HH:MM:SS format
+# \T	the current time in 12-hour HH:MM:SS format
+# \@	the current time in 12-hour am/pm format
+# \u	the username of the current user
+# \v	the version of bash (e.g., 2.00)
+# \V	the release of bash, version + patchlevel (e.g., 2.00.0)
+# \w	the current working directory
+# \W	the basename of the current working directory
+# \!	the history number of this command
+# \#	the command number of this command
+# \$	if the effective UID is 0, a #, otherwise a $
+# \nnn	the character corresponding to the octal number nnn
+# \\	a backslash
+# \[	begin a sequence of non-printing characters, which could be used to embed a terminal control sequence into the prompt
+# \]	end a sequence of non-printing characters

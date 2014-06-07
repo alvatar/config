@@ -1,0 +1,812 @@
+########
+#ISSUES#
+########
+# 1) TTY code isn't tweaked and does nothing.
+# 2) Beep code is from last prompt update,
+# not from start time of last program.
+
+# This code attempts to solve item 2,
+# but fails because it will always refresh
+# every 5 seconds, even while something is
+# running
+#REFRESH_TIME=5
+#if [ ${USE_TIME_BEEP:-0} -ne 0 ] ; then
+#	update_start_time &
+#fi
+#function update_start_time {
+#	while [ 0 ]
+#	do
+#		COUNT_START_TIME=$SECONDS
+#		sleep $REFRESH_TIME
+#	done
+#}
+
+
+prompt_error()
+{
+	echo "***PROMPT ERROR***"
+	echo "Please send an email to pagerc@gmail.com"
+	echo "Note the error: $@"
+	echo "Sorry for the inconvenience."
+	false
+}
+
+
+prompt_error_depends()
+{
+	echo "***PROMPT CONFIG WARNING***"
+	echo "Please modify '$PROMPT_CONFIG' and disable the following flag(s): $FLAGS."
+	echo "These feature(s) require the following unavailable command(s): $CMDS."
+	false
+}
+
+
+prompt_init()
+{
+	if [ -r /proc/acpi ] ; then
+		$(acpi > /dev/null 2>&1)
+		PROMPT_INFO_HAVE_ACPI=$?
+		([ ${PROMPT_INFO_HAVE_ACPI} -ne 0 ] || [ ${PROMPT_INFO_HAVE_ACPI} -ne 1 ]) && PROMPT_INFO_HAVE_ACPI=1
+	fi
+	if [ -r /proc/apm ] ; then
+		$(apm > /dev/null 2>&1)
+		PROMPT_INFO_HAVE_APM=$?
+		([ ${PROMPT_INFO_HAVE_APM} -ne 0 ] || [ ${PROMPT_INFO_HAVE_APM} -ne 1 ]) && PROMPT_INFO_HAVE_APM=1
+	fi
+
+	PROMPT_INFO_COUNT_START_TIME=$(date +%s 2> /dev/null) || echo prompt_error "date call"
+
+	PROMPT_INFO_TTY_DEV=$(tty 2> /dev/null) || echo prompt_error "tty call"
+
+	PROMPT_INFO_TTY_DEV=${PROMPT_INFO_TTY_DEV#/dev/}
+	PROMPT_INFO_OLDPWD=.
+
+	# Set PS1 globals so we don't need to
+	# refresh on every prompt update
+	PROMPT_COMMAND=precmd
+	if [ "$0" != "bash" ] && [ "$0" != "zsh" ] ; then
+		local CMD
+		local TEST
+
+		# Since this shell depends on prompt_cd to update PS1,
+		# we'll do it for initial login
+		precmd
+
+		for TEST in command builtin bltin
+		do
+			$TEST > /dev/null 2>&1
+			[ $? -ne 127 ] && CMD=$TEST
+		done
+
+		alias cd="prompt_cd $CMD"
+		prompt_cd()
+		{
+			local CD=$1
+			shift
+			$CD cd "$@"			
+			precmd
+		}
+	fi
+}
+
+
+prompt_depend_fail()
+{
+	CMDS=${CMDS#, \'${CMD}\'}
+	CMDS=${CMDS#\'${CMD}\'}
+	if [ "$CMDS" ] ; then
+		CMDS="$CMDS, '$CMD'"
+	else
+		CMDS="'$CMD'"
+	fi
+
+	FLAGS=${FLAGS#, \'$FLAG\'}
+	FLAGS=${FLAGS#\'$FLAG\'}
+	if [ "$FLAGS" ] ; then
+		FLAGS="$FLAGS, '$FLAG'"
+	else
+		FLAGS="'$FLAG'"
+	fi
+}
+
+prompt_depend_check()
+{
+	# Exec each command and direct output to /dev/null.
+	# Adds startup time to shell, but not much.
+	# Better to tell people what's broken at startup then let stuff be broken.
+	local CMD
+	local CMDS
+	local FLAG
+	local FLAGS
+
+	CMD=sed; $CMD --help > /dev/null 2>&1
+	local STATUS_SED=$?
+	CMD=date; $CMD --help > /dev/null 2>&1
+	local STATUS_DATE=$?
+	CMD=tty; $CMD --help > /dev/null 2>&1
+	local STATUS_TTY=$?
+	CMD=du;	$CMD --help > /dev/null 2>&1
+	local STATUS_DU=$?
+	CMD=ps;	$CMD --help > /dev/null 2>&1
+	local STATUS_PS=$?
+	CMD=pidof; $CMD pidof > /dev/null 2>&1
+	local STATUS_PIDOF=$?
+
+
+	FLAG="USE_ACPI" && [ ${STATUS_SED} -ne 0 ] && [ ${USE_ACPI:-0} -ne 0 ] && prompt_depend_fail
+	FLAG="USE_EMERGE" && [ ${STATUS_SED} -ne 0 ] && [ ${USE_EMERGE:-0} -ne 0 ] && prompt_depend_fail
+
+	FLAG="USE_ACPI"
+	if [ -r /proc/acpi ] ; then
+		CMD=acpi; $CMD --help > /dev/null 2>&1
+		local STATUS_ACPI=$?
+		[ ${STATUS_ACPI} -ne 0 ] && [ ${USE_ACPI:-0} -ne 0 ] && prompt_depend_fail
+	else
+		CMD=apm; $CMD --help > /dev/null 2>&1
+		local STATUS_APM=$?
+		[ ${STATUS_APM} -ne 0 ] && [ ${USE_ACPI:-0} -ne 0 ] && prompt_depend_fail
+	fi
+
+	FLAG="USE_TIME_BEEP"
+	[ ${STATUS_DATE} -ne 0 ] && [ ${USE_BEEP_ON_TIMER:-0} -ne 0 ] && prompt_depend_fail
+
+	FLAG="USE_TTY"
+	[ ${STATUS_TTY} -ne 0 ] && [ ${USE_TTY:-0} -ne 0 ] && prompt_depend_fail
+
+	FLAG="USE_DISK_USED"
+	[ ${STATUS_DU} -ne 0 ] && [ ${USE_DISK_USED:-0} -ne 0 ] && prompt_depend_fail
+
+	FLAG="USE_EMERGE"
+	[ ${STATUS_PS} -ne 0 ] && [ ${USE_EMERGE:-0} -ne 0 ] && prompt_depend_fail
+	[ ${STATUS_PIDOF} -ne 0 ] && [ ${USE_EMERGE:-0} -ne 0 ] && prompt_depend_fail
+
+	if [ -r /proc/loadavg ] ; then
+		CMD=cat; $CMD --help > /dev/null 2>&1
+		local STATUS_CAT=$?
+
+		FLAG="USE_PROC"
+		[ ${STATUS_CAT} -ne 0 ] && [ ${USE_PROC:-0} -ne 0 ] && prompt_depend_fail
+
+	elif [ ! -r /proc/loadavg ] ; then
+		CMD=ps; $CMD --help > /dev/null 2>&1
+		local STATUS_PS=$?
+		CMD=uptime; $CMD > /dev/null 2>&1
+		local STATUS_UPTIME=$?
+
+		FLAG="USE_PROC"
+		[ ${STATUS_PS} -ne 0 ] && [ ${USE_PROC:-0} -ne 0 ] && prompt_depend_fail
+
+		FLAG="USE_LOAD"
+		[ ${STATUS_UPTIME} -ne 0 ] && [ ${USE_LOAD:-0} -ne 0 ] && prompt_depend_fail
+	fi
+
+	[ "$FLAGS" ] && prompt_error_depends
+}
+
+
+prompt_exit_status()
+{
+	# Change prompt symbol color
+	# based on last app exit status
+	if [ ${PROMPT_STATUS:-0} -eq 0 ]
+	then
+		COLOR_PROMPT=$COLOR_SUCCESS
+	else
+		COLOR_PROMPT=$COLOR_FAILURE
+		if [ ${USE_BEEP_ON_FAIL:-0} -ne 0 ] ; then
+			ALARM="\a"
+		fi
+	fi
+}
+
+
+prompt_terminal_title()
+{
+	local TITLE
+	local ICON
+
+	# Change the window title of X terminals
+	# Title is the window title
+	# Icon is the task bar title
+	case $TERM in
+		linux|xterm*|rxvt|aterm|Eterm|eterm)
+			TITLE="\e]0;$WINDOW_TITLE\007"
+			ICON="\e]1;$WINDOW_ICON\007"
+			;;
+		screen*)
+			TITLE="\e_$WINDOW_TITLE\e\\\\"
+			ICON=""
+			;;
+	esac
+
+	# Seems that the console doesn't support escape sequences
+	if [ "$TERM" != "linux" ] ; then
+		PROMPT_INFO_WINDOW="${IGNORE_ESCAPE_START}${TITLE}${ICON}${IGNORE_ESCAPE_END}"
+	fi
+}
+
+
+prompt_timer()
+{
+	# Beep on completion of
+	# long running commands
+	if [ ${USE_BEEP_ON_TIMER:-0} -ne 0 ]
+	then
+	# PROMPT_INFO_COUNT_START_TIME really needs
+	# to be start of last run command
+	# not time of last prompt display
+	# anyone got an idea to set it
+	# before the shell executes the
+	# command?
+		local PROMPT_INFO_COUNT_END_TIME=$SECONDS
+		TMP=$PROMPT_INFO_COUNT_END_TIME
+		TMP=$(($TMP-$PROMPT_INFO_COUNT_START_TIME))
+		if [ $TMP -gt $BEEP_TIME ] ; then
+			ALARM="\a"
+		fi
+		PROMPT_INFO_COUNT_START_TIME=$PROMPT_INFO_COUNT_END_TIME
+	fi
+}
+
+
+prompt_tty_type()
+{
+	# Color tty based on local/remote connection
+	# Not modified yet from original source
+	if [ ${USE_TTY:-0} -ne 0 ] && ([ ${USE_ALWAYS_UPDATE:-0} -ne 0 ] || [ ! "$OLDPWD" ])
+	then
+		# screen connection
+#		if [ -n "${STY:+1}" ] ; then
+
+		# in gui (X)
+#		elif [ -n "${DISPLAY:+1}" ] ; then
+#		fi
+#		THIS_TTY=tty`ps aux | grep $$ | grep bash | awk '{ print $7 }'`
+#		SESS_SRC=`who | grep $THIS_TTY | awk '{ print $6 }'`
+
+#		SSH_FLAG=0
+#		SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
+#		if [ $SSH_IP ] ; then
+#			SSH_FLAG=1
+#		fi
+#		SSH2_IP=`echo $SSH2_CLIENT | awk '{ print $1 }'`
+#		if [ $SSH2_IP ] ; then
+#			SSH_FLAG=1
+#		fi
+#		if [ -n $SSH_FLAG -ne 0 ] ; then
+#			CONN=ssh
+#		elif [ -z $SESS_SRC ] ; then
+#			CONN=lcl
+#		elif [ $SESS_SRC = "(:0.0)" -o $SESS_SRC = "" ] ; then
+#			CONN=lcl
+#		else
+#			CONN=tel
+#		fi
+
+		PROMPT_INFO_TTY="${COLOR_TTY}${PROMPT_INFO_TTY_DEV}${SPACER}"
+	fi
+}
+
+
+prompt_path_set()
+{
+	if [ ${USE_PATH_ABSOLUTE:-1} -ne 0 ] ; then
+		# Get absolute path, not linked path
+		CWD=$(pwd -P)
+	else
+		CWD=$PWD
+	fi
+
+	if [ ${USE_PATH_LAST_DIR:-0} -ne 0 ] ; then
+		CWD=${CWD##*/}
+		[ -n "${CWD:=/}" ]
+	fi
+
+	if [ ${USE_COMPACT:-0} -ne 0 ] ; then
+		TMP=${CWD#$HOME}
+		if [ "$TMP" != "$CWD" ] ; then
+			CWD="~$TMP"
+		fi
+
+		local COUNT_SPACE_OVER=$((${#CWD}-$PATH_WIDTH+3))
+		if [ ${COUNT_SPACE_OVER:-0} -ge 0 ] ; then
+			TMP=''
+			while [ ${COUNT_SPACE_OVER:-0} -ne 0 ]
+			do
+				COUNT_SPACE_OVER=$(($COUNT_SPACE_OVER-1))
+				TMP=?$TMP
+			done
+
+			CWD="...${CWD#$TMP}"
+		fi
+	fi
+}
+
+
+prompt_path_status()
+{
+	# Change pwd color based on permissions
+	if [ ${USE_PWD:-0} -ne 0 ]
+	then
+		if [ -O "$PWD" ] ; then
+			COLOR_PWD=$COLOR_OWNER
+
+		elif [ -r "$PWD" ] && [ -w "$PWD" ] ; then
+			COLOR_PWD=$COLOR_RW
+
+		elif [ -w "$PWD" ] ; then
+			COLOR_PWD=$COLOR_NOR
+
+		elif [ -r "$PWD" ] ; then
+			COLOR_PWD=$COLOR_NOW
+
+		else
+			COLOR_PWD=$COLOR_NORW
+		fi
+	fi
+
+	PROMPT_INFO_PWD="${SPACER}${COLOR_PWD}...${CWD}"
+}
+
+
+prompt_wc()
+{
+	local LINE
+	local TMP=$IFS
+	local IFS=$'\n'
+
+	COUNT=0
+	for LINE in $("$@")
+	do
+		COUNT=$(($COUNT+1));
+	done
+	IFS=$TMP
+}
+
+
+prompt_proc_load_info()
+{
+	if [ ${USE_PROC:-0} -ne 0 ] || [ ${USE_LOAD:-0} -ne 0 ]
+	then
+		local COUNT_LOAD_AVG
+		local COUNT_PROC
+		local COUNT_LOAD
+	
+		# 1MIN 5MIN 15MIN FRAC_RUNNING_PROCS LAST_JOB
+		local COUNT_LOAD_1MIN
+		local COUNT_LOAD_5MIN
+		local COUNT_LOAD_15MIN
+		local LAST_JOB
+		local FIELD
+
+		# /proc/loadavg gives us PROC and LOAD info for CHEAP!
+		if [ -r /proc/loadavg ] ; then
+			COUNT_LOAD_AVG=$(cat /proc/loadavg) || prompt_error "proc read"
+		fi
+
+		if [ ${USE_PROC:-0} -ne 0 ] && [ ! "$COUNT_LOAD_AVG" ] ; then
+			COUNT_PROC=$(ps -ef | wc -l)
+			TMP=$?
+
+			if [ ${TMP:-0} -ne 0 ] ; then
+				local COUNT
+				prompt_wc ps -ef # note this forks ps -ef, and lets us not depend on wc
+				COUNT_PROC=$COUNT
+			fi
+
+			COUNT_PROC=$(($COUNT_PROC-1))
+		fi
+
+		if [ ${USE_LOAD:-0} -ne 0 ] && [ ! "$COUNT_LOAD_AVG" ] ; then
+			local UPTIME=$(uptime) || prompt_error "uptime call"
+
+			TMP=${UPTIME##*:[$IFS]}
+			COUNT_LOAD_AVG=${TMP%%,*}
+			TMP=${TMP#*,}
+			COUNT_LOAD_AVG=${COUNT_LOAD_AVG}${TMP%%,*}
+			TMP=${TMP#*,}
+			COUNT_LOAD_AVG=${COUNT_LOAD_AVG}${TMP%%,*}
+		fi
+
+		TMP=0
+		for FIELD in $COUNT_LOAD_AVG
+		do
+			case $TMP in
+				0)
+					COUNT_LOAD_1MIN=$FIELD;;
+				1)
+					COUNT_LOAD_5MIN=$FIELD;;
+				2)
+					COUNT_LOAD_15MIN=$FIELD;;
+				3)
+					COUNT_PROC=$FIELD;;
+				4)
+					LAST_JOB=$FIELD;;
+				*)
+					echo "LOAD_AVG_DEFAULT CAUGHT: (YOU HAVE 6+ items in /proc/loadavg)";;
+			esac
+
+			TMP=$(($TMP+1))
+		done
+
+		if [ ${USE_PROC:-0} -ne 0 ] ; then
+			PROMPT_INFO_PROC="${SPACER}${COLOR_PROC}${COUNT_PROC}"
+		fi
+
+		if [ ${USE_LOAD:-0} -ne 0 ] ; then
+			case $LOAD_AVG in
+				1)
+					COUNT_LOAD=$COUNT_LOAD_1MIN;;
+				5)
+					COUNT_LOAD=$COUNT_LOAD_5MIN;;
+				15)
+					COUNT_LOAD=$COUNT_LOAD_15MIN;;
+				*)
+					echo "ILLEGAL LOAD_AVG CAUGHT: VALID LOAD_AVG's of 1, 5, 15";;
+			esac
+
+			# Can't compare float values
+			TMP=${COUNT_LOAD%.*}
+			if [ ${TMP:-0} -ge $CRIT_LOAD ] ; then
+				COLOR_LOAD=$COLOR_CRIT_LOAD
+				ALARM="\a"
+
+			elif [ ${TMP:-0} -ge $HIGH_LOAD ] ; then
+				COLOR_LOAD=$COLOR_HIGH_LOAD
+
+			elif [ ${TMP:-0} -ge $MED_LOAD ] ; then
+				COLOR_LOAD=$COLOR_MED_LOAD
+
+			else
+				COLOR_LOAD=$COLOR_LOW_LOAD
+			fi
+
+			COLOR_HOST=$COLOR_LOAD
+			PROMPT_INFO_LOAD="${SPACER}${COLOR_LOAD}${COUNT_LOAD}"
+		fi
+	fi
+}
+
+
+prompt_directory_info()
+{
+	# Setup disk used variable
+	# Setup variables for numbers
+	# and types of files in pwd
+	if [ ${USE_DIR:-0} -ne 0 ] && ([ ${USE_ALWAYS_UPDATE:-0} -ne 0 ] || [ "$PROMPT_INFO_OLDPWD" != "$PWD" ])
+	then
+		PROMPT_INFO_OLDPWD=$PWD
+
+		local PROMPT_INFO_DISK_USED
+		local PROMPT_INFO_ALL_FILE
+		local PROMPT_INFO_VISIBLE_FILE
+		local PROMPT_INFO_HIDDEN_FILE
+		local PROMPT_INFO_ALL_DIR
+		local PROMPT_INFO_VISIBLE_DIR
+		local PROMPT_INFO_HIDDEN_DIR
+		local PROMPT_INFO_EXEC
+		local PROMPT_INFO_DEV
+			local PROMPT_INFO_BLOCK
+			local PROMPT_INFO_CHAR
+		local PROMPT_INFO_LINK
+		local PROMPT_INFO_PIPE
+		local PROMPT_INFO_SOCKET
+		local PROMPT_INFO_DENIED
+
+		local LIST_VISIBLE=*
+		local LIST_HIDDEN=.*
+		local LIST_DU=
+		local FILE
+
+		local DISK_USED=0
+		local COUNT_OWNER=0
+		local COUNT_GROUP=0
+		local COUNT_READ=0
+		local COUNT_WRITE=0
+		local COUNT_EXEC=0
+		local COUNT_RW=0
+		local COUNT_RX=0
+		local COUNT_WX=0
+		local COUNT_RWX=0
+		local COUNT_HIDDEN=0
+			local COUNT_HIDDEN_DIR=0
+			local COUNT_HIDDEN_FILE=0
+			local COUNT_HIDDEN_OTHER=0
+		local COUNT_DIR=0
+		local COUNT_FILE=0
+		local COUNT_DEV=0
+			local COUNT_BLOCK=0
+			local COUNT_CHAR=0
+		local COUNT_PIPE=0
+		local COUNT_SOCKET=0
+		local COUNT_LINK=0
+		local COUNT_DENIED=0
+
+		if [ ${USE_HIDDEN:-0} -ne 0 ] ; then
+		for FILE in $LIST_HIDDEN
+		do
+			if [ -d "$FILE" ] ; then
+				COUNT_HIDDEN_DIR=$(($COUNT_HIDDEN_DIR+1))
+			elif [ -f "$FILE" ] ; then
+				COUNT_HIDDEN_FILE=$(($COUNT_HIDDEN_FILE+1))
+				LIST_DU=$LIST_DU/$FILE
+			else
+				COUNT_HIDDEN_OTHER=$(($COUNT_HIDDEN_OTHER+1))
+			fi
+		done
+		fi
+
+		# This is insanely slow under busybox ash and /dev
+		if [ ${USE_VISIBLE:-0} -ne 0 ] ; then
+		for FILE in $LIST_VISIBLE
+		do
+			# Test file permissions: owner, read, write, execute
+			[ -O "$FILE" ] && COUNT_OWNER=$(($COUNT_OWNER+1))
+			[ -G "$FILE" ] && COUNT_GROUP=$(($COUNT_GROUP+1))
+
+			if [ -r "$FILE" ] && [ -w "$FILE" ] && [ -x "$FILE" ] ; then
+				COUNT_RWX=$(($COUNT_RWX+1))
+
+			elif [ -r "$FILE" ] && [ -w "$FILE" ] ; then
+				COUNT_RW=$(($COUNT_RW+1))
+
+			elif [ -r "$FILE" ] && [ -x "$FILE" ] ; then
+				COUNT_RX=$(($COUNT_RX+1))
+
+			elif [ -w "$FILE" ] && [ -x "$FILE" ] ; then
+				COUNT_WX=$(($COUNT_WX+1))
+
+			elif [ -r "$FILE" ] ; then
+				COUNT_READ=$(($COUNT_READ+1))
+			elif [ -w "$FILE" ] ; then
+				COUNT_WRITE=$(($COUNT_WRITE+1))
+
+			# We only want executable files
+			# skip this test here, test later
+#			elif [ -x "$FILE" ] ; then
+#				COUNT_EXEC=$(($COUNT_EXEC+1))
+			fi
+
+			# Links are considered the
+			# same as what they link to
+			# -L is deprecated in favor of -h
+			if [ -h "$FILE" ] ; then
+				COUNT_LINK=$(($COUNT_LINK+1))
+
+			# Determine type of file: directory or file
+			elif [ -d "$FILE" ] ; then
+				COUNT_DIR=$(($COUNT_DIR+1))
+			else	# File must be file, link, 
+				# block, character, pipe, socket
+			
+
+				if [ -f "$FILE" ] ; then
+					LIST_DU=$LIST_DU/$FILE
+
+					COUNT_FILE=$(($COUNT_FILE+1))
+					if [ -x "$FILE" ] ; then
+						COUNT_EXEC=$(($COUNT_EXEC+1))
+					fi
+
+				elif [ -b "$FILE" ] ; then
+					COUNT_BLOCK=$(($COUNT_BLOCK+1))
+
+				elif [ -c "$FILE" ] ; then
+					COUNT_CHAR=$(($COUNT_CHAR+1))
+
+				elif [ -p "$FILE" ] ; then
+					COUNT_PIPE=$(($COUNT_PIPE+1))
+
+				elif [ -S "$FILE" ] ; then
+					COUNT_SOCKET=$(($COUNT_SOCKET+1))
+
+				else
+					if [ "$FILE" != "*" ] ; then
+						COUNT_DENIED=$(($COUNT_DENIED+1))
+					fi
+				fi
+			fi
+		done
+		fi
+
+		COUNT_HIDDEN_DIR=$(($COUNT_HIDDEN_DIR-2))
+		COUNT_HIDDEN=$(($COUNT_HIDDEN_DIR+$COUNT_HIDDEN_FILE+$COUNT_HIDDEN_OTHER))
+		COUNT_DEV=$(($COUNT_BLOCK+$COUNT_CHAR))
+
+		PROMPT_INFO_VISIBLE_FILE="${SPACER}${COLOR_FILE}${COUNT_FILE}"
+		PROMPT_INFO_VISIBLE_DIR="${SPACER}${COLOR_DIR}${COUNT_DIR}"
+
+		# Compaction will show only types of file that had count > 0
+		if [ ${USE_COMPACT:-0} -ne 0 ] ; then
+			if [ ${COUNT_DEV:-0} -ne 0 ] ; then
+				PROMPT_INFO_DEV="${SPACER}${COLOR_DEV}${COUNT_DEV}bc"
+				if [ ${COUNT_BLOCK:-0} -ne 0 ] ; then
+					PROMPT_INFO_BLOCK="${SPACER}${COLOR_DEV}${COUNT_BLOCK}b"
+				fi
+				if [ ${COUNT_CHAR:-0} -ne 0 ] ; then
+					PROMPT_INFO_CHAR="${SPACER}${COLOR_DEV}${COUNT_CHAR}c"
+				fi
+			fi
+
+			if [ ${COUNT_HIDDEN_FILE:-0} -ne 0 ] ; then
+				PROMPT_INFO_HIDDEN_FILE="${DEFAULT}.${COLOR_HIDDEN_FILE}${COUNT_HIDDEN_FILE}"
+			fi
+
+			if [ ${COUNT_HIDDEN_DIR:-0} -ne 0 ] ; then
+				PROMPT_INFO_HIDDEN_DIR="${DEFAULT}.${COLOR_HIDDEN_DIR}${COUNT_HIDDEN_DIR}"
+			fi
+
+			if [ ${COUNT_LINK:-0} -ne 0 ] ; then
+				PROMPT_INFO_LINK="${SPACER}${COLOR_LINK}${COUNT_LINK}l"
+			fi
+
+			if [ ${COUNT_PIPE:-0} -ne 0 ] ; then
+				PROMPT_INFO_PIPE="${SPACER}${COLOR_PIPE}${COUNT_PIPE}p"
+			fi
+
+			if [ ${COUNT_SOCKET:-0} -ne 0 ] ; then
+				PROMPT_INFO_SOCKET="${SPACER}${COLOR_SOCKET}${COUNT_SOCKET}s"
+			fi
+
+			if [ ${COUNT_EXEC:-0} -ne 0 ] ; then
+				PROMPT_INFO_EXEC="${DEFAULT}-${COLOR_EXEC}${COUNT_EXEC}x"
+			fi
+
+			if [ ${COUNT_DENIED:-0} -ne 0 ] ; then
+				PROMPT_INFO_DENIED="${SPACER}${COLOR_DENIED}${COUNT_DENIED}!"
+			fi
+		else
+			PROMPT_INFO_HIDDEN_FILE="${DEFAULT}.${COLOR_HIDDEN_FILE}${COUNT_HIDDEN_FILE}"
+			PROMPT_INFO_HIDDEN_DIR="${DEFAULT}.${COLOR_HIDDEN_DIR}${COUNT_HIDDEN_DIR}"
+
+			PROMPT_INFO_DEV="${SPACER}${COLOR_DEV}${COUNT_DEV}bc"
+				PROMPT_INFO_BLOCK="${SPACER}${COLOR_DEV}${COUNT_BLOCK}b"
+				PROMPT_INFO_CHAR="${SPACER}${COLOR_DEV}${COUNT_CHAR}c"
+			PROMPT_INFO_LINK="${SPACER}${COLOR_LINK}${COUNT_LINK}l"
+			PROMPT_INFO_PIPE="${SPACER}${COLOR_PIPE}${COUNT_PIPE}p"
+			PROMPT_INFO_SOCKET="${SPACER}${COLOR_SOCKET}${COUNT_SOCKET}s"
+			PROMPT_INFO_EXEC="${DEFAULT}-${COLOR_EXEC}${COUNT_EXEC}x"
+			PROMPT_INFO_DENIED="${SPACER}${COLOR_DENIED}${COUNT_DENIED}!"
+		fi
+
+		PROMPT_INFO_ALL_FILE="${PROMPT_INFO_VISIBLE_FILE}${PROMPT_INFO_HIDDEN_FILE:-f}${PROMPT_INFO_EXEC}"
+		PROMPT_INFO_ALL_DIR="${PROMPT_INFO_VISIBLE_DIR}${PROMPT_INFO_HIDDEN_DIR}d"
+
+		if [ ${USE_DISK_USED:-0} -ne 0 ] ; then
+			if [ ${USE_HIDDEN:-0} -eq 0 ] && [ ${USE_VISIBLE:-0} -eq 0 ] ; then
+				for FILE in $LIST_VISIBLE $LIST_HIDDEN
+				do
+					[ -f "$FILE" ] && LIST_DU=$LIST_DU/$FILE
+				done
+			fi
+
+			TMP=$IFS
+			LIST_DU=${LIST_DU#/}
+			local IFS=/
+			[ ! "$LIST_DU" ] || DISK_USED=$(du -ch -- $LIST_DU) || echo prompt_error "du call"
+			IFS=$TMP
+
+			# Make the size and unit last on the line then remove everything before it
+			DISK_USED=${DISK_USED%[$IFS]*}
+			DISK_USED=${DISK_USED##*[$IFS]}
+
+			PROMPT_INFO_DISK_USED="${SPACER}${COLOR_DISK_USED}${DISK_USED}B"
+		fi
+
+		PROMPT_INFO_DIR="${PROMPT_INFO_DISK_USED}${PROMPT_INFO_ALL_FILE}${PROMPT_INFO_ALL_DIR}\
+${PROMPT_INFO_LINK}${PROMPT_INFO_DEV}${PROMPT_INFO_PIPE}${PROMPT_INFO_SOCKET}${PROMPT_INFO_DENIED}"
+	fi
+}
+
+
+prompt_acpi_info()
+{
+	# Setup battery/temperature variables
+	([ ${USE_ACPI:-0} -ne 0 ] && [ ${PROMPT_INFO_HAVE_ACPI:-1} != ${PROMPT_INFO_HAVE_APM:-1} ] && USE_ACPI=1) || USE_ACPI=0
+	if [ ${USE_ACPI:-0} -ne 0 ]
+	then
+		local PROMPT_INFO_BAT
+		local PROMPT_INFO_TEMP
+		if [ "$PROMPT_INFO_HAVE_ACPI" ] ; then
+			# Get ACPI info and split out temperature and battery data
+			# FIX SED CRAP #
+			local COUNT_BAT=$(acpi -V | sed -e "s/[^:]*[^0-9]*\([0-9]\{,3\}\).*/\1/g") || echo prompt_error "acpi call"
+			local COUNT_TEMP=$(echo $COUNT_BAT | sed -e "s/[^ ]* \(.*\)/\1/") || echo prompt_error "echo call [acpi]"
+			COUNT_BAT=$(echo $COUNT_BAT | sed -e "s/\([^ ]*\) .*/\1/") || echo prompt_error "echo call [acpi]"
+
+			# Set temperature degrees color based on temp level
+			if [ ${COUNT_TEMP:-0} -le $TEMP_LOW ] ; then
+				COLOR_TEMP=$COLOR_TEMP_LOW
+
+			elif [ ${COUNT_TEMP:-0} -le $TEMP_MED ] ; then
+				COLOR_TEMP=$COLOR_TEMP_MED
+
+			elif [ ${COUNT_TEMP:-0} -le $TEMP_HIGH ] ; then
+				COLOR_TEMP=$COLOR_TEMP_HIGH
+
+			else
+				COLOR_TEMP=$COLOR_TEMP_CRIT
+				ALARM="\a"
+			fi
+			PROMPT_INFO_TEMP="${SPACER}${COLOR_TEMP}${COUNT_TEMP}C"
+
+
+		elif [ "$PROMPT_INFO_HAVE_APM" ] ; then
+			local COUNT_BAT=$(apm) || echo prompt_error "apm call"
+			local STATE_AC="AC on"
+			local STATE_NOAC="AC off"
+
+			case $COUNT_BAT in
+				*"AC on"*)
+					local COUNT_AC=1;;
+				*$"AC off"*)
+					local COUNT_AC=0;;
+			esac
+
+			# Battery time left
+			local COUNT_BAT_TIME=${COUNT_BAT##* }
+
+			# Remove everything from % on
+			COUNT_BAT=${COUNT_BAT%%%*}
+			# Remove everything up to % left
+			COUNT_BAT=${COUNT_BAT##* }
+		fi
+
+		# If no AC power, use dark battery colors
+		if [ ${COUNT_AC:-0} -eq 0 ] ; then
+			local COLOR_BAT_HIGH=$COLOR_BAT_HIGH_NOAC
+			local COLOR_BAT_MED=$COLOR_BAT_MED_NOAC
+			local COLOR_BAT_LOW=$COLOR_BAT_LOW_NOAC
+			local COLOR_BAT_CRIT=$COLOR_BAT_CRIT_NOAC
+		fi
+
+
+		# Set battery % color based on battery % life left
+		if [ ${COUNT_BAT:-0} -ge $BAT_HIGH ] ; then
+			COLOR_BAT=$COLOR_BAT_HIGH
+
+		elif [ ${COUNT_BAT:-0} -ge $BAT_MED ] ; then
+			COLOR_BAT=$COLOR_BAT_MED
+
+		elif [ ${COUNT_BAT:-0} -ge $BAT_LOW ] ; then
+			COLOR_BAT=$COLOR_BAT_LOW
+
+		else	
+			COLOR_BAT=$COLOR_BAT_CRIT
+			ALARM="\a"
+		fi
+		PROMPT_INFO_BAT="${SPACER}${COLOR_BAT}${COUNT_BAT}%"
+
+		PROMPT_INFO_ACPI="${PROMPT_INFO_BAT}${PROMPT_INFO_TEMP}"
+	fi
+}
+
+
+prompt_emerge_info()
+{
+	# Setup current emerge variable
+	if [ ${USE_EMERGE:-0} -ne 0 ]
+	then
+		local EMERGE=$(pidof sandbox) || echo prompt_error "pidof call"
+		if [ "$EMERGE" ] ; then
+			if ([ ${USE_ALWAYS_UPDATE:-0} -ne 0 ] || [ "$PROMPT_INFO_EMERGE_PIDS" != "$EMERGE" ]) ; then
+				PROMPT_INFO_EMERGE_PIDS=$EMERGE
+				#FIX SED CALL#
+				EMERGE=$(ps $EMERGE | sed -e '1d' -e "s/.*${IGNORE_ESCAPE_START}\(.*\)${IGNORE_ESCAPE_END}.*/\1/") || echo prompt_error "ps call [emerge]"
+				EMERGE=$(echo $EMERGE) || echo prompt_error "echo call [emerge]"
+
+				PROMPT_INFO_EMERGE="${SPACER}${COLOR_EMERGE}${EMERGE}"
+			fi
+			PROMPT_INFO_SWAP=$PROMPT_INFO_EMERGE
+		else
+			unset PROMPT_INFO_EMERGE
+			PROMPT_INFO_SWAP=$PROMPT_INFO_DIR
+		fi
+	fi
+}
+
+
+prompt_set_alarm()
+{
+	[ "$ALARM" ] && ALARM="${IGNORE_ESCAPE_START}\e$ALARM${IGNORE_ESCAPE_END}"
+}

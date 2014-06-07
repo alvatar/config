@@ -1,0 +1,143 @@
+media-libs/freetype fontforge infinality
+
+sys-libs/ncurses tinfo
+
+media-plugins/alsa-plugins pulseaudio
+app-accessibility/espeak pulseaudio
+
+media-gfx/blender python_single_target_python3_3 python_targets_python3_3 
+dev-python/numpy python_single_target_python3_3 python_targets_python3_3 
+dev-python/setuptools python_single_target_python3_3 python_targets_python3_3 
+dev-cpp/glog gflags
+
+net-fs/cifs-utils acl ads
+
+app-emulation/playonlinux winbind
+
+media-libs/sdl2-mixer mad
+media-libs/sdl-mixer mad
+
+sys-devel/gcc gcj
+
+sys-auth/consolekit policykit
+virtual/udev static-libs gudev hwdb
+sys-fs/udev static-libs gudev hwdb
+sys-auth/pambase consolekit
+
+media-sound/sox mad
+
+app-emulation/vmware-tools vmware_guest_linux
+
+sys-libs/e2fsprogs-libs static-libs
+
+app-editors/emacs gnutls gtk3 toolkit-scroll-bars wide-int
+
+media-libs/mesa xvmc g3dvl gles2
+
+sys-libs/zlib minizip
+
+dev-libs/libgcrypt static-libs
+sys-fs/cryptsetup static-libs
+dev-libs/libgpg-error static-libs
+sys-apps/util-linux static-libs
+dev-libs/popt static-libs
+sys-fs/lvm2 static-libs
+
+sys-fs/ecryptfs-utils suid
+
+app-editors/gvim gtk python
+app-editors/vim python
+
+app-emulation/virtualbox extensions
+
+dev-libs/boost python
+
+net-misc/tightvnc server
+net-misc/tigervnc server
+
+media-libs/lcms python
+
+net-wireless/wpa_supplicant qt4 
+
+dev-scheme/bigloo emacs multimedia sqlite ssl threads web bglpkg calendar crypto gmp java mail openpgp packrat srfi1 srfi27 text
+
+app-text/poppler qt4
+dev-python/PyQt4 webkit svg
+
+net-p2p/transmission gtk
+
+app-misc/freemind latex
+
+app-office/libreoffice gtk
+
+x11-terms/rxvt-unicode 256-color pixbuf
+
+x11-wm/xmonad hscolour
+
+media-libs/devil allegro mng openexr sdl xpm
+
+media-libs/libpng apng
+
+sys-apps/hal dell
+
+dev-scheme/gambit cplusplus static
+
+www-plugins/adobe-flash nspluginwrapper
+
+media-libs/gd fontconfig
+
+app-admin/eselect-php apache2
+dev-lang/php apache2 gd mysql mysqli
+www-apps/wordpress vhosts
+
+net-print/hplip -qt4
+
+net-im/bitlbee msn
+
+dev-python/django sqlite mysql postgres
+
+dev-lang/python sqlite
+
+dev-scheme/chicken -emacs
+
+net-print/cups samba zeroconf
+net-print/cups-filters zeroconf
+sys-libs/talloc python
+
+media-video/ffmpeg altivec opus
+net-fs/samba winbind
+
+net-libs/loudmouth debug
+
+media-libs/libdv sdl
+media-sound/sox libsamplerate
+media-libs/mlt dv frei0r libsamplerate melt sdl
+
+dev-vcs/git xinetd
+
+x11-drivers/nvidia-drivers acpi vdpau uvm
+
+media-sound/moc libsamplerate mad modplug musepack sid sndfile speex timidity wavpack
+
+dev-java/sun-jdk nsplugin
+
+x11-terms/rxvt-unicode xterm-color
+
+dev-util/cmake -qt4
+dev-libs/qtd X opengl svg xml core network webkit
+dev-util/dsss-bin dmd ldc
+dev-libs/tango dmd ldc
+
+net-p2p/amule gtk
+app-office/openoffice gtk
+
+app-editors/vim vim-with-x vim-pager
+
+dev-scheme/guile networking
+
+dev-util/nvidia-cuda-sdk emulation
+
+dev-lang/erlang hipe
+
+dev-ruby/rubygems ruby_targets_ruby18
+

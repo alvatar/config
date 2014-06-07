@@ -1,0 +1,66 @@
+#!/bin/sh
+
+
+DSSS_BIN="/opt/dsss/bin/dsss"
+TANGO_INCLUDES="/usr/include/tango"
+PHOBOS_INCLUDES="/usr/include/phobos"
+
+printUsageAndExit() {
+    
+    $DSSS_BIN | head -n1
+    echo "Usage [branch] [dsss options] <command> [options]"
+    echo -e "  Branch:\n    d1:        D1 version (ldc1 tango)\n    d2:        D2 version (dmd2 phobos)"
+    $DSSS_BIN | tail -n+3
+    exit 192;
+
+}
+
+callDsss() {
+
+    case $1 in
+	d1)
+	shift
+	$DSSS_BIN $@ #-d-version=Tango --includedir=$TANGO_INCLUDES
+	;;
+	d2)
+	shift
+	$DSSS_BIN $@ --includedir=$PHOBOS_INCLUDES
+	;;
+	plain)
+	shift
+	$DSSS_BIN $@
+	;;
+	*)
+	echo "Branch not recognized: $1"
+	;;	
+    esac
+
+}
+
+
+# If no arguments, print usage
+if [ $# -le 0 ]; then printUsageAndExit; fi
+
+# If the argument "build" appears, then a branch is needed
+if [[ $@ =~ .*build.* ]]
+then
+    # If the first argument is the branch, then callDss, otherwise complain
+    if [[ $1 == "d1" || $1 == "d2" ]]
+    then
+	callDsss $@
+	exit $?
+    else
+	echo "You need to specify the language branch if you issue a build command"
+	exit 192
+    fi
+elif [[ $1 == "d1" || $1 == "d2" ]]
+then
+    if [ $# -lt 2 ]
+    then
+	printUsageAndExit
+    else
+	callDsss $@
+    fi
+else
+    callDsss plain $@
+fi
