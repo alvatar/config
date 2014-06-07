@@ -100,36 +100,6 @@ autocmd BufNewFile,BufRead *.{c,C,cpp,cxx,cc,h,hpp} set equalprg=astyle\ -s2\ --
 
 autocmd BufRead,BufNewFile *.{markdown,md} set syntax=off
 
-"
-" D compiler
-" set errorformat+=%f(%l):\ %m " Digital Mars DMD 1.x & 2.x
-
-"
-" Templates and Abbreviations
-"
-" function LoadTemplate(extension)
-"     if expand(a:extension) =~# '^\(c\|cpp\|cxx\|c++\)$'
-" 	silent! :execute '0r $VIMHOME/templates/c.tpl'
-"     elseif expand(a:extension) =~# '^\(h\|hpp\|hxx\|h++\)$'
-" 	silent! :execute '0r $VIMHOME/templates/h.tpl'
-"     endif
-"     call LoadPatterns(a:extension)
-"     " silent! :execute '0r $VIMHOME/templates/'. a:extension. '.tpl'
-" endfunction
-" function LoadPatterns(extension)
-"     if expand(a:extension) =~# '^\(c\|cpp\|cxx\|c++\|h\|hpp\|hxx\|h++\)$'
-" 	silent! execute 'source $VIMHOME/templates/c.pat'
-"     elseif expand(a:extension) =~# '^\(7\|6\)$'
-" 	silent! execute 'source $VIMHOME/templates/man.pat'
-"     endif
-"     " silent! execute 'source $VIMHOME/templates/'.a:extension.'.patterns.tpl'
-" endfunction
-" autocmd BufNewFile * call LoadTemplate('%:e')
-" autocmd BufRead * call LoadPatterns('%:e')
-" nnoremap <c-j> /<++.\{-1,}++><cr>c//e<cr>
-" inoremap <c-j> <ESC>/<++.\{-1,}++><cr>c//e<cr>
-" match IncSearch /<++*++>/
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "" PLUGINS
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
