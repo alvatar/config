@@ -3,7 +3,7 @@
 ;(setq user-emacs-directory "~/.emacs.d")
 
 (if (eq system-type 'windows-nt)
-    ;; Windows
+    ;; Windows. $HOME in minibuffer will show you the path.
     (progn
       (package-initialize)
       (unless (require 'el-get nil 'noerror)
