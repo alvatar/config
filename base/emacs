@@ -66,6 +66,7 @@
     color-theme             ; nice looking emacs
     cscope
     cider
+    dockerfile-mode
     go-mode
     lua-mode
     )
