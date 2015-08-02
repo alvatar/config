@@ -1,4 +1,11 @@
 ;; el-get
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 ;(setq user-emacs-directory "~/.emacs.d")
 
@@ -44,9 +51,6 @@
              (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
    (:name linum-ex
     :after (global-linum-mode 1))
-   (:name color-theme-solarized ; Color theme
-    :after (when (display-graphic-p)
-                 (color-theme-solarized 'light)))
    ;; search capable of interactive string replace
    (:name phi-search
     :after (setq phi-search-case-sensitive  t))
@@ -54,22 +58,40 @@
    (:name ace-jump-mode
     :after (global-set-key (kbd "C-c C-f") 'ace-jump-mode))
    (:name js2-mode
-    :after (setq js-indent-level 2))))
+    :after (setq js-indent-level 2))
+   (:name go-mode
+          :after (progn
+                   (let ((go-path "/Users/Alvaro/lantern/lantern"))
+                     (setenv "GOPATH" go-path)
+                     (setq exec-path (cons (concat go-path "/bin") exec-path)))
+                   (add-hook 'before-save-hook 'gofmt-before-save)
+                   ;; C-? global binding
+                   (global-set-key (kbd "C-?") 'godef-jump)))))
 
 ;; now set our own packages
 (setq
  my:el-get-packages
  (append
-  '(el-get                  ; el-get is self-hosting
-    auto-complete           ; complete as you type with overlays
-    emmet-mode              ; zencoding evolved
-    color-theme             ; nice looking emacs
-    cscope
+  '(
+    auto-complete                 ; complete as you type with overlays
     cider
+    color-theme-solarized
+    color-theme-sanityinc
+    color-theme-sanityinc-tomorrow
+    cscope
     dockerfile-mode
-    go-mode
+    el-get                           ; el-get is self-hosting
+    emmet-mode                       ; zencoding evolved
+    go-autocomplete                  ; go get -u github.com/nsf/gocode
+    go-errcheck
+    go-flymake
+    go-oracle
+    livedown                            ; npm install -g livedown
     lua-mode
+    markdown-mode
+    yaml-mode
     )
+
   (mapcar 'el-get-source-name el-get-sources)))
 
 ;; install new packages and init already installed packages
@@ -99,10 +121,42 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes (quote ("1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
+ '(ansi-color-names-vector
+   (vector "#cccccc" "#f2777a" "#99cc99" "#ffcc66" "#6699cc" "#cc99cc" "#66cccc" "#2d2d2d"))
+ '(custom-enabled-themes (quote (sanityinc-tomorrow-day)))
+ '(custom-safe-themes
+   (quote
+    ("bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
+ '(fci-rule-color "#515151")
+ '(frame-background-mode (quote light))
  '(inhibit-startup-screen t)
  '(load-home-init-file t t)
- '(org-agenda-files nil))
+ '(org-agenda-files nil)
+ '(package-selected-packages (quote (queue)))
+ '(vc-annotate-background nil)
+ '(vc-annotate-color-map
+   (quote
+    ((20 . "#f2777a")
+     (40 . "#f99157")
+     (60 . "#ffcc66")
+     (80 . "#99cc99")
+     (100 . "#66cccc")
+     (120 . "#6699cc")
+     (140 . "#cc99cc")
+     (160 . "#f2777a")
+     (180 . "#f99157")
+     (200 . "#ffcc66")
+     (220 . "#99cc99")
+     (240 . "#66cccc")
+     (260 . "#6699cc")
+     (280 . "#cc99cc")
+     (300 . "#f2777a")
+     (320 . "#f99157")
+     (340 . "#ffcc66")
+     (360 . "#99cc99"))))
+ '(vc-annotate-very-old-color nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -216,3 +270,9 @@
         (replace-match "" nil nil))
       (goto-char current))))
 (put 'downcase-region 'disabled nil)
+
+(defun filter-with-shell-command (command arg)
+  "Run a command with the buffer as input and replace it"
+  (interactive (list (read-from-minibuffer "Shell command: " nil nil nil 'shell-command-history)
+                     current-prefix-arg))
+  (shell-command-on-region (point-min) (point-max) command t t))
