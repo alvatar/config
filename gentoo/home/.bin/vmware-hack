@@ -1,6 +1,0 @@
-#!/bin/bash
-/etc/init.d/vmware status &>/dev/null || sudo /etc/init.d/vmware start
-sudo mv $(readlink -f /usr/lib/libgtk-x11-2.0.so) $(readlink -f /usr/lib/libgtk-x11-2.0.so).old
-/opt/vmware/bin/vmplayer &>/dev/null& disown
-sleep 1
-sudo mv $(readlink -f /usr/lib/libgtk-x11-2.0.so).old $(readlink -f /usr/lib/libgtk-x11-2.0.so)

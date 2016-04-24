@@ -1,0 +1,10 @@
+! Fonts {{{
+Xft.antialias: 	true
+Xft.hinting:	true
+Xft.rgba:	rgb
+Xft.hintstyle:	hintfull
+Xft.dpi:	220
+! }}}
+
+
+!`URxvt*font:	xft:DejaVuSansMono:size=8

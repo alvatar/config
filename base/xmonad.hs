@@ -25,7 +25,7 @@ import qualified Data.Map        as M
 -- certain contrib modules.
 --
 -- myTerminal      = "urxvt -is +tr -si -sw +sb -fg '#ffffff' -bg '#111111' -fn 'xft:Andale Mono:pixelsize=11:antialias=true:autohinting=true'"
-myTerminal      = "urxvt +tr -ss -j +si +sw -sk -bc +sb -sl 9999 -fn 'xft:Montecarlo:pixelsize=11:autohinti ng=true'"
+myTerminal      = "urxvt -is +tr -si -sw +sb -fn 'xft:Monoid:size=16:antialias=true:autohinting=true'"
 
 -- Width of the window border in pixels.
 --
@@ -36,7 +36,7 @@ myBorderWidth   = 1
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask       = mod5Mask
+myModMask       = mod4Mask
 
 -- The mask for the numlock key. Numlock status is "masked" from the
 -- current modifier status, so the keybindings will work with numlock on or
@@ -89,104 +89,77 @@ myDefaultGaps   = [(0,0,0,0)]
 --
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
-    -- PROGRAMS ROW
+    -- LAUNCH PROGRAMS
     -- launch a terminal
     [ ((modMask,                xK_Return), spawn $ XMonad.terminal conf)
-
-    --
     -- launch dmenu
     -- , ((modMask,               xK_m     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
-    , ((modMask,               xK_m     ), spawn "dmenu_run")
-
+    , ((modMask,               xK_m     ), spawn "dmenu_run -fn 'xft:Monoid:size=16'")
     -- launch gmrun
     --  , ((modMask,               xK_apostrophe     ), spawn "gmrun")
-
     -- launch internet browser
     -- , ((modMask,               xK_b     ), spawn "opera --notrayicon")
-    , ((modMask,               xK_n     ), spawn "gvim")
-
+    --, ((modMask,               xK_n     ), spawn "gvim")
     -- launch gvim
-    , ((modMask,               xK_b     ), spawn "emacs")
+    --, ((modMask,               xK_b     ), spawn "emacs")
 
-    -- close focused window 
-    , ((modMask .|. shiftMask,               xK_q     ), kill)
-
+    -- MULTIMEDIA KEYS
+    , ((0, 0x1008ff12), spawn "amixer set Master toggle")
+    , ((0, 0x1008ff11), spawn "amixer set Master 10%+")
+    , ((0, 0x1008ff13), spawn "amixer set Master 10%-")
+    , ((0, 0x1008ff04), spawn "xbacklight -dec 10")
+    , ((0, 0x1008ff02), spawn "xbacklight -inc 10")
 	
-	-- LAYOUT
-
-     -- Rotate through the available layout algorithms
-    , ((mod4Mask,               xK_space ), sendMessage NextLayout)
-
-    --  Reset the layouts on the current workspace to default
-    , ((mod4Mask .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
-
-
-    -- WORKSPACE ROW
+    -- WORKSPACE
     -- Go to next workspace
-    , ((modMask,               xK_exclamdown),  nextWS)
-    
+    -- , ((modMask,               xK_exclamdown),  nextWS)
     -- Go to previous workspace
-    , ((modMask,               xK_apostrophe),    prevWS)
-
+    -- , ((modMask,               xK_apostrophe),    prevWS)
     -- Shift to next workspace
-    , ((modMask .|. shiftMask, xK_exclamdown),  shiftToNext)
-    
+    -- , ((modMask .|. shiftMask, xK_exclamdown),  shiftToNext)
     -- Shift to previous workspace
-    , ((modMask .|. shiftMask, xK_apostrophe),    shiftToPrev)
-
-	-- Choose window from a grid
-	, ((mod4Mask, xK_w), goToSelected defaultGSConfig)
-
-    -- WINDOWS ROW
+    -- , ((modMask .|. shiftMask, xK_apostrophe),    shiftToPrev)
+	  -- Choose window from a grid
+	  , ((mod4Mask, xK_w), goToSelected defaultGSConfig)
+    -- close focused window 
+    , ((modMask .|. shiftMask,               xK_t     ), kill)
     -- Move focus to the previous window
     , ((modMask,               xK_o     ), windows W.focusUp  )
-
     -- Move focus to the next window
     , ((modMask,               xK_p     ), windows W.focusDown)
-
     -- Move focus to the master window
     --  , ((modMask,               xK_p     ), windows W.focusMaster  )
-
     -- Swap the focused window and the master window
     --  , ((modMask,               xK_p), windows W.swapMaster)
-
     -- Swap the focused window with the next window
     --  , ((modMask,                xK_h     ), windows W.swapDown  )
-
     -- Swap the focused window with the previous window
     , ((modMask,                xK_i     ), windows W.swapUp    )
-
     -- Shrink the master area
     , ((modMask,               xK_k     ), sendMessage Shrink)
-
     -- Expand the master area
     , ((modMask,               xK_l     ), sendMessage Expand)
-
     -- Push window back into tiling
     , ((modMask,               xK_j     ), withFocused $ windows . W.sink)
-    
     -- Resize viewed windows to the correct size
     , ((modMask,               xK_h     ), refresh)
-
-
-    -- OTHERS
     -- Increment the number of windows in the master area
     , ((modMask              , xK_comma ), sendMessage (IncMasterN 1))
-
     -- Deincrement the number of windows in the master area
     , ((modMask              , xK_period), sendMessage (IncMasterN (-1)))
-
+    -- Rotate through the available layout algorithms
+    , ((mod4Mask,               xK_space ), sendMessage NextLayout)
+    --  Reset the layouts on the current workspace to default
+    , ((mod4Mask .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     -- toggle the status bar gap
     --, ((modMask              , xK_b     ),
     --      modifyGap (\i n -> let x = (XMonad.defaultGaps conf ++ repeat (0,0,0,0)) !! i
     --                         in if n == x then (0,0,0,0) else x))
 
-    -- Quit xmonad
+    -- Xmonad
     --, ((modMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
-
     -- Restart xmonad
     , ((modMask .|. shiftMask, xK_z ), restart "xmonad" True)
-
     -- Reset the layouts on the current workspace to default
     , ((modMask .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     ]
