@@ -25,7 +25,7 @@ import qualified Data.Map        as M
 -- certain contrib modules.
 --
 -- myTerminal      = "urxvt -is +tr -si -sw +sb -fg '#ffffff' -bg '#111111' -fn 'xft:Andale Mono:pixelsize=11:antialias=true:autohinting=true'"
-myTerminal      = "urxvt -is +tr -si -sw +sb -fn 'xft:Monoid:size=16:antialias=true:autohinting=true'"
+myTerminal      = "urxvt -sw +sb -fn 'xft:Monoid:size=16:antialias=true:autohinting=true'"
 
 -- Width of the window border in pixels.
 --
