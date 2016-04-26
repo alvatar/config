@@ -30,6 +30,9 @@ synclient VertScrollDelta=-50
 synclient TapButton2=
 synclient TapButton3=2
 
+battery-check.sh &
+eval `ssh-agent -s`
+
 
 exec xmonad
 
