@@ -6,5 +6,7 @@ Xft.hintstyle:	hintfull
 Xft.dpi:	220
 ! }}}
 
+Xcursor.theme: gentoo-silver
+Xcursor.size: 34
 
 !`URxvt*font:	xft:DejaVuSansMono:size=8
