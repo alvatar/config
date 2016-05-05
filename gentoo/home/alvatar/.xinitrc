@@ -27,7 +27,8 @@ xflux -l 40.4 -g -3.6
 
 # Trackpad
 synclient VertScrollDelta=-50
-synclient TapButton2=
+synclient TapButton1=1
+synclient TapButton2=3
 synclient TapButton3=2
 
 battery-check.sh &
