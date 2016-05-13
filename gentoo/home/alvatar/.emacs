@@ -60,35 +60,43 @@
    (:name js2-mode
     :after (setq js-indent-level 2))
    (:name go-mode
-          :after (progn
-                   (let ((go-path "/Users/Alvaro/lantern/lantern"))
-                     (setenv "GOPATH" go-path)
-                     (setq exec-path (cons (concat go-path "/bin") exec-path)))
-                   (add-hook 'before-save-hook 'gofmt-before-save)
-                   ;; C-? global binding
-                   (global-set-key (kbd "C-?") 'godef-jump)))))
+    :after (progn
+             (setq gofmt-command "goimports")
+             (add-hook 'before-save-hook 'gofmt-before-save)
+             ;; C-? global binding
+             (global-set-key (kbd "C-?") 'godef-jump)))
+   (:name cider
+    :after (progn
+             (setq cider-show-error-buffer nil)
+             (setq cider-show-error-buffer 'only-in-repl)))))
 
 ;; now set our own packages
 (setq
  my:el-get-packages
  (append
   '(
+    sublime-themes
     auto-complete                 ; complete as you type with overlays
-    cider
+    ac-cider
     color-theme-solarized
     color-theme-sanityinc
     color-theme-sanityinc-tomorrow
+    company-mode
     cscope
     dockerfile-mode
     el-get                           ; el-get is self-hosting
     emmet-mode                       ; zencoding evolved
+    flx ; Fuzzy IDO
     go-autocomplete                  ; go get -u github.com/nsf/gocode
     go-errcheck
     go-flymake
+    go-imports
     go-oracle
+    go-projectile
     livedown                            ; npm install -g livedown
     lua-mode
     markdown-mode
+    projectile ; Project navigation
     yaml-mode
     )
 
@@ -108,6 +116,8 @@
 (setq browse-url-generic-program (executable-find "firefox")
       browse-url-browser-function 'browse-url-generic)
 (fset 'yes-or-no-p 'y-or-n-p)
+(setq inhibit-startup-buffer-menu t)
+(global-set-key (kbd "C-x C-b") 'buffer-menu)
 (add-hook 'find-file-hook
           (lambda ()
             (setf show-trailing-whitespace t)))
@@ -128,7 +138,7 @@
  '(custom-enabled-themes (quote (sanityinc-tomorrow-day)))
  '(custom-safe-themes
    (quote
-    ("bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
+    ("9b59e147dbbde5e638ea1cde5ec0a358d5f269d27bd2b893a0947c4a867e14c1" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "46fd293ff6e2f6b74a5edf1063c32f2a758ec24a5f63d13b07a20255c074d399" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "3cd28471e80be3bd2657ca3f03fbb2884ab669662271794360866ab60b6cb6e6" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
  '(fci-rule-color "#515151")
  '(frame-background-mode (quote light))
  '(inhibit-startup-screen t)
@@ -188,15 +198,15 @@
               (let ((use-dialog-box nil))
                 ad-do-it)))
         (progn
-          ;(set-default-font "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
-          ;(set-face-attribute 'default nil :height 110)
-          ;(set-face-font 'font-lock-comment-face "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
-          ;(set-face-font 'font-lock-comment-delimiter-face "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
-          (set-default-font "Monoid-7")
+          (set-default-font "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
+          (set-face-attribute 'default nil :height 110)
+          (set-face-font 'font-lock-comment-face "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
           (set-face-foreground 'font-lock-comment-delimiter-face "DimGrey")
+          (set-face-font 'font-lock-comment-delimiter-face "-*-montecarlo-medium-*-normal-*-*-*-*-*-*-*-*-*")
           (set-face-foreground 'font-lock-comment-face "DimGrey")))))
 (column-number-mode 1)
 (line-number-mode 1)
+(set-default 'truncate-lines t)
 (blink-cursor-mode 0)
 (global-font-lock-mode 1)
 (transient-mark-mode 1)
@@ -226,14 +236,36 @@
                              (compilation-shell-minor-mode 1)
                              (setq compilation-auto-jump-to-first-error 1)))
 
+;; Clojure (Cider)
+(add-hook 'cider-repl-mode-hook #'company-mode)
+(add-hook 'cider-mode-hook #'company-mode)
+
+;; C
+
+(setq c-default-style "linux"
+      c-basic-offset 4)
+
+;; Go
+(let ((projects-home (getenv "PROJECTS_HOME")))
+ (let ((go-root (concat projects-home "/go/go1.6.2"))
+       (go-path (concat projects-home "/go")))
+   (setenv "GOPATH" go-path)
+   (setenv "GOROOT" go-root)
+   (setenv "PATH" (concat go-path "/bin:"
+                          go-root "/bin:"
+                          (getenv "PATH")))
+   (setq exec-path (cons (concat go-root "/bin") exec-path))
+   (setq exec-path (cons (concat go-path "/bin")
+                         exec-path))))
+
 ;; Scheme
 
 (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-(add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit-C/bin/gsc")))
+(add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
 (font-lock-add-keywords 'scheme-mode
                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
                                                    (compose-region (match-beginning 1)
-                                                                   (match-end 1)
+                                                                    (match-end 1)
                                                                    ?λ))))))
 (global-set-key "\C-c\C-qr" 'run-scheme)
 (global-set-key "\C-c\C-c" 'comment-region)
@@ -251,7 +283,7 @@
 
 ;; Load remote SchemeSpheres remote debugging if installed
 (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"
-       ;;"/usr/local/Gambit-C/spheres/energy/src/remote/sense-emacs.el"
+       ;;"/usr/local/Gambit/spheres/energy/src/remote/sense-emacs.el"
        ))
   (message "Emacs Sense loaded")
   (if (file-exists-p sense-emacs)
@@ -277,3 +309,30 @@
   (interactive (list (read-from-minibuffer "Shell command: " nil nil nil 'shell-command-history)
                      current-prefix-arg))
   (shell-command-on-region (point-min) (point-max) command t t))
+
+
+
+;; (define-key key-translation-map [?\C-h] [?\C-?]) ; Unmask 'delete' as backspace
+
+;; (let ((translations
+;;        '( 229 [?\M-a]  230 [?\M-b]   231 [?\M-c]  8706 [?\M-d]   nil [?\M-e]
+;;           402 [?\M-f]  169 [?\M-g]   729 [?\M-h]   nil [?\M-i]  8710 [?\M-j]
+;;           730 [?\M-k]  172 [?\M-l]   181 [?\M-m]   nil [?\M-n]   248 [?\M-o]
+;;           960 [?\M-p]  339 [?\M-q]   174 [?\M-r]   223 [?\M-s]  8224 [?\M-t]
+;;           nil [?\M-u] 8730 [?\M-v]  8721 [?\M-w]  8776 [?\M-x]   165 [?\M-y]
+;;           937 [?\M-z]
+;;           96 [?\M-~]  161 [?\M-1]   162 [?\M-4]   163 [?\M-3]   167 [?\M-6]
+;;           170 [?\M-9]  171 [?\M-\\]  175 [?\M-<]   176 [?\M-*]   177 [?\M-+]
+;;           182 [?\M-7]  183 [?\M-\(]  186 [?\M-0]   187 [?\M-|]   191 [?\M-\?]
+;;           198 [?\M-\"] 230 [?\M-']   247 [?\M-/]   728 [?\M->]  8211 [?\M-\-]
+;;           8212 [?\M-_] 8216 [?\M-\]] 8217 [?\M-}]  8218 [?\M-\)] 8220 [?\M-\[]
+;;           8221 [?\M-{] 8225 [?\M-&]  8226 [\?M-8]  8249 [?\M-#]  8250 [?\M-$]
+;;           8260 [?\M-!] 8364 [\?M-@]  8482 [?\M-2]  8734 [\?M-5]  8800 [?\M-=]
+;;           8804 [?\M-,] 8805 [?\M-.] 64257 [?\M-%] 64258 [?\M-^])))
+;;   (while translations
+;;     (let ((key (car translations)) (def (cadr translations)))
+;;       (if key
+;;           (define-key key-translation-map (make-string 1 key) def)))
+;;     (setq translations (cddr translations))))
+
+;;(global-set-key "\M-_" 'undo-only)

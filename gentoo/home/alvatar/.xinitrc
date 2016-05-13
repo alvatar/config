@@ -15,7 +15,7 @@ xmodmap .Xmodmaprc
 
 xsetroot -cursor_name left_ptr
 [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
-[[ -d ~/.tomorrow-Xdefaults ]] && xrdb -merge ~/.tomorrow-Xdefaults/XresourceTomorrow
+[[ -d ~/.tomorrow-Xdefaults ]] && xrdb -merge ~/.tomorrow-Xdefaults/XresourceTomorrowNightBright
 
 export EDITOR="vim"
 export VIMHOME="~/.vim"

@@ -112,14 +112,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((0, 0x1008ff04), spawn "xbacklight -dec 10")
 	
     -- WORKSPACE
-    -- Go to next workspace
-    -- , ((modMask,               xK_exclamdown),  nextWS)
     -- Go to previous workspace
-    -- , ((modMask,               xK_apostrophe),    prevWS)
+    , ((modMask,               xK_d),    prevWS)
+    -- Go to next workspace
+    , ((modMask,               xK_f),  nextWS)
     -- Shift to next workspace
-    -- , ((modMask .|. shiftMask, xK_exclamdown),  shiftToNext)
+    , ((modMask .|. shiftMask, xK_d),  shiftToNext)
     -- Shift to previous workspace
-    -- , ((modMask .|. shiftMask, xK_apostrophe),    shiftToPrev)
+    , ((modMask .|. shiftMask, xK_f),    shiftToPrev)
 	  -- Choose window from a grid
 	  , ((mod4Mask, xK_w), goToSelected defaultGSConfig)
     -- close focused window 

@@ -4,4 +4,7 @@ Fix choppy scrolling
 Find layout.frame_rate.precise set it to enable. It increases animation speed. On my system it elliminated choppy scrolling almost completely.
 
 
+This one seems to work (above one didn't)
+
+Enable async-pan-zoom
 
