@@ -26,7 +26,8 @@ import qualified Data.Map        as M
 --
 -- myTerminal      = "urxvt -is +tr -si -sw +sb -fg '#ffffff' -bg '#111111' -fn 'xft:Andale Mono:pixelsize=11:antialias=true:autohinting=true'"
 -- Use urxvtc!
-myTerminal      = "urxvtc -sw +sb -fn 'xft:Monoid:size=16:antialias=true:autohinting=true'"
+--myTerminal      = "urxvtc -sw +sb -fn 'xft:Monoid:size=16:antialias=true:autohinting=true'"
+myTerminal      = "urxvtc -sw +sb -fn 'xft:Hack:size=18:antialias=true:autohinting=true'"
 
 -- Width of the window border in pixels.
 --
@@ -105,9 +106,9 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     --, ((modMask,               xK_b     ), spawn "emacs")
 
     -- MULTIMEDIA KEYS
-    , ((0, 0x1008ff12), spawn "amixer set PCM toggle")
-    , ((0, 0x1008ff11), spawn "amixer set PCM 5%-")
-    , ((0, 0x1008ff13), spawn "amixer set PCM 5%+")
+    , ((0, 0x1008ff12), spawn "amixer set Master toggle")
+    , ((0, 0x1008ff11), spawn "amixer set Master 5%-")
+    , ((0, 0x1008ff13), spawn "amixer set Master 5%+")
     , ((0, 0x1008ff02), spawn "xbacklight -inc 10")
     , ((0, 0x1008ff04), spawn "xbacklight -dec 10")
 	

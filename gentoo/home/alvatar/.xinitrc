@@ -11,8 +11,6 @@
 #hsetroot -solid "#000000" # Stops The Gray Background
 
 
-xmodmap .Xmodmaprc
-
 xsetroot -cursor_name left_ptr
 [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
 [[ -d ~/.tomorrow-Xdefaults ]] && xrdb -merge ~/.tomorrow-Xdefaults/XresourceTomorrowNightBright
@@ -23,17 +21,25 @@ export VIMHOME="~/.vim"
 urxvtd --quiet --opendisplay --fork
 
 # Display temperature adaptation
-xflux -l 40.4 -g -3.6
+# Madrid
+#xflux -l 40.4 -g -3.6
+# Nuuk
+xflux -l 64.18 -g -51.69
 
 # Trackpad
 synclient VertScrollDelta=-50
 synclient TapButton1=1
 synclient TapButton2=3
 synclient TapButton3=2
+PalmDetect=1
 
 battery-check.sh &
-eval `ssh-agent -s`
+#eval `ssh-agent -s`
 
 
-exec xmonad
+exec xmonad &
 
+# Keyboard
+#xmodmap .Xmodmaprc
+
+wait
