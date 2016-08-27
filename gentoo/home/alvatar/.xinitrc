@@ -22,9 +22,9 @@ urxvtd --quiet --opendisplay --fork
 
 # Display temperature adaptation
 # Madrid
-#xflux -l 40.4 -g -3.6
+xflux -l 40.4 -g -3.6
 # Nuuk
-xflux -l 64.18 -g -51.69
+# xflux -l 64.18 -g -51.69
 
 # Trackpad
 synclient VertScrollDelta=-50
@@ -36,6 +36,8 @@ PalmDetect=1
 battery-check.sh &
 #eval `ssh-agent -s`
 
+# Run Jack audio
+source .jackdrc
 
 exec xmonad &
 

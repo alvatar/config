@@ -107,8 +107,8 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- MULTIMEDIA KEYS
     , ((0, 0x1008ff12), spawn "amixer set Master toggle")
-    , ((0, 0x1008ff11), spawn "amixer set Master 5%-")
-    , ((0, 0x1008ff13), spawn "amixer set Master 5%+")
+    , ((0, 0x1008ff11), spawn "amixer set Master 5%- && amixer set PCM 5%- -c 1")
+    , ((0, 0x1008ff13), spawn "amixer set Master 5%+ && amixer set PCM 5%+ -c 1")
     , ((0, 0x1008ff02), spawn "xbacklight -inc 10")
     , ((0, 0x1008ff04), spawn "xbacklight -dec 10")
 	
