@@ -189,13 +189,13 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ ((mod4Mask, button1), (\w -> focus w >> mouseMoveWindow w))
+    [ ((mod4Mask .|. shiftMask, button1), (\w -> focus w >> mouseMoveWindow w))
 
     -- mod-button2, Raise the window to the top of the stack
-    , ((mod4Mask, button2), (\w -> focus w >> windows W.swapMaster))
+    , ((mod4Mask .|. shiftMask, button2), (\w -> focus w >> windows W.swapMaster))
 
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((mod4Mask, button3), (\w -> focus w >> mouseResizeWindow w))
+    , ((mod4Mask .|. shiftMask, button3), (\w -> focus w >> mouseResizeWindow w))
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -245,20 +245,14 @@ myLayout = smartBorders tiled ||| noBorders simpleTabbed ||| Mirror tiled
 myManageHook = composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
-    , className =? "Amule"          --> doFloat
-    --  , className =? "Pidgin"         --> doFloat
     , className =? "Skype"          --> doFloat
     , className =? "Inkscape"       --> doFloat
     , className =? "feh"            --> doFloat
     , className =? "Gliv"           --> doFloat
-    , className =? "MuPDF"           --> doFloat
     , className =? "Xchm"           --> doFloat
     , className =? "Wine"           --> doFloat
     , className =? "sun-awt-X11-XFramePeer"       --> doFloat
-    , title =? "Vacuum Virtual Machine"  --> doFloat
-    , title =? "Artifex"  --> doFloat
     , title =? "opengl"  --> doFloat
-    , title =? "ipvr"  --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore ]
 
