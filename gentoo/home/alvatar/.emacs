@@ -98,6 +98,8 @@
     markdown-mode
     projectile ; Project navigation
     yaml-mode
+    solidity-mode
+    less-css-mode
     )
 
   (mapcar 'el-get-source-name el-get-sources)))
