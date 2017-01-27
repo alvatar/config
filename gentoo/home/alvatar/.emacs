@@ -67,7 +67,8 @@
    (:name cider
     :after (progn
              (setq cider-show-error-buffer nil)
-             (setq cider-show-error-buffer 'only-in-repl)))))
+             (setq cider-show-error-buffer 'only-in-repl)
+             (setq cider-repl-display-help-banner nil)))))
 
 ;; now set our own packages
 (setq
