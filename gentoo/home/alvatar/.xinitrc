@@ -37,7 +37,7 @@ battery-check.sh &
 #eval `ssh-agent -s`
 
 # Run Jack audio
-source .jackdrc
+# source .jackdrc
 
 exec xmonad &
 

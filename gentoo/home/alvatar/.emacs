@@ -23,52 +23,58 @@
 (setq
  el-get-sources
  '((:name buffer-move                   ; have to add your own keys
-    :after (progn
-             (global-set-key (kbd "<C-S-up>")     'buf-move-up)
-             (global-set-key (kbd "<C-S-down>")   'buf-move-down)
-             (global-set-key (kbd "<C-S-left>")   'buf-move-left)
-             (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
+          :after (progn
+                   (global-set-key (kbd "<C-S-up>")     'buf-move-up)
+                   (global-set-key (kbd "<C-S-down>")   'buf-move-down)
+                   (global-set-key (kbd "<C-S-left>")   'buf-move-left)
+                   (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
    (:name smex                          ; a better (ido like) M-x
-    :after (progn
-             (setq smex-save-file "~/.emacs.d/.smex-items")
-             (global-set-key (kbd "M-x") 'smex)
-             (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
+          :after (progn
+                   (setq smex-save-file "~/.emacs.d/.smex-items")
+                   (global-set-key (kbd "M-x") 'smex)
+                   (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
    (:name magit                        ; git meet emacs, and a binding
-    :after (progn
-             (global-set-key (kbd "C-x C-z") 'magit-status)))
-   (:name switch-window          ; takes over C-x o
-    :after (progn
-             (global-set-key (kbd "C-x o") 'switch-window)))
+          :after (progn
+                   (global-set-key (kbd "C-x C-z") 'magit-status)
+                   (setq with-editor-file-name-history-exclude 1)))
+   ;; (:name switch-window                 ; takes over C-x o
+   ;;        :after (progn
+   ;;                 (global-set-key (kbd "C-x o") 'switch-window)))
    (:name goto-last-change          ; move pointer back to last change
           :after (progn
                    (global-set-key (kbd "C-x C-/") 'goto-last-change)))
    (:name paredit
-    :after (progn
-             (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
-             (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
-             (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
-             (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
+          :after (progn
+                   (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
+                   (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
+                   (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
+                   (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
    (:name linum-ex
-    :after (global-linum-mode 1))
+          :after (global-linum-mode 1))
    ;; search capable of interactive string replace
    (:name phi-search
-    :after (setq phi-search-case-sensitive  t))
+          :after (setq phi-search-case-sensitive  t))
    ;; fast navigation
-   (:name ace-jump-mode
-    :after (global-set-key (kbd "C-c C-f") 'ace-jump-mode))
+   (:name avy
+          :after (progn
+                   (global-set-key (kbd "C-'") 'avy-goto-char-timer)
+                   (global-set-key (kbd "C-:") 'avy-goto-char)
+                   (global-set-key (kbd "C-\"") 'avy-goto-char-2)))
+   (:name ace-window
+          :after (global-set-key (kbd "C-x o") 'ace-window))
    (:name js2-mode
-    :after (setq js-indent-level 2))
-   (:name go-mode
-    :after (progn
-             (setq gofmt-command "goimports")
-             (add-hook 'before-save-hook 'gofmt-before-save)
-             ;; C-? global binding
-             (global-set-key (kbd "C-?") 'godef-jump)))
+          :after (setq js-indent-level 2))
+   ;; (:name go-mode
+   ;;        :after (progn
+   ;;                 (setq gofmt-command "goimports")
+   ;;                 (add-hook 'before-save-hook 'gofmt-before-save)
+   ;;                 ;; C-? global binding
+   ;;                 (global-set-key (kbd "C-?") 'godef-jump)))
    (:name cider
-    :after (progn
-             (setq cider-show-error-buffer nil)
-             (setq cider-show-error-buffer 'only-in-repl)
-             (setq cider-repl-display-help-banner nil)))))
+          :after (progn
+                   (setq cider-show-error-buffer nil)
+                   (setq cider-show-error-buffer 'only-in-repl)
+                   (setq cider-repl-display-help-banner nil)))))
 
 ;; now set our own packages
 (setq
@@ -76,7 +82,7 @@
  (append
   '(
     sublime-themes
-    auto-complete                 ; complete as you type with overlays
+    auto-complete ; complete as you type with overlays
     ac-cider
     color-theme-solarized
     color-theme-sanityinc
@@ -84,23 +90,26 @@
     company-mode
     cscope
     dockerfile-mode
-    el-get                           ; el-get is self-hosting
-    emmet-mode                       ; zencoding evolved
+    el-get ; el-get is self-hosting
+    emmet-mode ; zencoding evolved
     flx ; Fuzzy IDO
-    go-autocomplete                  ; go get -u github.com/nsf/gocode
+    go-autocomplete ; go get -u github.com/nsf/gocode
     go-errcheck
     go-flymake
     go-imports
-    go-oracle
     go-projectile
     go-lint
-    livedown                            ; npm install -g livedown
+    livedown ; npm install -g livedown
     lua-mode
     markdown-mode
     projectile ; Project navigation
     yaml-mode
     solidity-mode
     less-css-mode
+    git-timemachine
+    helm
+    helm-projectile
+    helm-cider
     )
 
   (mapcar 'el-get-source-name el-get-sources)))
@@ -257,16 +266,16 @@
 ;; Go
 
 (let ((projects-home (getenv "PROJECTS_HOME")))
- (let ((go-root (concat projects-home "/go/go1.6.2"))
-       (go-path (concat projects-home "/go")))
-   (setenv "GOPATH" go-path)
-   (setenv "GOROOT" go-root)
-   (setenv "PATH" (concat go-path "/bin:"
-                          go-root "/bin:"
-                          (getenv "PATH")))
-   (setq exec-path (cons (concat go-root "/bin") exec-path))
-   (setq exec-path (cons (concat go-path "/bin")
-                         exec-path))))
+  (let ((go-root (concat projects-home "/go/go1.7.4"))
+        (go-path (concat projects-home "/go")))
+    (setenv "GOPATH" go-path)
+    (setenv "GOROOT" go-root)
+    (setenv "PATH" (concat go-path "/bin:"
+                           go-root "/bin:"
+                           (getenv "PATH")))
+    (setq exec-path (cons (concat go-root "/bin") exec-path))
+    (setq exec-path (cons (concat go-path "/bin")
+                          exec-path))))
 
 ;; Scheme
 
@@ -312,6 +321,7 @@
       (while (re-search-forward "[ \t]+$" nil t)
         (replace-match "" nil nil))
       (goto-char current))))
+
 (put 'downcase-region 'disabled nil)
 
 (defun filter-with-shell-command (command arg)
@@ -320,7 +330,15 @@
                      current-prefix-arg))
   (shell-command-on-region (point-min) (point-max) command t t))
 
+(defun toggle-maximize-buffer () "Maximize buffer"
+       (interactive)
+       (if (= 1 (length (window-list)))
+           (jump-to-register '_)
+         (progn
+           (set-register '_ (list (current-window-configuration)))
+           (delete-other-windows))))
 
+(global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 
 ;; (define-key key-translation-map [?\C-h] [?\C-?]) ; Unmask 'delete' as backspace
 
@@ -344,5 +362,3 @@
 ;;       (if key
 ;;           (define-key key-translation-map (make-string 1 key) def)))
 ;;     (setq translations (cddr translations))))
-
-;;(global-set-key "\M-_" 'undo-only)
