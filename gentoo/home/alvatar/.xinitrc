@@ -22,9 +22,11 @@ urxvtd --quiet --opendisplay --fork
 
 # Display temperature adaptation
 # Madrid
-xflux -l 40.4 -g -3.6
+# xflux -l 40.4 -g -3.6
 # Nuuk
 # xflux -l 64.18 -g -51.69
+# Cancún
+xflux -l 21.16 -g -86.85
 
 # Trackpad
 synclient VertScrollDelta=-50

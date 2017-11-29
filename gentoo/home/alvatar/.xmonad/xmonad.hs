@@ -118,9 +118,9 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- Go to next workspace
     , ((modMask,               xK_f),  nextWS)
     -- Shift to next workspace
-    , ((modMask .|. shiftMask, xK_d),  shiftToNext)
+    , ((modMask .|. shiftMask, xK_d),  shiftToPrev)
     -- Shift to previous workspace
-    , ((modMask .|. shiftMask, xK_f),    shiftToPrev)
+    , ((modMask .|. shiftMask, xK_f),    shiftToNext)
 	  -- Choose window from a grid
 	  , ((mod4Mask, xK_w), goToSelected defaultGSConfig)
     -- close focused window 
