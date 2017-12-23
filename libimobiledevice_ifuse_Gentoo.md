@@ -185,6 +185,10 @@ It is a [known issue music sync no longer works][music] in later versions of iOS
 [music]: https://github.com/search?q=org%3Alibimobiledevice+music&type=Issues
 
 
+-------------------------------------
+
+(Added extra)
+
 # For Gentoo
 
 Need to run this daemon:
@@ -199,3 +203,4 @@ Mount VLC:
 ifuse --documents org.videolan.vlc-ios  ~/usr/mnt/
 ```
 
+https://gist.github.com/samrocketman/70dff6ebb18004fc37dc5e33c259a0fc
