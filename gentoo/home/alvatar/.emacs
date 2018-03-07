@@ -100,7 +100,7 @@
     color-theme-sanityinc
     color-theme-sanityinc-tomorrow
     company-mode
-    cscope
+    ;; cscope
     dockerfile-mode
     el-get ; el-get is self-hosting
     emmet-mode ; zencoding evolved
@@ -274,17 +274,17 @@
 
 ;; Go
 
-(let ((projects-home (getenv "PROJECTS_HOME")))
-  (let ((go-root (concat projects-home "/go/go1.7.4"))
-        (go-path (concat projects-home "/go")))
-    (setenv "GOPATH" go-path)
-    (setenv "GOROOT" go-root)
-    (setenv "PATH" (concat go-path "/bin:"
-                           go-root "/bin:"
-                           (getenv "PATH")))
-    (setq exec-path (cons (concat go-root "/bin") exec-path))
-    (setq exec-path (cons (concat go-path "/bin")
-                          exec-path))))
+;; (let ((projects-home (getenv "PROJECTS_HOME")))
+;;   (let ((go-root (concat projects-home "/go/go1.7.4"))
+;;         (go-path (concat projects-home "/go")))
+;;     (setenv "GOPATH" go-path)
+;;     (setenv "GOROOT" go-root)
+;;     (setenv "PATH" (concat go-path "/bin:"
+;;                            go-root "/bin:"
+;;                            (getenv "PATH")))
+;;     (setq exec-path (cons (concat go-root "/bin") exec-path))
+;;     (setq exec-path (cons (concat go-path "/bin")
+;;                           exec-path))))
 
 ;; Scheme
 
