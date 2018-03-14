@@ -100,7 +100,7 @@
     color-theme-sanityinc
     color-theme-sanityinc-tomorrow
     company-mode
-    cscope
+    ;;cscope
     dockerfile-mode
     el-get ; el-get is self-hosting
     emmet-mode ; zencoding evolved
@@ -156,9 +156,7 @@
    [default bold shadow italic underline bold bold-italic bold])
  '(ansi-color-names-vector
    (vector "#cccccc" "#f2777a" "#99cc99" "#ffcc66" "#6699cc" "#cc99cc" "#66cccc" "#2d2d2d"))
- '(custom-enabled-themes (list '(sanityinc-tomorrow-day)
-                               '(sanityinc-tomorrow-night)
-                               '(sanityinc-tomorrow-bright)))
+ '(custom-enabled-themes (quote (sanityinc-tomorrow-day)))
  '(custom-safe-themes
    (quote
     ("9b59e147dbbde5e638ea1cde5ec0a358d5f269d27bd2b893a0947c4a867e14c1" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "46fd293ff6e2f6b74a5edf1063c32f2a758ec24a5f63d13b07a20255c074d399" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "3cd28471e80be3bd2657ca3f03fbb2884ab669662271794360866ab60b6cb6e6" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
@@ -274,17 +272,12 @@
 
 ;; Go
 
-(let ((projects-home (getenv "PROJECTS_HOME")))
-  (let ((go-root (concat projects-home "/go/go1.7.4"))
-        (go-path (concat projects-home "/go")))
-    (setenv "GOPATH" go-path)
-    (setenv "GOROOT" go-root)
-    (setenv "PATH" (concat go-path "/bin:"
-                           go-root "/bin:"
-                           (getenv "PATH")))
-    (setq exec-path (cons (concat go-root "/bin") exec-path))
-    (setq exec-path (cons (concat go-path "/bin")
-                          exec-path))))
+(let ((go-path "/Users/alvatar/go"))
+  (setenv "GOPATH" go-path)
+  (setenv "PATH" (concat go-path "/bin:"
+                         (getenv "PATH")))
+  (setq exec-path (cons (concat go-path "/bin")
+                        exec-path)))
 
 ;; Scheme
 
