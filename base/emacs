@@ -353,3 +353,6 @@
 
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
+(global-set-key (kbd "<f8>") 'flymake-goto-next-error)
+(global-set-key (kbd "<f9>") 'flymake-popup-current-error-menu)
+(global-set-key (kbd "<f10>") 'gofmt)
