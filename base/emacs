@@ -112,6 +112,7 @@
     go-flymake
     go-imports
     go-projectile
+    go-rename
     go-lint
     livedown ; npm install -g livedown
     lua-mode
