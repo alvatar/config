@@ -57,9 +57,10 @@
    ;; fast navigation
    (:name avy
           :after (progn
-                   (global-set-key (kbd "C-'") 'avy-goto-char-timer)
-                   (global-set-key (kbd "C-:") 'avy-goto-char)
-                   (global-set-key (kbd "C-\"") 'avy-goto-char-2)))
+                   (global-set-key (kbd "M-p") 'avy-goto-char-timer)
+                   ;;(global-set-key (kbd "C-:") 'avy-goto-char)
+                   ;;(global-set-key (kbd "C-\"") 'avy-goto-char-2)
+                   ))
    (:name ace-window
           :after (global-set-key (kbd "C-x o") 'ace-window))
    (:name js2-mode
@@ -87,42 +88,56 @@
                    (global-set-key (kbd "C-x C-g") 'helm-do-ag)))
    (:name helm-gtags
           :after (progn
-                   (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))))
+                   (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))
+   (:name flycheck
+          :after (progn
+                   (global-flycheck-mode)
+                   (setq-default flycheck-disabled-checkers '(go-golint))))))
 
 (setq
  my:el-get-packages
  (append
   '(
-    elpy
-    jedi
+    el-get ; el-get is self-hosting
+    ;; Themes
     sublime-themes
-    auto-complete ; complete as you type with overlays
-    ac-cider
     color-theme-solarized
     color-theme-sanityinc
     color-theme-sanityinc-tomorrow
-    company-mode
-    cscope
-    dockerfile-mode
-    el-get ; el-get is self-hosting
-    emmet-mode ; zencoding evolved
+    ;; Misc
+    git-timemachine
     flx ; Fuzzy IDO
+    projectile ; Project navigation
+    flycheck-color-mode-line
+    ;;flycheck
+    ;; Languages
+    dockerfile-mode
+    lua-mode
+    markdown-mode
+    yaml-mode
+    solidity-mode
+    less-css-mode
+    ;; Python
+    elpy
+    jedi
+    ;; Clojure
+    helm-cider
+    ;; Completion
+    auto-complete ; complete as you type with overlays
+    ac-cider
+    company-mode
+    ;;cscope
+    ;; Go
+    ;;go-flymake
     go-autocomplete ; go get -u github.com/nsf/gocode
     go-errcheck
-    go-flymake
     go-imports
     go-projectile
     go-rename
     go-lint
+    ;; Web
     livedown ; npm install -g livedown
-    lua-mode
-    markdown-mode
-    projectile ; Project navigation
-    yaml-mode
-    solidity-mode
-    less-css-mode
-    git-timemachine
-    helm-cider
+    emmet-mode ; zencoding evolved
     )
 
   (mapcar 'el-get-source-name el-get-sources)))
@@ -277,8 +292,8 @@
 
 ;; Go
 
-(let ((projects-home (getenv "PROJECTS_HOME")))
-  (let ((go-root (concat projects-home "/go/go1.7.4"))
+(let ((projects-home "/home/alvatar/"))
+  (let ((go-root (concat projects-home "/go/go" (getenv "GOVERSION")))
         (go-path (concat projects-home "/go")))
     (setenv "GOPATH" go-path)
     (setenv "GOROOT" go-root)
@@ -356,6 +371,9 @@
 
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
-(global-set-key (kbd "<f8>") 'flymake-goto-next-error)
-(global-set-key (kbd "<f9>") 'flymake-popup-current-error-menu)
+(global-set-key (kbd "M-p") '-)
+;;(global-set-key (kbd "<f8>") 'flymake-goto-next-error)
+;;(global-set-key (kbd "<f9>") 'flymake-popup-current-error-menu)
+(global-set-key (kbd "<f9>") 'flycheck-first-error)
 (global-set-key (kbd "<f10>") 'gofmt)
+;;(global-set-key (kbd "M-.") 'find-tag)
