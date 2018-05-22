@@ -85,10 +85,11 @@
                    (global-set-key (kbd "C-x C-f") 'helm-projectile-find-file)))
    (:name helm-ag
           :after (progn
-                   (global-set-key (kbd "C-x C-g") 'helm-do-ag)))
-   (:name helm-gtags
-          :after (progn
-                   (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))
+                   (global-set-key (kbd "C-x C-g") 'helm-do-ag-project-root)
+                   (global-set-key (kbd "C-x C-h") 'xref-find-references)))
+   ;;(:name helm-gtags
+   ;;       :after (progn
+   ;;                (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))
    (:name flycheck
           :after (progn
                    (global-flycheck-mode)
