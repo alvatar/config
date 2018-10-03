@@ -99,7 +99,11 @@ export GOPATH="$HOME/go/"
 export PATH="$PATH:$GOPATH/bin:$GOPATH/go$GOVERSION/bin"
 export ANDROID_HOME="/Users/alvatar/Library/Android/sdk"
 
-alias awesome-run="docker run -v $HOME/Dropbox/projects/:/mnt -p 52022:22 --name awesome -d -P alvatar/standard"
+alias awesome-run="docker run -v $HOME/Dropbox/projects/:/mnt -p 52022:22 --name awesome --cap-add=NET_ADMIN -d -P alvatar/standard"
 alias awesome-destroy="docker stop awesome && docker rm awesome"
-alias awesome-gen="cd $HOME/Dropbox/projects/dockerfiles/standard && docker build -t alvatar/standard . && cd -"
+alias awesome-build="$HOME/Dropbox/projects/dockerfiles/standard && cp $HOME/.ssh/id_rsa* . && docker build -t alvatar/standard . ; rm -f id_rsa*; cd -"
 alias awesome-enter="ssh -A alvatar@127.0.0.1 -p 52022"
+
+alias emacs="/usr/local/Cellar/emacs-plus/25.3/bin/emacs -nw"
+
+alias create-android="$ANDROID_HOME/tools/bin/avdmanager create avd --force --name testAVD --abi google_apis/x86 --package 'system-images;android-27;google_apis;x86'"
