@@ -57,9 +57,10 @@
    ;; fast navigation
    (:name avy
           :after (progn
-                   (global-set-key (kbd "C-'") 'avy-goto-char-timer)
-                   (global-set-key (kbd "C-:") 'avy-goto-char)
-                   (global-set-key (kbd "C-\"") 'avy-goto-char-2)))
+                   (global-set-key (kbd "M-p") 'avy-goto-char-timer)
+                   ;;(global-set-key (kbd "C-:") 'avy-goto-char)
+                   ;;(global-set-key (kbd "C-\"") 'avy-goto-char-2)
+                   ))
    (:name ace-window
           :after (global-set-key (kbd "C-x o") 'ace-window))
    (:name js2-mode
@@ -81,45 +82,64 @@
    (:name helm-projectile
           :after (progn
                    (helm-projectile-on)
-                   (global-set-key (kbd "C-x C-f") 'helm-projectile-find-file)
-                   (global-set-key (kbd "C-x C-g") 'helm-projectile-grep)))
-   (:name helm-gtags
+                   (global-set-key (kbd "C-x C-f") 'helm-projectile-find-file)))
+   (:name helm-ag
           :after (progn
-                   (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))))
+                   (global-set-key (kbd "C-x C-g") 'helm-do-ag-project-root)
+                   (global-set-key (kbd "C-x C-h") 'xref-find-references)))
+   ;;(:name helm-gtags
+   ;;       :after (progn
+   ;;                (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))
+   (:name flycheck
+          :after (progn
+                   (global-flycheck-mode)
+                   (setq-default flycheck-disabled-checkers '(go-golint))))))
 
 (setq
  my:el-get-packages
  (append
   '(
-    elpy
-    jedi
+    el-get ; el-get is self-hosting
+    ;; Themes
     sublime-themes
-    auto-complete ; complete as you type with overlays
-    ac-cider
     color-theme-solarized
     color-theme-sanityinc
     color-theme-sanityinc-tomorrow
-    company-mode
-    ;; cscope
-    dockerfile-mode
-    el-get ; el-get is self-hosting
-    emmet-mode ; zencoding evolved
+    ;; Misc
+    git-timemachine
     flx ; Fuzzy IDO
-    go-autocomplete ; go get -u github.com/nsf/gocode
-    go-errcheck
-    go-flymake
-    go-imports
-    go-projectile
-    go-lint
-    livedown ; npm install -g livedown
+    projectile ; Project navigation
+    flycheck-color-mode-line
+    ;;flycheck
+    ;; Languages
+    dockerfile-mode
     lua-mode
     markdown-mode
-    projectile ; Project navigation
     yaml-mode
     solidity-mode
     less-css-mode
-    git-timemachine
+    ;; Python
+    elpy
+    jedi
+    ;; Clojure
     helm-cider
+    ;; Completion
+    auto-complete ; complete as you type with overlays
+    ac-cider
+    company-mode
+    ;;cscope
+    ;; Go
+    ;; go-flymake
+    go-autocomplete ; go get -u github.com/nsf/gocode
+    go-errcheck
+    go-imports
+    go-projectile
+    go-rename
+    go-lint
+    ;; Web
+    livedown ; npm install -g livedown
+    emmet-mode ; zencoding evolved
+    autopair ; automatically close {([
     )
 
   (mapcar 'el-get-source-name el-get-sources)))
@@ -139,63 +159,10 @@
       browse-url-browser-function 'browse-url-generic)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq inhibit-startup-buffer-menu t)
-(add-hook 'find-file-hook
-          (lambda ()
-            (setf show-trailing-whitespace t)))
-(if (eq system-type 'darwin)
-    (setq browse-url-generic-program "~/.emacs.d/run-firefox.sh"))
+(add-hook 'find-file-hook (lambda () (setf show-trailing-whitespace t)))
+(ac-config-default)
 
 ;;; Look & feel
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default bold shadow italic underline bold bold-italic bold])
- '(ansi-color-names-vector
-   (vector "#cccccc" "#f2777a" "#99cc99" "#ffcc66" "#6699cc" "#cc99cc" "#66cccc" "#2d2d2d"))
- '(custom-enabled-themes (list '(sanityinc-tomorrow-day)
-                               '(sanityinc-tomorrow-night)
-                               '(sanityinc-tomorrow-bright)))
- '(custom-safe-themes
-   (quote
-    ("9b59e147dbbde5e638ea1cde5ec0a358d5f269d27bd2b893a0947c4a867e14c1" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "46fd293ff6e2f6b74a5edf1063c32f2a758ec24a5f63d13b07a20255c074d399" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "3cd28471e80be3bd2657ca3f03fbb2884ab669662271794360866ab60b6cb6e6" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
- '(fci-rule-color "#515151")
- '(frame-background-mode (quote light))
- '(inhibit-startup-screen t)
- '(load-home-init-file t t)
- '(org-agenda-files nil)
- '(package-selected-packages (quote (queue)))
- '(vc-annotate-background nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#f2777a")
-     (40 . "#f99157")
-     (60 . "#ffcc66")
-     (80 . "#99cc99")
-     (100 . "#66cccc")
-     (120 . "#6699cc")
-     (140 . "#cc99cc")
-     (160 . "#f2777a")
-     (180 . "#f99157")
-     (200 . "#ffcc66")
-     (220 . "#99cc99")
-     (240 . "#66cccc")
-     (260 . "#6699cc")
-     (280 . "#cc99cc")
-     (300 . "#f2777a")
-     (320 . "#f99157")
-     (340 . "#ffcc66")
-     (360 . "#99cc99"))))
- '(vc-annotate-very-old-color nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 (menu-bar-mode 0)
 (if (display-graphic-p)
     ;; GUI
@@ -217,19 +184,27 @@
             ;; Prevent opening a dialog on OSX (buggy)
             (defadvice yes-or-no-p (around prevent-dialog activate)
               "Prevent yes-or-no-p from activating a dialog"
-              (let ((use-dialog-box nil))
-                ad-do-it))
+              (let ((use-dialog-box nil)) ad-do-it))
             (defadvice y-or-n-p (around prevent-dialog-yorn activate)
               "Prevent y-or-n-p from activating a dialog"
-              (let ((use-dialog-box nil))
-                ad-do-it)))
+              (let ((use-dialog-box nil)) ad-do-it)))
         ;; Linux
         (progn
           (set-default-font "Hack")
           (set-face-attribute 'default nil :height 85))))
   ;; Console
   (progn
-    (color-theme-sanityinc-tomorrow-bright)))
+    ;; (color-theme-sanityinc-dark)
+    (set-face-attribute 'font-lock-comment-face nil :foreground "#cccccc")
+    (set-face-attribute 'font-lock-comment-delimiter-face nil :foreground "#cccccc")
+    (set-face-attribute 'font-lock-string-face nil :foreground "#4f004f" :weight 'normal)
+    (set-face-attribute 'font-lock-constant-face nil :foreground "#4f004f")
+    (set-face-attribute 'font-lock-keyword-face nil :foreground "#00003f")
+    (set-face-attribute 'font-lock-builtin-face nil :foreground "#008080")
+    (set-face-attribute 'font-lock-type-face nil :foreground "#eae374")
+    (set-face-attribute 'font-lock-function-name-face nil :foreground "#008080" :weight 'bold)
+    (set-face-attribute 'font-lock-variable-name-face nil :foreground "#008080" :weight 'bold)))
+
 (column-number-mode 1)
 (line-number-mode 1)
 (set-default 'truncate-lines t)
@@ -241,20 +216,6 @@
 (show-paren-mode 1)
 (setq ns-right-alternate-modifier nil)
 
-;; Aspell
-
-(setq ispell-program-name "aspell")
-(setq exec-path (cons "/usr/local/bin/" exec-path))
-
-;; Etags
-
-(defun create-tags (dir-name)
-  "Create tags file."
-  (interactive
-   "Directory:")
-  (shell-command
-   (format "cd %s && find . -type f | grep \".*\\.\\(c\\|h\\|cpp\\|hpp\\|scm\\|sld\\|ss\\)$\" | xargs etags"
-           (directory-file-name dir-name))))
 
 ;; Shell
 
@@ -274,17 +235,19 @@
 
 ;; Go
 
-;; (let ((projects-home (getenv "PROJECTS_HOME")))
-;;   (let ((go-root (concat projects-home "/go/go1.7.4"))
-;;         (go-path (concat projects-home "/go")))
-;;     (setenv "GOPATH" go-path)
-;;     (setenv "GOROOT" go-root)
-;;     (setenv "PATH" (concat go-path "/bin:"
-;;                            go-root "/bin:"
-;;                            (getenv "PATH")))
-;;     (setq exec-path (cons (concat go-root "/bin") exec-path))
-;;     (setq exec-path (cons (concat go-path "/bin")
-;;                           exec-path))))
+(let ((projects-home "/home/alvatar/"))
+  (let ((go-root (concat projects-home "/go/go" (getenv "GOVERSION")))
+        (go-path (concat projects-home "/go")))
+    (setenv "GOPATH" go-path)
+    (setenv "GOROOT" go-root)
+    (setenv "PATH" (concat go-path "/bin:"
+                           go-root "/bin:"
+                           (getenv "PATH")))
+    (setq exec-path (cons (concat go-root "/bin") exec-path))
+    (setq exec-path (cons (concat go-path "/bin")
+                          exec-path))))
+
+(add-hook 'go-mode-hook #'autopair-mode)
 
 ;; Scheme
 
@@ -311,11 +274,11 @@
 
 ;; Load remote SchemeSpheres remote debugging if installed
 (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"
-       ;;"/usr/local/Gambit/spheres/energy/src/remote/sense-emacs.el"
-       ))
-  (message "Emacs Sense loaded")
-  (if (file-exists-p sense-emacs)
-      (load-file sense-emacs)))
+                   ;;"/usr/local/Gambit/spheres/energy/src/remote/sense-emacs.el"
+                   ))
+  (when (file-exists-p sense-emacs)
+    (load-file sense-emacs)
+    (message "Emacs Sense loaded")))
 
 ;;-----------------
 
@@ -339,13 +302,14 @@
                      current-prefix-arg))
   (shell-command-on-region (point-min) (point-max) command t t))
 
-(defun toggle-maximize-buffer () "Maximize buffer"
-       (interactive)
-       (if (= 1 (length (window-list)))
-           (jump-to-register '_)
-         (progn
-           (set-register '_ (list (current-window-configuration)))
-           (delete-other-windows))))
+(defun toggle-maximize-buffer ()
+  "Maximize buffer"
+  (interactive)
+  (if (= 1 (length (window-list)))
+      (jump-to-register '_)
+    (progn
+      (set-register '_ (list (current-window-configuration)))
+      (delete-other-windows))))
 
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 
@@ -353,3 +317,13 @@
 
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
+
+(global-set-key (kbd "<f8>") 'flycheck-list-errors)
+(global-set-key (kbd "<f9>") 'flycheck-next-error)
+(global-set-key (kbd "<f10>") 'gofmt)
+(global-set-key (kbd "C-2") 'xref-find-references)
+(global-set-key (kbd "C-3") 'helm-do-grep-ag)
+
+
+(provide '.emacs)
+;;; .emacs ends here
