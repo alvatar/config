@@ -194,16 +194,17 @@
           (set-face-attribute 'default nil :height 85))))
   ;; Console
   (progn
-    ;; (color-theme-sanityinc-dark)
-    (set-face-attribute 'font-lock-comment-face nil :foreground "#cccccc")
-    (set-face-attribute 'font-lock-comment-delimiter-face nil :foreground "#cccccc")
-    (set-face-attribute 'font-lock-string-face nil :foreground "#4f004f" :weight 'normal)
-    (set-face-attribute 'font-lock-constant-face nil :foreground "#4f004f")
-    (set-face-attribute 'font-lock-keyword-face nil :foreground "#00003f")
-    (set-face-attribute 'font-lock-builtin-face nil :foreground "#008080")
-    (set-face-attribute 'font-lock-type-face nil :foreground "#eae374")
-    (set-face-attribute 'font-lock-function-name-face nil :foreground "#008080" :weight 'bold)
-    (set-face-attribute 'font-lock-variable-name-face nil :foreground "#008080" :weight 'bold)))
+    (color-theme-sanityinc-dark)
+    (set-face-attribute 'font-lock-comment-face nil :foreground "#111111" :background "#666666")
+    (set-face-attribute 'font-lock-comment-delimiter-face nil :foreground "#111111" :background "#666666")
+    ;; (set-face-attribute 'font-lock-string-face nil :foreground "#4f004f" :weight 'normal)
+    ;; (set-face-attribute 'font-lock-constant-face nil :foreground "#4f004f")
+    ;; (set-face-attribute 'font-lock-keyword-face nil :foreground "#00003f")
+    ;; (set-face-attribute 'font-lock-builtin-face nil :foreground "#008080")
+    ;; (set-face-attribute 'font-lock-type-face nil :foreground "#eae374")
+    ;; (set-face-attribute 'font-lock-function-name-face nil :foreground "#008080" :weight 'bold)
+    ;; (set-face-attribute 'font-lock-variable-name-face nil :foreground "#008080" :weight 'bold)
+    ))
 
 (column-number-mode 1)
 (line-number-mode 1)
@@ -325,5 +326,5 @@
 (global-set-key (kbd "C-3") 'helm-do-grep-ag)
 
 
+
 (provide '.emacs)
-;;; .emacs ends here
