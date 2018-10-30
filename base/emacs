@@ -322,8 +322,8 @@
 (global-set-key (kbd "<f8>") 'flycheck-list-errors)
 (global-set-key (kbd "<f9>") 'flycheck-next-error)
 (global-set-key (kbd "<f10>") 'gofmt)
-(global-set-key (kbd "C-2") 'xref-find-references)
-(global-set-key (kbd "C-3") 'helm-do-grep-ag)
+(global-set-key (kbd "C-c 2") 'xref-find-references)
+(global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
 
 
 
