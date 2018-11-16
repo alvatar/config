@@ -36,7 +36,8 @@
    (:name magit                        ; git meet emacs, and a binding
           :after (progn
                    (global-set-key (kbd "C-x C-z") 'magit-status)
-                   (setq with-editor-file-name-history-exclude 1)))
+                   ;; (setq with-editor-file-name-history-exclude 1)
+                   ))
    ;; (:name switch-window                 ; takes over C-x o
    ;;        :after (progn
    ;;                 (global-set-key (kbd "C-x o") 'switch-window)))
@@ -194,17 +195,15 @@
           (set-face-attribute 'default nil :height 85))))
   ;; Console
   (progn
-    (color-theme-sanityinc-dark)
-    (set-face-attribute 'font-lock-comment-face nil :foreground "#111111" :background "#666666")
-    (set-face-attribute 'font-lock-comment-delimiter-face nil :foreground "#111111" :background "#666666")
-    ;; (set-face-attribute 'font-lock-string-face nil :foreground "#4f004f" :weight 'normal)
-    ;; (set-face-attribute 'font-lock-constant-face nil :foreground "#4f004f")
-    ;; (set-face-attribute 'font-lock-keyword-face nil :foreground "#00003f")
-    ;; (set-face-attribute 'font-lock-builtin-face nil :foreground "#008080")
-    ;; (set-face-attribute 'font-lock-type-face nil :foreground "#eae374")
-    ;; (set-face-attribute 'font-lock-function-name-face nil :foreground "#008080" :weight 'bold)
-    ;; (set-face-attribute 'font-lock-variable-name-face nil :foreground "#008080" :weight 'bold)
-    ))
+    (custom-set-variables
+     '(custom-enabled-themes (quote (sanityinc-tomorrow-bright)))
+     '(custom-safe-themes
+       (quote
+        ("1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" default))))
+    (color-theme-sanityinc-tomorrow-bright)
+    (custom-set-faces
+     '(font-lock-comment-face ((t (:background "#666666" :foreground "black" :slant italic))))
+     '(font-lock-comment-delimiter-face ((t (:background "#666666" :foreground "black" :slant italic)))))))
 
 (column-number-mode 1)
 (line-number-mode 1)
@@ -322,9 +321,9 @@
 (global-set-key (kbd "<f8>") 'flycheck-list-errors)
 (global-set-key (kbd "<f9>") 'flycheck-next-error)
 (global-set-key (kbd "<f10>") 'gofmt)
+(global-set-key (kbd "C-c 1") 'xref-find-definitions)
 (global-set-key (kbd "C-c 2") 'xref-find-references)
 (global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
-
 
 
 (provide '.emacs)
