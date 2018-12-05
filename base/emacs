@@ -34,7 +34,7 @@
    (:name magit
           :after (progn
                    (global-set-key (kbd "C-x C-z") 'magit-status)))
-   ;; (:name switch-window                 ; takes over C-x o
+   ;; (:name switch-window
    ;;        :after (progn
    ;;                 (global-set-key (kbd "C-x o") 'switch-window)))
    (:name goto-last-change          ; move pointer back to last change
@@ -50,7 +50,7 @@
    ;;        :after (global-linum-mode 1))
    ;; search capable of interactive string replace
    (:name phi-search
-          :after (setq phi-search-case-sensitive  t))
+          :after (setq phi-search-case-sensitive  f))
    ;; fast navigation
    (:name avy
           :after (progn
@@ -79,14 +79,24 @@
                    (global-flycheck-mode)
                    (setq-default flycheck-disabled-checkers '(go-golint))))
    (:name moe-theme
-          :after (require 'moe-theme))))
+          :after (require 'moe-theme))
+   (:name sublimity
+          :after (progn
+                   (sublimity-mode)
+                   (require 'sublimity-scroll)
+                   (require 'sublimity-attractive)
+                   (setq sublimity-auto-hscroll-mode 't)))
+   (:name beacon
+          :after (beacon-mode))
+   (:name main-line
+          :after (setq main-line-separator-style 'slant))))
 
 (setq
  my:el-get-packages
  (append
   '(
     el-get ; el-get is self-hosting
-    ;; Themes
+    ;; Themes & eye-candy
     color-theme-sanityinc-tomorrow
     ;; Misc
     git-timemachine
@@ -138,6 +148,8 @@
       browse-url-browser-function 'browse-url-generic)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq inhibit-startup-buffer-menu t)
+(setq ring-bell-function (lambda ()))
+
 (add-hook 'find-file-hook (lambda () (setf show-trailing-whitespace t)))
 (ac-config-default)
 
@@ -193,7 +205,7 @@
       show-paren-style 'parenthesis)
 (show-paren-mode 1)
 (setq ns-right-alternate-modifier nil)
-
+(set-fringe-mode '(1 . 1))
 
 ;; Shell
 
@@ -220,7 +232,11 @@
   (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.11.2") "/bin:" (getenv "PATH")))
   (setq exec-path (cons (concat go-path "/bin") exec-path)))
 
-(add-hook 'go-mode-hook #'autopair-mode)
+(add-hook 'go-mode-hook
+          (lambda ()
+            (autopair-mode)
+            (global-set-key (kbd "C-c 1") 'go-guru-definition)
+            (global-set-key (kbd "C-c 2") 'go-guru-callers)))
 
 ;; Scheme
 
@@ -289,7 +305,11 @@
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
-
+(global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
+(global-set-key (kbd "<f7>")
+        (lambda ()
+          (interactive)
+          (shell-command "/usr/local/Cellar/ctags/5.8_1/bin/ctags --languages=Go -e -R .")))
 (global-set-key (kbd "<f8>") 'flycheck-list-errors)
 (global-set-key (kbd "<f9>") 'flycheck-next-error)
 (global-set-key (kbd "<f10>") 'gofmt)
@@ -300,3 +320,4 @@
 
 
 (provide '.emacs)
+(put 'scroll-left 'disabled nil)
