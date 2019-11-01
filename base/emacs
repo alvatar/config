@@ -72,7 +72,7 @@
   :ensure helm
   :bind ("C-x M-f" . helm-find-files))
 (use-package helm-projectile
-  ;;(helm-projectile-on)
+  :ensure helm-projectile
   :bind ("C-x C-f" . helm-projectile-find-file))
 ;; (use-package helm-cider
 ;;   :ensure helm-cider)
