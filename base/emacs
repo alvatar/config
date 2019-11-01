@@ -1,160 +1,190 @@
+(require 'package)
+
+;;; Code:
+
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+
+;; Init
+
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  (when no-ssl (warn "Your version of Emacs does not support SSL connections"))
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  (add-to-list 'package-archives (cons "marmalade" (concat proto "://marmalade-repo.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+
 (package-initialize)
 
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+(if (not (package-installed-p 'use-package))
+    (progn
+      (package-refresh-contents)
+      (package-install 'use-package)))
 
-(unless (require 'el-get nil t)
-(url-retrieve
- "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
- (lambda (s)
-   (end-of-buffer)
-   (eval-print-last-sexp))))
+(require 'use-package)
 
-;; now either el-get is `require'd already, or have been `load'ed by the
-;; el-get installer.
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+
+;; Packages
+
+(use-package expand-region
+  :ensure expand-region
+  :bind ("C-=" . er/expand-region))
+(use-package smex
+  :ensure smex
+  :init (setq smex-save-file "~/.emacs.d/.smex-items")
+  :bind (("M-x" . smex)
+         ("M-X" . smex-major-mode-commands)))
+(use-package magit
+  :ensure magit
+  :bind ("C-x C-z" . magit-status))
+(use-package goto-last-change
+  :ensure goto-last-change
+  :bind ("C-x C-/" . goto-last-change))
+(use-package paredit
+  :ensure paredit
+  :init (progn
+          (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
+(use-package avy
+  :ensure avy
+  :bind ("M-p" . 'avy-goto-char-timer))
+(use-package ace-window
+  :ensure ace-window
+  :bind ("C-x o" . ace-window))
+(use-package cider
+  :ensure cider
+  :init (progn
+          (setq cider-show-error-buffer nil)
+          (setq cider-show-error-buffer 'only-in-repl)
+          (setq cider-repl-display-help-banner nil)
+          (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+          (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)))
+;; Helm, Projectile
+(use-package helm
+  :ensure helm
+  :bind ("C-x M-f" . helm-find-files))
+(use-package helm-projectile
+  ;;(helm-projectile-on)
+  :bind ("C-x C-f" . helm-projectile-find-file))
+;; (use-package helm-cider
+;;   :ensure helm-cider)
+(use-package flycheck
+  :ensure flycheck
+  :init (progn
+          (global-flycheck-mode)
+          (setq-default flycheck-disabled-checkers '(go-golint))))
+(use-package moe-theme)
+(use-package beacon
+  :ensure beacon)
+(use-package smart-tab
+  :ensure smart-tab)
+(use-package powerline
+  :ensure powerline
+  :init (powerline-default-theme))
+(use-package  multiple-cursors
+  :ensure multiple-cursors
+  :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
+(use-package sublimity
+  :ensure sublimity
+  :init (progn
+          (sublimity-mode)
+          (require 'sublimity-scroll)
+          (require 'sublimity-attractive)
+          (setq sublimity-auto-hscroll-mode 't)))
+(use-package git-timemachine
+  :ensure git-timemachine)
+(use-package autopair
+  :ensure autopair)
+;; Languages
+(use-package dockerfile-mode
+  :ensure dockerfile-mode)
+(use-package js2-mode
+  :ensure js2-mode)
+(use-package markdown-mode
+  :ensure markdown-mode)
+(use-package yaml-mode
+  :ensure yaml-mode)
+;; (use-package auto-complete
+;;   :ensure auto-complete)
+;; (use-package ac-cider
+;;   :ensure ac-cider)
+(use-package go-mode
+  :ensure go-mode)
+;; (use-package go-autocomplete
+;;   :ensure go-autocomplete)
+(use-package emmet-mode
+  :ensure emmet-mode)
+(use-package flycheck-golangci-lint
+  :ensure flycheck-golangci-lint)
+(use-package company
+  :ensure company
+  :init (global-company-mode))
+(use-package company-go
+  :ensure company-go)
+(use-package company-fuzzy
+  :ensure company-fuzzy
+  :init (global-company-fuzzy-mode 1))
+;; Themes
+(use-package tron-theme
+  :ensure tron-theme)
 
 ;; PATH
-(setq exec-path (cons (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.11.2") "/bin") exec-path))
+(setq exec-path (append (list
+                         "/usr/local/bin"
+                         (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.11.5") "/bin"))
+                        exec-path))
 (setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
 
-;; set local recipes, el-get-sources should only accept PLIST element
-(setq
- el-get-sources
- '((:name buffer-move
-          :after (progn
-                   (global-set-key (kbd "<C-S-up>")     'buf-move-up)
-                   (global-set-key (kbd "<C-S-down>")   'buf-move-down)
-                   (global-set-key (kbd "<C-S-left>")   'buf-move-left)
-                   (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
-   ;; a better (ido like) M-x
-   (:name smex
-          :after (progn
-                   (setq smex-save-file "~/.emacs.d/.smex-items")
-                   (global-set-key (kbd "M-x") 'smex)
-                   (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
-   (:name magit
-          :after (progn
-                   (global-set-key (kbd "C-x C-z") 'magit-status)))
-   ;; (:name switch-window
-   ;;        :after (progn
-   ;;                 (global-set-key (kbd "C-x o") 'switch-window)))
-   (:name goto-last-change          ; move pointer back to last change
-          :after (progn
-                   (global-set-key (kbd "C-x C-/") 'goto-last-change)))
-   (:name paredit
-          :after (progn
-                   (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
-   ;; (:name linum-ex
-   ;;        :after (global-linum-mode 1))
-   ;; search capable of interactive string replace
-   (:name phi-search
-          :after (setq phi-search-case-sensitive  f))
-   ;; fast navigation
-   (:name avy
-          :after (progn
-                   (global-set-key (kbd "M-p") 'avy-goto-char-timer)
-                   ;;(global-set-key (kbd "C-:") 'avy-goto-char)
-                   ;;(global-set-key (kbd "C-\"") 'avy-goto-char-2)
-                   ))
-   (:name ace-window
-          :after (global-set-key (kbd "C-x o") 'ace-window))
-   (:name js2-mode
-          :after (setq js-indent-level 2))
-   (:name cider
-          :after (progn
-                   (setq cider-show-error-buffer nil)
-                   (setq cider-show-error-buffer 'only-in-repl)
-                   (setq cider-repl-display-help-banner nil)))
-   (:name helm
-          :after (progn
-                   (global-set-key (kbd "C-x M-f") 'helm-find-files)))
-   (:name helm-projectile
-          :after (progn
-                   (helm-projectile-on)
-                   (global-set-key (kbd "C-x C-f") 'helm-projectile-find-file)))
-   (:name flycheck
-          :after (progn
-                   (global-flycheck-mode)
-                   (setq-default flycheck-disabled-checkers '(go-golint))))
-   (:name moe-theme
-          :after (require 'moe-theme))
-   (:name sublimity
-          :after (progn
-                   (sublimity-mode)
-                   (require 'sublimity-scroll)
-                   (require 'sublimity-attractive)
-                   (setq sublimity-auto-hscroll-mode 't)))
-   (:name beacon
-          :after (beacon-mode))
-   (:name main-line
-          :after (setq main-line-separator-style 'slant))))
 
-(setq
- my:el-get-packages
- (append
-  '(
-    el-get ; el-get is self-hosting
-    ;; Themes & eye-candy
-    color-theme-sanityinc-tomorrow
-    ;; Misc
-    git-timemachine
-    flx ; Fuzzy IDO
-    projectile ; Project navigation
-    flycheck-color-mode-line
-    autopair ; automatically close {([
-    ;; Misc languages
-    dockerfile-mode
-    lua-mode
-    markdown-mode
-    yaml-mode
-    less-css-mode
-    ;; Python
-    elpy
-    jedi
-    ;; Clojure
-    helm-cider
-    ;; Completion
-    auto-complete ; complete as you type with overlays
-    ac-cider
-    company-mode
-    ;; Go
-    go-autocomplete ; go get -u github.com/nsf/gocode
-    go-errcheck
-    go-imports
-    go-projectile
-    go-rename
-    go-lint
-    ;; Web
-    livedown ; npm install -g livedown
-    emmet-mode ; zencoding evolved
-    )
-
-  (mapcar 'el-get-source-name el-get-sources)))
-
-;; install new packages and init already installed packages
-(el-get 'sync my:el-get-packages)
-
-;;-----------------
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 ;; General Config
 
+;; No backups
 (setq backup-inhibited t)
 (setq auto-save-default nil)
-(setq-default indent-tabs-mode nil)
 (setq make-backup-files nil)
-(setq browse-url-generic-program (executable-find "firefox")
-      browse-url-browser-function 'browse-url-generic)
-(fset 'yes-or-no-p 'y-or-n-p)
+;; Silent bell
+(setq ring-bell-function 'ignore)
+;; It makes indentation use spaces.
+(setq-default indent-tabs-mode nil)
+;; Sometimes the mini-buffer becomes multi-line, and it can be a bit annoying as
+;; you type in it. This makes it stay one line.
+(setq resize-mini-windows nil)
+;; Startup screen
 (setq inhibit-startup-buffer-menu t)
-(setq ring-bell-function (lambda ()))
-
+(setq inhibit-splash-screen t)
+;; Show matching parentecies globaly.
+(show-paren-mode 1)
+;; Use UTF-8 by default
+(set-language-environment "UTF-8")
+;; Show  trailing whitespace
 (add-hook 'find-file-hook (lambda () (setf show-trailing-whitespace t)))
-(ac-config-default)
-
-;;; Look & feel
+;; Confirmation menu
+(fset 'yes-or-no-p 'y-or-n-p)
+;; Transient mark
+(transient-mark-mode 1)
+;; Look & feel
 (menu-bar-mode 0)
+(column-number-mode 1)
+(line-number-mode 1)
+(set-default 'truncate-lines t)
+(blink-cursor-mode 0)
+(global-font-lock-mode 1)
+(setq show-paren-delay 0
+      show-paren-style 'parenthesis)
+(show-paren-mode 1)
+(setq ns-right-alternate-modifier nil)
+(set-fringe-mode '(1 . 1))
 (if (display-graphic-p)
     ;; GUI
     (progn
@@ -195,81 +225,8 @@
      '(font-lock-comment-face ((t (:background "#666666" :foreground "black" :slant italic))))
      '(font-lock-comment-delimiter-face ((t (:background "#666666" :foreground "black" :slant italic)))))))
 
-(column-number-mode 1)
-(line-number-mode 1)
-(set-default 'truncate-lines t)
-(blink-cursor-mode 0)
-(global-font-lock-mode 1)
-(transient-mark-mode 1)
-(setq show-paren-delay 0
-      show-paren-style 'parenthesis)
-(show-paren-mode 1)
-(setq ns-right-alternate-modifier nil)
-(set-fringe-mode '(1 . 1))
-
-;; Shell
-
-(add-hook 'shell-mode-hook (lambda ()
-                             (compilation-shell-minor-mode 1)
-                             (setq compilation-auto-jump-to-first-error 1)))
-
-;; Clojure (Cider)
-
-(add-hook 'cider-repl-mode-hook #'company-mode)
-(add-hook 'cider-mode-hook #'company-mode)
-
-;; C
-
-(setq c-default-style "linux"
-      c-basic-offset 4)
-
-;; Go
-
-(let* ((home (getenv "HOME"))
-       (go-path (concat home "/go")))
-  (setenv "GOPATH" go-path)
-  (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.11.2") "/bin:" (getenv "PATH")))
-  (setq exec-path (cons (concat go-path "/bin") exec-path)))
-
-(add-hook 'go-mode-hook
-          (lambda ()
-            (autopair-mode)
-            (global-set-key (kbd "C-c 1") 'go-guru-definition)
-            (global-set-key (kbd "C-c 2") 'go-guru-callers)))
-
-;; Scheme
-
-(add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-(add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
-(font-lock-add-keywords 'scheme-mode
-                        '(("(\\(lambda\\)\\>" (0 (prog1 ()
-                                                   (compose-region (match-beginning 1)
-                                                                    (match-end 1)
-                                                                   ?λ))))))
-(global-set-key "\C-c\C-qr" 'run-scheme)
-(global-set-key "\C-c\C-c" 'comment-region)
-(global-set-key "\C-c\M-c" 'uncomment-region)
-(add-hook 'scheme-mode-hook
-          (lambda ()
-            (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file)))
-;; (add-hook 'inferior-scheme-mode-hook
-;;           (lambda ()
-;;             (linum-mode 0)))
-(add-hook 'inferior-scheme-mode-hook
-          (lambda ()
-            (define-key scheme-mode-map "\C-c\C-c" 'comment-region)
-            (define-key scheme-mode-map "\C-c\M-c" 'uncomment-region)))
-
-;; Load remote SchemeSpheres remote debugging if installed
-(let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"
-                   ;;"/usr/local/Gambit/spheres/energy/src/remote/sense-emacs.el"
-                   ))
-  (when (file-exists-p sense-emacs)
-    (load-file sense-emacs)
-    (message "Emacs Sense loaded")))
-
-;;-----------------
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 
 ;; Custom functions
 
@@ -300,7 +257,10 @@
       (set-register '_ (list (current-window-configuration)))
       (delete-other-windows))))
 
-;; Custom Key bindings
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+
+;; Key bindings
 
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
@@ -310,6 +270,7 @@
         (lambda ()
           (interactive)
           (shell-command "/usr/local/Cellar/ctags/5.8_1/bin/ctags --languages=Go -e -R .")))
+(global-set-key (kbd "<f7>") 'compile)
 (global-set-key (kbd "<f8>") 'flycheck-list-errors)
 (global-set-key (kbd "<f9>") 'flycheck-next-error)
 (global-set-key (kbd "<f10>") 'gofmt)
@@ -318,6 +279,60 @@
 (global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
 (global-set-key (kbd "C-c 4") 'helm-do-ag-project-root)
 
+;; (put 'scroll-left 'disabled nil)
+
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+;; Languages
+
+;; Shell
+(add-hook 'shell-mode-hook (lambda ()
+                             (compilation-shell-minor-mode 1)
+                             (setq compilation-auto-jump-to-first-error 1)))
+
+;; C
+(setq c-default-style "linux"
+      c-basic-offset 4)
+
+;; Go
+(let* ((home (getenv "HOME"))
+       (go-path (concat home "/go")))
+  (setenv "GOPATH" go-path)
+  ;;(setenv "GOROOT" go-path)
+  (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
+  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.3") "/bin:" (getenv "PATH")))
+  (setq exec-path (cons (concat go-path "/bin") exec-path)))
+(add-hook 'go-mode-hook
+          (lambda ()
+            (autopair-mode)
+            (global-set-key (kbd "C-c 1") 'go-guru-definition)
+            (global-set-key (kbd "C-c 2") 'go-guru-callers)))
+
+;; Scheme
+;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
+;; (add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
+;; (font-lock-add-keywords 'scheme-mode
+;;                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
+;;                                                    (compose-region (match-beginning 1)
+;;                                                                     (match-end 1)
+;;                                                                    ?λ))))))
+;; (global-set-key "\C-c\C-qr" 'run-scheme)
+;; (global-set-key "\C-c\C-c" 'comment-region)
+;; (global-set-key "\C-c\M-c" 'uncomment-region)
+;; (add-hook 'scheme-mode-hook
+;;           (lambda ()
+;;             (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file)))
+;; (add-hook 'inferior-scheme-mode-hook
+;;           (lambda ()
+;;             (define-key scheme-mode-map "\C-c\C-c" 'comment-region)
+;;             (define-key scheme-mode-map "\C-c\M-c" 'uncomment-region)))
+
+;; ;; Load remote SchemeSpheres remote debugging if installed
+;; (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"))
+;;   (when (file-exists-p sense-emacs)
+;;     (load-file sense-emacs)
+;;     (message "Emacs Sense loaded")))
+
+;;------------------------------------------------------------------------------
 
 (provide '.emacs)
-(put 'scroll-left 'disabled nil)
