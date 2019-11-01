@@ -306,8 +306,11 @@
 (add-hook 'go-mode-hook
           (lambda ()
             (autopair-mode)
+            (set (make-local-variable 'company-backends) '(company-go))
             (global-set-key (kbd "C-c 1") 'go-guru-definition)
             (global-set-key (kbd "C-c 2") 'go-guru-callers)))
+
+
 
 ;; Scheme
 ;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
