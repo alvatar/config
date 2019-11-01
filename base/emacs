@@ -123,7 +123,8 @@
 (use-package emmet-mode
   :ensure emmet-mode)
 (use-package flycheck-golangci-lint
-  :ensure flycheck-golangci-lint)
+  :ensure flycheck-golangci-lint
+  :hook (go-mode . flycheck-golangci-lint-setup))
 (use-package company
   :ensure company
   :init (global-company-mode))
