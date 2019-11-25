@@ -24,6 +24,9 @@ set wildmenu
 set hidden
 map K <Nop>
 
+" OsX fix
+set backspace=2
+
 " Don't do any kind of backup or swap
 set nobackup
 set nowritebackup
