@@ -47,7 +47,7 @@
   :ensure goto-last-change
   :bind ("C-x C-/" . goto-last-change))
 (use-package paredit
-  :ensure paredit
+  :ensure t
   :init (progn
           (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
           (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
@@ -74,75 +74,95 @@
 (use-package helm-projectile
   :ensure helm-projectile
   :bind ("C-x C-f" . helm-projectile-find-file))
-;; (use-package helm-cider
-;;   :ensure helm-cider)
-(use-package flycheck
-  :ensure flycheck
-  :init (progn
-          (global-flycheck-mode)
-          (setq-default flycheck-disabled-checkers '(go-golint))))
+(use-package helm-cider
+  :ensure helm-cider
+  :init (helm-cider-mode 1))
+;; (use-package flycheck
+;;   :ensure flycheck
+;;   :init (progn
+;;           (global-flycheck-mode)
+;;           (setq-default flycheck-disabled-checkers '(go-golint))))
+;; (use-package flycheck-golangci-lint
+;;   :ensure flycheck-golangci-lint
+;;   :hook (go-mode . flycheck-golangci-lint-setup))
 (use-package moe-theme)
-(use-package beacon
-  :ensure beacon)
-(use-package smart-tab
-  :ensure smart-tab)
+(use-package beacon :ensure t)
+(use-package smart-tab :ensure t)
 (use-package powerline
   :ensure powerline
   :init (powerline-default-theme))
 (use-package  multiple-cursors
   :ensure multiple-cursors
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
-(use-package sublimity
-  :ensure sublimity
-  :init (progn
-          (sublimity-mode)
-          (require 'sublimity-scroll)
-          (require 'sublimity-attractive)
-          (setq sublimity-auto-hscroll-mode 't)))
-(use-package git-timemachine
-  :ensure git-timemachine)
+;; (use-package sublimity
+;;   :ensure sublimity
+;;   :init (progn
+;;           (sublimity-mode)
+;;           (require 'sublimity-scroll)
+;;           (require 'sublimity-attractive)
+;;           (setq sublimity-auto-hscroll-mode 't)))
+(use-package git-timemachine :ensure t)
 (use-package autopair
-  :ensure autopair)
+  :ensure t
+  :init (autopair-global-mode))
 ;; Languages
-(use-package dockerfile-mode
-  :ensure dockerfile-mode)
-(use-package js2-mode
-  :ensure js2-mode)
-(use-package markdown-mode
-  :ensure markdown-mode)
-(use-package yaml-mode
-  :ensure yaml-mode)
+(use-package dockerfile-mode :ensure t)
+(use-package js2-mode :ensure t)
+(use-package markdown-mode :ensure t)
+(use-package yaml-mode :ensure t)
+(use-package protobuf-mode :ensure t)
+(use-package emmet-mode :ensure t)
 ;; (use-package auto-complete
 ;;   :ensure auto-complete)
 ;; (use-package ac-cider
 ;;   :ensure ac-cider)
 (use-package go-mode
-  :ensure go-mode)
+  :ensure go-mode
+  :init (setq gofmt-command "goimports"))
 ;; (use-package go-autocomplete
 ;;   :ensure go-autocomplete)
-(use-package emmet-mode
-  :ensure emmet-mode)
-(use-package flycheck-golangci-lint
-  :ensure flycheck-golangci-lint
-  :hook (go-mode . flycheck-golangci-lint-setup))
+;; Auto-completion
 (use-package company
   :ensure company
   :init (global-company-mode))
-(use-package company-go
-  :ensure company-go)
+(use-package company-go :ensure t)
 (use-package company-fuzzy
   :ensure company-fuzzy
   :init (global-company-fuzzy-mode 1))
+;; LSP
+(use-package lsp-mode
+  :ensure t
+  :hook (go-mode . lsp-deferred)
+  :commands (lsp lsp-deferred))
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp
+  :init (progn
+          (global-set-key (kbd "<f8>") 'lsp-treemacs-errors-list)
+          (global-set-key (kbd "C-c 1") 'lsp-ui-peek-find-definitions)
+          (global-set-key (kbd "C-c 2") 'lsp-ui-peek-find-references)))
+(use-package helm-lsp
+  :ensure t
+  :commands helm-lsp-workspace-symbol)
+(use-package lsp-treemacs
+  :ensure t
+  :commands lsp-treemacs-errors-list)
+(use-package dap-mode :ensure t)
+(use-package yasnippet :ensure t)
 ;; Themes
-(use-package tron-theme
-  :ensure tron-theme)
+(use-package tron-theme  :ensure tron-theme)
 
 ;; PATH
-(setq exec-path (append (list
-                         "/usr/local/bin"
-                         (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.11.5") "/bin"))
-                        exec-path))
-(setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
+(setq exec-path (append
+                 (list
+                  "/usr/local/bin"
+                  (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.13.4") "/bin")
+                  (concat (getenv "HOME") "go/bin"))
+                 exec-path))
+(setenv "PATH" (concat (getenv "HOME") "go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
 
 
 ;;------------------------------------------------------------------------------
@@ -202,7 +222,7 @@
             ;; WARNING!  Depending on the default font,
             ;; if the size is not supported very well, the frame will be clipped
             ;; so that the beginning of the buffer may not be visible correctly.
-            (set-face-attribute 'default nil :height 110)
+            (set-face-attribute 'default nil :height 130)
             ;; Prevent opening a dialog on OSX (buggy)
             (defadvice yes-or-no-p (around prevent-dialog activate)
               "Prevent yes-or-no-p from activating a dialog"
@@ -267,20 +287,20 @@
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
 (global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
-(global-set-key (kbd "<f7>")
-        (lambda ()
-          (interactive)
-          (shell-command "/usr/local/Cellar/ctags/5.8_1/bin/ctags --languages=Go -e -R .")))
-(global-set-key (kbd "<f7>") 'compile)
-(global-set-key (kbd "<f8>") 'flycheck-list-errors)
-(global-set-key (kbd "<f9>") 'flycheck-next-error)
+;; (global-set-key (kbd "<f7>")
+;;         (lambda ()
+;;           (interactive)
+;;           (shell-command "/usr/local/Cellar/ctags/5.8_1/bin/ctags --languages=Go -e -R .")))
+;; (global-set-key (kbd "<f7>") 'compile)
+;; (global-set-key (kbd "<f8>") 'flycheck-list-errors)
+;; (global-set-key (kbd "<f9>") 'flycheck-next-error)
+(global-set-key (kbd "<f9>") 'flymake-goto-next-error)
 (global-set-key (kbd "<f10>") 'gofmt)
-(global-set-key (kbd "C-c 1") 'xref-find-definitions)
-(global-set-key (kbd "C-c 2") 'xref-find-references)
+;; (global-set-key (kbd "C-c 1") 'xref-find-definitions)
+;; (global-set-key (kbd "C-c 2") 'xref-find-references)
 (global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
 (global-set-key (kbd "C-c 4") 'helm-do-ag-project-root)
 
-;; (put 'scroll-left 'disabled nil)
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
@@ -301,36 +321,29 @@
   (setenv "GOPATH" go-path)
   ;;(setenv "GOROOT" go-path)
   (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.3") "/bin:" (getenv "PATH")))
+  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.4") "/bin:" (getenv "PATH")))
   (setq exec-path (cons (concat go-path "/bin") exec-path)))
-(add-hook 'go-mode-hook
-          (lambda ()
-            (autopair-mode)
-            (set (make-local-variable 'company-backends) '(company-go))
-            (global-set-key (kbd "C-c 1") 'go-guru-definition)
-            (global-set-key (kbd "C-c 2") 'go-guru-callers)))
-
-
+;; (add-hook 'go-mode-hook
+;;           (lambda ()
+;;             (autopair-mode)
+;;             (set (make-local-variable 'company-backends) '(company-go))
+;;             ;; (global-set-key (kbd "C-c 1") 'go-guru-definition)
+;;             ;; (global-set-key (kbd "C-c 2") 'go-guru-callers)
+;;             ))
 
 ;; Scheme
-;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-;; (add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
-;; (font-lock-add-keywords 'scheme-mode
-;;                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
-;;                                                    (compose-region (match-beginning 1)
-;;                                                                     (match-end 1)
-;;                                                                    ?λ))))))
-;; (global-set-key "\C-c\C-qr" 'run-scheme)
-;; (global-set-key "\C-c\C-c" 'comment-region)
-;; (global-set-key "\C-c\M-c" 'uncomment-region)
-;; (add-hook 'scheme-mode-hook
-;;           (lambda ()
-;;             (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file)))
-;; (add-hook 'inferior-scheme-mode-hook
-;;           (lambda ()
-;;             (define-key scheme-mode-map "\C-c\C-c" 'comment-region)
-;;             (define-key scheme-mode-map "\C-c\M-c" 'uncomment-region)))
-
+(add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
+(add-hook 'scheme-mode-hook
+          (lambda ()
+            (global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
+            (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
+(font-lock-add-keywords 'scheme-mode
+                        '(("(\\(lambda\\)\\>" (0 (prog1 ()
+                                                   (compose-region (match-beginning 1)
+                                                                    (match-end 1)
+                                                                   ?λ))))))
+(global-set-key "\C-c\C-qr" 'run-scheme)
+;; (add-hook 'scheme-mode-hook (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file))
 ;; ;; Load remote SchemeSpheres remote debugging if installed
 ;; (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"))
 ;;   (when (file-exists-p sense-emacs)
@@ -340,3 +353,18 @@
 ;;------------------------------------------------------------------------------
 
 (provide '.emacs)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+(put 'scroll-left 'disabled nil)

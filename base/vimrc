@@ -185,3 +185,4 @@ if has("cscope")
   cnoremap <C-Space><C-Space> vert scscope find
 endif
 
+set backspace=2
