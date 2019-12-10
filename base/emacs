@@ -85,7 +85,7 @@
 ;; (use-package flycheck-golangci-lint
 ;;   :ensure flycheck-golangci-lint
 ;;   :hook (go-mode . flycheck-golangci-lint-setup))
-(use-package moe-theme)
+(use-package moe-theme :ensure t)
 (use-package beacon :ensure t)
 (use-package smart-tab :ensure t)
 (use-package powerline
@@ -159,7 +159,7 @@
 (setq exec-path (append
                  (list
                   "/usr/local/bin"
-                  (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.13.4") "/bin")
+                  (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.13.5") "/bin")
                   (concat (getenv "HOME") "go/bin"))
                  exec-path))
 (setenv "PATH" (concat (getenv "HOME") "go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
@@ -222,7 +222,7 @@
             ;; WARNING!  Depending on the default font,
             ;; if the size is not supported very well, the frame will be clipped
             ;; so that the beginning of the buffer may not be visible correctly.
-            (set-face-attribute 'default nil :height 130)
+            (set-face-attribute 'default nil :height 115)
             ;; Prevent opening a dialog on OSX (buggy)
             (defadvice yes-or-no-p (around prevent-dialog activate)
               "Prevent yes-or-no-p from activating a dialog"
@@ -321,7 +321,7 @@
   (setenv "GOPATH" go-path)
   ;;(setenv "GOROOT" go-path)
   (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.4") "/bin:" (getenv "PATH")))
+  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.5") "/bin:" (getenv "PATH")))
   (setq exec-path (cons (concat go-path "/bin") exec-path)))
 ;; (add-hook 'go-mode-hook
 ;;           (lambda ()
