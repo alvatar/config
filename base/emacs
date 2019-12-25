@@ -33,18 +33,18 @@
 ;; Packages
 
 (use-package expand-region
-  :ensure expand-region
+  :ensure t
   :bind ("C-=" . er/expand-region))
 (use-package smex
-  :ensure smex
+  :ensure t
   :init (setq smex-save-file "~/.emacs.d/.smex-items")
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)))
 (use-package magit
-  :ensure magit
+  :ensure t
   :bind ("C-x C-z" . magit-status))
 (use-package goto-last-change
-  :ensure goto-last-change
+  :ensure t
   :bind ("C-x C-/" . goto-last-change))
 (use-package paredit
   :ensure t
@@ -54,13 +54,13 @@
           (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
           (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
 (use-package avy
-  :ensure avy
+  :ensure t
   :bind ("M-p" . 'avy-goto-char-timer))
 (use-package ace-window
-  :ensure ace-window
+  :ensure t
   :bind ("C-x o" . ace-window))
 (use-package cider
-  :ensure cider
+  :ensure t
   :init (progn
           (setq cider-show-error-buffer nil)
           (setq cider-show-error-buffer 'only-in-repl)
@@ -69,14 +69,15 @@
           (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)))
 ;; Helm, Projectile
 (use-package helm
-  :ensure helm
+  :ensure t
   :bind ("C-x M-f" . helm-find-files))
 (use-package helm-projectile
-  :ensure helm-projectile
+  :ensure t
   :bind ("C-x C-f" . helm-projectile-find-file))
 (use-package helm-cider
-  :ensure helm-cider
+  :ensure t
   :init (helm-cider-mode 1))
+(use-package helm-swoop :ensure t)
 ;; (use-package flycheck
 ;;   :ensure flycheck
 ;;   :init (progn
@@ -89,10 +90,10 @@
 (use-package beacon :ensure t)
 (use-package smart-tab :ensure t)
 (use-package powerline
-  :ensure powerline
+  :ensure t
   :init (powerline-default-theme))
 (use-package  multiple-cursors
-  :ensure multiple-cursors
+  :ensure t
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
 ;; (use-package sublimity
 ;;   :ensure sublimity
@@ -117,17 +118,17 @@
 ;; (use-package ac-cider
 ;;   :ensure ac-cider)
 (use-package go-mode
-  :ensure go-mode
+  :ensure t
   :init (setq gofmt-command "goimports"))
 ;; (use-package go-autocomplete
 ;;   :ensure go-autocomplete)
 ;; Auto-completion
 (use-package company
-  :ensure company
+  :ensure t
   :init (global-company-mode))
 (use-package company-go :ensure t)
 (use-package company-fuzzy
-  :ensure company-fuzzy
+  :ensure t
   :init (global-company-fuzzy-mode 1))
 ;; LSP
 (use-package lsp-mode
@@ -360,7 +361,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package))))
+    (helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
