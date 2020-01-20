@@ -95,13 +95,13 @@
 (use-package  multiple-cursors
   :ensure t
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
-;; (use-package sublimity
-;;   :ensure sublimity
-;;   :init (progn
-;;           (sublimity-mode)
-;;           (require 'sublimity-scroll)
-;;           (require 'sublimity-attractive)
-;;           (setq sublimity-auto-hscroll-mode 't)))
+(use-package sublimity
+  :ensure sublimity
+  :init (progn
+          (sublimity-mode)
+          (require 'sublimity-scroll)
+          (require 'sublimity-attractive)
+          (setq sublimity-auto-hscroll-mode 't)))
 (use-package git-timemachine :ensure t)
 (use-package autopair
   :ensure t
@@ -336,7 +336,7 @@
 (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
 (add-hook 'scheme-mode-hook
           (lambda ()
-            (global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
+            (local-unset-key (kbd "C-c C-c"))
             (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
 (font-lock-add-keywords 'scheme-mode
                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
