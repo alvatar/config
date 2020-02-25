@@ -99,13 +99,15 @@
   :ensure sublimity
   :init (progn
           (sublimity-mode)
-          (require 'sublimity-scroll)
+          ;;(require 'sublimity-scroll)
           (require 'sublimity-attractive)
-          (setq sublimity-auto-hscroll-mode 't)))
+          ;;(setq sublimity-auto-hscroll-mode 't)
+          ))
 (use-package git-timemachine :ensure t)
-(use-package autopair
-  :ensure t
-  :init (autopair-global-mode))
+;; (use-package autopair
+;;   :ensure t
+;;   :init (autopair-global-mode))
+(use-package smartparens :ensure t)
 ;; Languages
 (use-package dockerfile-mode :ensure t)
 (use-package js2-mode :ensure t)
@@ -113,13 +115,32 @@
 (use-package yaml-mode :ensure t)
 (use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
+(use-package rust-mode
+  :ensure t
+  :init (progn
+          (setq rust-format-on-save t)
+          (racer-mode)
+          (smartparens-mode))
+  :hook (local-set-key (kbd "<f10>") 'rust-format-buffer))
+(use-package racer
+  :ensure t
+  :init (global-eldoc-mode))
+(use-package cargo
+  :ensure t
+  :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
+          (setenv "PATH" (concat (getenv "PATH") ":" path))
+          (setq exec-path (append exec-path (list path)))))
+(use-package rustic :ensure t)
 ;; (use-package auto-complete
 ;;   :ensure auto-complete)
 ;; (use-package ac-cider
 ;;   :ensure ac-cider)
 (use-package go-mode
   :ensure t
-  :init (setq gofmt-command "goimports"))
+  :init (setq gofmt-command "goimports")
+  :hook (progn
+          (local-set-key (kbd "<f10>") 'gofmt)
+          (smartparens-mode)))
 ;; (use-package go-autocomplete
 ;;   :ensure go-autocomplete)
 ;; Auto-completion
@@ -154,7 +175,13 @@
 (use-package dap-mode :ensure t)
 (use-package yasnippet :ensure t)
 ;; Themes
-(use-package tron-theme  :ensure tron-theme)
+(use-package tron-theme :ensure t)
+(use-package gotham-theme :ensure t)
+(use-package gruvbox-theme
+  :ensure t
+  ;; :init (load-theme 'gruvbox-dark-hard)
+  )
+
 
 ;; PATH
 (setq exec-path (append
@@ -296,7 +323,7 @@
 ;; (global-set-key (kbd "<f8>") 'flycheck-list-errors)
 ;; (global-set-key (kbd "<f9>") 'flycheck-next-error)
 (global-set-key (kbd "<f9>") 'flymake-goto-next-error)
-(global-set-key (kbd "<f10>") 'gofmt)
+;;(global-set-key (kbd "<f10>") 'gofmt)
 ;; (global-set-key (kbd "C-c 1") 'xref-find-definitions)
 ;; (global-set-key (kbd "C-c 2") 'xref-find-references)
 (global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
@@ -359,9 +386,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default))
  '(package-selected-packages
-   (quote
-    (helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package))))
+   '(gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
