@@ -102,11 +102,17 @@ source $ZSH/oh-my-zsh.sh
 export LC_ALL=en_US.UTF-8
 
 
-export GOVERSION=1.13.4
+export GOVERSION=1.14
 export GOROOT="$HOME/go/go$GOVERSION"
 export GOPATH="$HOME/go"
+export GOPRIVATE=github.com/covrco
+
+export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
 export PATH="$PATH:$GOPATH/bin:$GOROOT/bin"
 export PATH="/usr/local/Gambit/bin:/usr/local/opt/llvm/bin:$PATH"
 
 unalias gsi
 alias k=kubectl
+alias clear='[ $[$RANDOM % 2] = 0 ] && cmatrix; clear || clear'
+
+export LEIN_USE_BOOTCLASSPATH=no

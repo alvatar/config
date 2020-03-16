@@ -66,7 +66,8 @@
           (setq cider-show-error-buffer 'only-in-repl)
           (setq cider-repl-display-help-banner nil)
           (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
-          (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)))
+          (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
+          (setenv "LEIN_USE_BOOTCLASSPATH" "no")))
 ;; Helm, Projectile
 (use-package helm
   :ensure t
@@ -120,8 +121,8 @@
   :init (progn
           (setq rust-format-on-save t)
           (racer-mode)
-          (smartparens-mode))
-  :hook (local-set-key (kbd "<f10>") 'rust-format-buffer))
+          (smartparens-mode)
+          (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))))
 (use-package racer
   :ensure t
   :init (global-eldoc-mode))
@@ -137,10 +138,13 @@
 ;;   :ensure ac-cider)
 (use-package go-mode
   :ensure t
-  :init (setq gofmt-command "goimports")
-  :hook (progn
-          (local-set-key (kbd "<f10>") 'gofmt)
-          (smartparens-mode)))
+  :init (progn (setq gofmt-command "goimports")
+               (add-hook 'go-mode-hook
+                         (lambda ()
+                           (setq gofmt-command "goimports")
+                           (local-set-key (kbd "<f10>") 'gofmt)
+                           (smartparens-mode))))
+)
 ;; (use-package go-autocomplete
 ;;   :ensure go-autocomplete)
 ;; Auto-completion
@@ -175,8 +179,9 @@
 (use-package dap-mode :ensure t)
 (use-package yasnippet :ensure t)
 ;; Themes
-(use-package tron-theme :ensure t)
-(use-package gotham-theme :ensure t)
+(use-package tron-theme)
+(use-package clues-theme :ensure t)
+(use-package night-owl-theme :ensure t)
 (use-package gruvbox-theme
   :ensure t
   ;; :init (load-theme 'gruvbox-dark-hard)
@@ -187,7 +192,7 @@
 (setq exec-path (append
                  (list
                   "/usr/local/bin"
-                  (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.13.5") "/bin")
+                  (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.14") "/bin")
                   (concat (getenv "HOME") "go/bin"))
                  exec-path))
 (setenv "PATH" (concat (getenv "HOME") "go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
@@ -311,6 +316,7 @@
 
 ;; Key bindings
 
+(global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-S-k") 'delete-region)
@@ -349,7 +355,7 @@
   (setenv "GOPATH" go-path)
   ;;(setenv "GOROOT" go-path)
   (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.13.5") "/bin:" (getenv "PATH")))
+  (setenv "PATH" (concat home "/go/go" (or (getenv "GOVERSION") "1.14") "/bin:" (getenv "PATH")))
   (setq exec-path (cons (concat go-path "/bin") exec-path)))
 ;; (add-hook 'go-mode-hook
 ;;           (lambda ()
@@ -387,9 +393,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default))
+   '("e1d09f1b2afc2fed6feb1d672be5ec6ae61f84e058cb757689edb669be926896" "123a8dabd1a0eff6e0c48a03dc6fb2c5e03ebc7062ba531543dfbce587e86f2a" "de65dc21fefce202883a5071170962c73b4bf4b691156d0a28239765f71b23e5" "a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default))
  '(package-selected-packages
-   '(gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
+   '(night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
