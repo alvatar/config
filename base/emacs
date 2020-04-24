@@ -98,12 +98,13 @@
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
 (use-package sublimity
   :ensure sublimity
-  :init (progn
-          (sublimity-mode)
-          ;;(require 'sublimity-scroll)
-          (require 'sublimity-attractive)
-          ;;(setq sublimity-auto-hscroll-mode 't)
-          ))
+  ;; :init (progn
+  ;;         (sublimity-mode)
+  ;;         ;;(require 'sublimity-scroll)
+  ;;         (require 'sublimity-attractive)
+  ;;         ;;(setq sublimity-auto-hscroll-mode 't)
+  ;;         )
+  )
 (use-package git-timemachine :ensure t)
 ;; (use-package autopair
 ;;   :ensure t
@@ -178,14 +179,41 @@
   :commands lsp-treemacs-errors-list)
 (use-package dap-mode :ensure t)
 (use-package yasnippet :ensure t)
+(use-package posframe :ensure t)
+(use-package dap-mode
+  :ensure t
+  :init (progn
+          (dap-mode 1)
+          (dap-ui-mode 1)
+          ;; enables mouse hover support
+          (dap-tooltip-mode 1)
+          ;; use tooltips for mouse hover
+          ;; if it is not enabled `dap-mode' will use the minibuffer.
+          (tooltip-mode 1)
+          ;; displays floating panel with debug buttons
+          (dap-ui-controls-mode 1)
+          (add-hook 'dap-stopped-hook
+                    (lambda (arg) (call-interactively #'dap-hydra)))))
+(use-package dap-go :ensure t)
+(dap-register-debug-template
+ "Launch Exchange"
+ (list :type "go"
+       :request "launch"
+       :name "Launch Exchange"
+       :mode "debug"
+       :program "/Users/alvatar/projects/infra/cmd/myprogram/main.go"
+       :buildFlags "-gcflags '-N -l'"
+       :dlvToolPath "/Users/alvatar/go/bin/dlv"
+       :args nil
+       :env nil
+       :envFile nil))
 ;; Themes
 (use-package tron-theme)
 (use-package clues-theme :ensure t)
 (use-package night-owl-theme :ensure t)
 (use-package gruvbox-theme
   :ensure t
-  ;; :init (load-theme 'gruvbox-dark-hard)
-  )
+  :init (load-theme 'gruvbox-dark-hard))
 
 
 ;; PATH
@@ -195,7 +223,7 @@
                   (concat (getenv "HOME") "/go/go" (or (getenv "GOVERSION") "1.14") "/bin")
                   (concat (getenv "HOME") "go/bin"))
                  exec-path))
-(setenv "PATH" (concat (getenv "HOME") "go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
+(setenv "PATH" (concat (getenv "HOME") "/go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
 
 
 ;;------------------------------------------------------------------------------
@@ -395,7 +423,7 @@
  '(custom-safe-themes
    '("e1d09f1b2afc2fed6feb1d672be5ec6ae61f84e058cb757689edb669be926896" "123a8dabd1a0eff6e0c48a03dc6fb2c5e03ebc7062ba531543dfbce587e86f2a" "de65dc21fefce202883a5071170962c73b4bf4b691156d0a28239765f71b23e5" "a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default))
  '(package-selected-packages
-   '(night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
+   '(dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
