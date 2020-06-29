@@ -115,7 +115,7 @@
 (use-package js2-mode :ensure t)
 (use-package markdown-mode :ensure t)
 (use-package yaml-mode :ensure t)
-(use-package protobuf-mode :ensure t)
+;;(use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
 (use-package rust-mode
   :ensure t
@@ -163,14 +163,15 @@
   :commands (lsp lsp-deferred))
 (use-package lsp-ui
   :ensure t
-  :commands lsp-ui-mode)
-(use-package company-lsp
-  :ensure t
-  :commands company-lsp
+  :commands lsp-ui-mode
   :init (progn
           (global-set-key (kbd "<f8>") 'lsp-treemacs-errors-list)
           (global-set-key (kbd "C-c 1") 'lsp-ui-peek-find-definitions)
           (global-set-key (kbd "C-c 2") 'lsp-ui-peek-find-references)))
+;; (use-package company-lsp
+;;   :ensure t
+;;   :commands company-lsp
+;;   )
 (use-package helm-lsp
   :ensure t
   :commands helm-lsp-workspace-symbol)
@@ -185,6 +186,7 @@
   :init (progn
           (dap-mode 1)
           (dap-ui-mode 1)
+          (require 'dap-go)
           ;; enables mouse hover support
           (dap-tooltip-mode 1)
           ;; use tooltips for mouse hover
@@ -194,7 +196,6 @@
           (dap-ui-controls-mode 1)
           (add-hook 'dap-stopped-hook
                     (lambda (arg) (call-interactively #'dap-hydra)))))
-(use-package dap-go :ensure t)
 (dap-register-debug-template
  "Launch Exchange"
  (list :type "go"
@@ -208,12 +209,13 @@
        :env nil
        :envFile nil))
 ;; Themes
-(use-package tron-theme)
+;;(use-package tron-theme)
 (use-package clues-theme :ensure t)
 (use-package night-owl-theme :ensure t)
 (use-package gruvbox-theme
   :ensure t
-  :init (load-theme 'gruvbox-dark-hard))
+  ;;:init (load-theme 'gruvbox-dark-hard)
+  )
 
 
 ;; PATH
@@ -423,7 +425,7 @@
  '(custom-safe-themes
    '("e1d09f1b2afc2fed6feb1d672be5ec6ae61f84e058cb757689edb669be926896" "123a8dabd1a0eff6e0c48a03dc6fb2c5e03ebc7062ba531543dfbce587e86f2a" "de65dc21fefce202883a5071170962c73b4bf4b691156d0a28239765f71b23e5" "a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default))
  '(package-selected-packages
-   '(dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo rust-mode helm-swoop protobuf-mde protobuf-mode yasnippet helm-cider dap-mode lsp-treemacs helm-lsp company-lsp helm-imenu lsp-ui lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change magit smex expand-region use-package)))
+   '(flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -431,3 +433,4 @@
  ;; If there is more than one, they won't work right.
  )
 (put 'scroll-left 'disabled nil)
+(put 'upcase-region 'disabled nil)
