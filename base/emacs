@@ -151,7 +151,10 @@
 ;; Auto-completion
 (use-package company
   :ensure t
-  :init (global-company-mode))
+  :init (global-company-mode)
+  :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1))
 (use-package company-go :ensure t)
 (use-package company-fuzzy
   :ensure t
@@ -160,7 +163,11 @@
 (use-package lsp-mode
   :ensure t
   :hook (go-mode . lsp-deferred)
-  :commands (lsp lsp-deferred))
+  :commands (lsp lsp-deferred)
+  :init (progn
+          (setq lsp-gopls-staticcheck t)
+          (setq lsp-eldoc-render-all t)
+          (setq lsp-gopls-complete-unimported t)))
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
@@ -179,7 +186,10 @@
   :ensure t
   :commands lsp-treemacs-errors-list)
 (use-package dap-mode :ensure t)
-(use-package yasnippet :ensure t)
+(use-package yasnippet
+  :ensure t
+  :commands yas-minor-mode
+  :hook (go-mode . yas-minor-mode))
 (use-package posframe :ensure t)
 (use-package dap-mode
   :ensure t
