@@ -1,4 +1,4 @@
-#!/bin/bash
+#!bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -7,5 +7,5 @@ unset files i
 while IFS= read -r -d $'\0' file; do
   files[i++]="$file"
   REF_FILE="${file//$DIR\/gentoo\/}"
-  cp "/$REF_FILE" "$DIR/gentoo/$REF_FILE"
+  echo "/$REF_FILE" "$DIR/gentoo/$REF_FILE"
 done < <(find $DIR/gentoo -type f -print0)
