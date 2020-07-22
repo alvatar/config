@@ -93,12 +93,12 @@
       _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
     };
     systemPackages = with pkgs; [
-      wget tmux vim emacs git zsh htop tree p7zip zip unzip file killall silver-searcher
+      wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
       lm_sensors acpitool pciutils glxinfo powertop
-      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel xss-lock libnotify vanilla-dmz capitaine-cursors stalonetray xorg.xmodmap xorg.xev
+      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel xss-lock libnotify vanilla-dmz capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip
       firefox chromium
       nload iftop nmap
-      mplayer vlc libreoffice zathura imv mupdf gimp darktable
+      mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus
       spotify dropbox-cli zoom-us
       go openjdk12 python3
       postgresql_12 apacheKafka_2_4
@@ -196,6 +196,9 @@ delete.topic.enable = true
       enable = true;
       accelSpeed = "2.0";
       naturalScrolling = true;
+      clickMethod = "clickfinger";
+      tapping = false;
+      disableWhileTyping = true;
     };
     windowManager.xmonad = {
       enable = true;
