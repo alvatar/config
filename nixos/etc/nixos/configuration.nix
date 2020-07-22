@@ -100,9 +100,9 @@
       nload iftop nmap
       mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus
       spotify dropbox-cli zoom-us
+      docker-compose protobuf
       go openjdk12 python3
       postgresql_12 apacheKafka_2_4
-      protobuf
     ];
   };
 
@@ -265,7 +265,7 @@ delete.topic.enable = true
     users = {
       alvatar = {
         isNormalUser = true;
-        extraGroups = [ "wheel" "video" "networkmanager" ];
+        extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
         initialPassword = "1234";
       };
     };
