@@ -102,4 +102,6 @@ source $ZSH/oh-my-zsh.sh
 
 
 export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOPATH/bin:/$HOME/bin
+
+alias screen-off="xset dpms force off"
