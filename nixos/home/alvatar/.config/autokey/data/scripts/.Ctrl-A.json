@@ -1,0 +1,28 @@
+{
+    "type": "script",
+    "description": "Ctrl-A",
+    "store": {},
+    "modes": [],
+    "usageCount": 6,
+    "prompt": false,
+    "omitTrigger": false,
+    "showInTrayMenu": false,
+    "abbreviation": {
+        "abbreviations": [],
+        "backspace": true,
+        "ignoreCase": false,
+        "immediate": false,
+        "triggerInside": false,
+        "wordChars": "[\\w]"
+    },
+    "hotkey": {
+        "modifiers": [
+            "<ctrl>"
+        ],
+        "hotKey": "a"
+    },
+    "filter": {
+        "regex": null,
+        "isRecursive": false
+    }
+}

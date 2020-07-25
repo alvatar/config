@@ -95,7 +95,7 @@
     systemPackages = with pkgs; [
       wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
       lm_sensors acpitool pciutils glxinfo powertop
-      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel xss-lock libnotify vanilla-dmz capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip
+      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme
       firefox chromium
       nload iftop nmap
       mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus
@@ -124,7 +124,7 @@
   };
 
   programs.ssh.startAgent = true;
-
+  programs.slock.enable = true;
   programs = {
     zsh.ohMyZsh = {
       enable = true;
@@ -195,7 +195,7 @@ delete.topic.enable = true
     # Enable touchpad support.
     libinput = {
       enable = true;
-      accelSpeed = "2.0";
+      accelSpeed = "4.0";
       naturalScrolling = true;
       clickMethod = "clickfinger";
       tapping = false;
@@ -242,6 +242,7 @@ delete.topic.enable = true
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
+      autokey-gtk
       '';
     }; 
   };
