@@ -95,10 +95,11 @@
     systemPackages = with pkgs; [
       wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
       lm_sensors acpitool pciutils glxinfo powertop
-      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme
+      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz capitaine-cursors
+      stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme pavucontrol
       firefox chromium
       nload iftop nmap
-      mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus
+      mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus xfce.ristretto
       spotify dropbox-cli zoom-us
       docker-compose protobuf
       go openjdk12 python3
@@ -242,7 +243,7 @@ delete.topic.enable = true
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
-      autokey-gtk
+      autokey-gtk &disown
       '';
     }; 
   };
