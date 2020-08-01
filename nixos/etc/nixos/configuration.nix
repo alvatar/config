@@ -7,37 +7,52 @@
 {
   imports =
     [
-      (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
+      #(import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
+       <nixos-hardware/dell/xps/15-9500>
       ./hardware-configuration.nix
     ];
 
   ## Hardware config
 
-  services.xserver.videoDrivers = lib.mkDefault ["nvidia"];
-  hardware.nvidia.modesetting.enable = lib.mkDefault true;
-  hardware.nvidia.optimus_prime.enable = lib.mkDefault true;
-  hardware.nvidia.optimus_prime.nvidiaBusId = lib.mkDefault "PCI:1:0:0";
-  hardware.nvidia.optimus_prime.intelBusId = lib.mkDefault "PCI:0:2:0";
+  #services.xserver.videoDrivers = lib.mkDefault ["nvidia"];
+  #hardware.nvidia.modesetting.enable = lib.mkDefault true;
+  #hardware.nvidia.optimus_prime.enable = lib.mkDefault true;
+  #hardware.nvidia.optimus_prime.nvidiaBusId = lib.mkDefault "PCI:1:0:0";
+  #hardware.nvidia.optimus_prime.intelBusId = lib.mkDefault "PCI:0:2:0";
 
-  hardware.cpu.intel.updateMicrocode =
-    lib.mkDefault config.hardware.enableRedistributableFirmware;
-  
+  #hardware.cpu.intel.updateMicrocode =
+    #lib.mkDefault config.hardware.enableRedistributableFirmware;
+  #
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  hardware.opengl.extraPackages = with pkgs; [
-    vaapiIntel
-    vaapiVdpau
-    libvdpau-va-gl
-    intel-media-driver
-  ];
+  #hardware.opengl.extraPackages = with pkgs; [
+    #vaapiIntel
+    #vaapiVdpau
+    #libvdpau-va-gl
+    #intel-media-driver
+  #];
 
-  # Power management
-  services.tlp.enable = lib.mkDefault true;
-  #powerManagement = {
-    #enable = true;
-    #cpuFreqGovernor = "ondemand";
-  #};
+  ## Power management
+
+  powerManagement = {
+    enable = true;
+    cpuFreqGovernor = lib.mkDefault "ondemand";
+    powertop.enable = false;
+  };
+
+  services.tlp = {
+    enable = true;
+    # The following prevents the battery from charging fully to
+    # preserve lifetime. Run `tlp fullcharge` to temporarily force
+    # full charge.
+    extraConfig = ''
+      CPU_SCALING_GOVERNOR_ON_BAT = powersave
+      ENERGY_PERF_POLICY_ON_BAT = powersave
+      START_CHARGE_THRESH_BAT0 = 40
+      STOP_CHARGE_THRESH_BAT0 = 80
+    '';
+  };
 
   ## Boot
   boot = {
@@ -94,17 +109,17 @@
     };
     systemPackages = with pkgs; [
       wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      lm_sensors acpitool pciutils glxinfo powertop
+      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz capitaine-cursors
-      stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme pavucontrol
+      stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme pavucontrol gtk2 cbatticon
       firefox chromium
       nload iftop nmap
       mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus xfce.ristretto
       spotify dropbox-cli zoom-us
       docker-compose protobuf
-      go openjdk12 python3
+      go openjdk12 python3 python2
       postgresql_12 apacheKafka_2_4
-    ];
+    ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
   location = {
@@ -243,7 +258,10 @@ delete.topic.enable = true
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
+      stalonetray -i 36 &disown
       autokey-gtk &disown
+      blueman-applet &disown
+      cbatticon &disown
       '';
     }; 
   };
@@ -274,17 +292,17 @@ delete.topic.enable = true
     };
   };
 
-  home-manager.users.alvatar = {
-    programs.git = {
-      enable = true;
-      userName  = "Alvaro Castro-Castilla";
-      userEmail = "a@fourthbit.com";
-      extraConfig = {
-        url."ssh://git@host".insteadOf = "http://github.com";
-      };
-    };
-    programs.go.enable = true;
-  };
+  #home-manager.users.alvatar = {
+    #programs.git = {
+      #enable = true;
+      #userName  = "Alvaro Castro-Castilla";
+      #userEmail = "a@fourthbit.com";
+      #extraConfig = {
+        #url."ssh://git@host".insteadOf = "http://github.com";
+      #};
+    #};
+    #programs.go.enable = true;
+  #};
 
   ## Systemd
 
