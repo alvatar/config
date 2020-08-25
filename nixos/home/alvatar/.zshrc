@@ -103,5 +103,6 @@ source $ZSH/oh-my-zsh.sh
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:/$HOME/bin
+export PATH=$PATH:$HOME/.linkerd2/bin
 
-alias screen-off="xset dpms force off"
+alias k=kubectl

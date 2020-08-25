@@ -47,10 +47,16 @@
     # preserve lifetime. Run `tlp fullcharge` to temporarily force
     # full charge.
     extraConfig = ''
-      CPU_SCALING_GOVERNOR_ON_BAT = powersave
-      ENERGY_PERF_POLICY_ON_BAT = powersave
-      START_CHARGE_THRESH_BAT0 = 40
-      STOP_CHARGE_THRESH_BAT0 = 80
+      CPU_SCALING_GOVERNOR_ON_AC=performance
+      CPU_SCALING_GOVERNOR_ON_BAT=powersave
+      ENERGY_PERF_POLICY_ON_BAT=power
+      #CPU_ENERGY_PERF_POLICY_ON_BAT=power
+      SOUND_POWER_SAVE_ON_BAT=0
+      START_CHARGE_THRESH_BAT0=40
+      STOP_CHARGE_THRESH_BAT0=80
+      # Runtime Power Management for PCI(e) bus devices: on=disable, auto=enable.
+      RUNTIME_PM_ON_AC=on
+      RUNTIME_PM_ON_BAT=auto
     '';
   };
 
@@ -94,7 +100,7 @@
     useXkbConfig = true;
   };
 
-  time.timeZone = "Europe/Madrid";
+  time.timeZone = "Europe/Athens";
 
   nixpkgs.config.allowUnfree = true;
 
@@ -105,20 +111,33 @@
       GDK_SCALE = "2";
       GDK_DPI_SCALE = "0.5";
       QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-      _JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
+      #_JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
     };
     systemPackages = with pkgs; [
+      # Utils
       wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui
-      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz capitaine-cursors
-      stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme pavucontrol gtk2 cbatticon
+      nload iftop iotop nmap appimage-run openssl wipe
+      # Hardware utils
+      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils
+      # Browsers
       firefox chromium
-      nload iftop nmap
-      mplayer vlc libreoffice zathura imv mupdf gimp darktable scribus xfce.ristretto
+      # GUI base
+      picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
+      capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme
+      pavucontrol gtk2 cbatticon
+      # GUI programs
+      mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus xfce.ristretto xfce.tumbler
+      transmission-gtk
+      # Unfree
       spotify dropbox-cli zoom-us
-      docker-compose protobuf
-      go openjdk12 python3 python2
+      # Language runtimes
+      go openjdk11 python3 leiningen nodejs yarn
+      # Databases
       postgresql_12 apacheKafka_2_4
+      # Development libraries
+      protobuf 
+      # DevOps
+      docker-compose kubectl minikube k9s aws
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
@@ -157,6 +176,7 @@
     authentication = pkgs.lib.mkOverride 10 ''
       local all all trust
       host all all ::1/128 trust
+      host all all 0.0.0.0/0 trust
     '';
     #initialScript = pkgs.writeText "backend-initScript" ''
       #CREATE ROLE nixcloud WITH LOGIN PASSWORD 'nixcloud' CREATEDB;
@@ -211,7 +231,7 @@ delete.topic.enable = true
     # Enable touchpad support.
     libinput = {
       enable = true;
-      accelSpeed = "4.0";
+      accelSpeed = "16.0";
       naturalScrolling = true;
       clickMethod = "clickfinger";
       tapping = false;

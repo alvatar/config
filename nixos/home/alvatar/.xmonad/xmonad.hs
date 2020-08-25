@@ -108,9 +108,9 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((0, 0x1008ff12), spawn "amixer set Master toggle")
     , ((0, 0x1008ff11), spawn "amixer set Master 5%- && amixer set PCM 5%- -c 1")
     , ((0, 0x1008ff13), spawn "amixer set Master 5%+ && amixer set PCM 5%+ -c 1")
-    , ((0, 0x1008ff02), spawn "light -A 10")
-    , ((0, 0x1008ff03), spawn "light -U 10")
-    , ((0, 0x1008ff14), spawn "glxgears")
+    , ((0, 0x1008ff02), spawn "light -A 5")
+    , ((0, 0x1008ff03), spawn "light -U 5")
+    -- , ((0, 0x1008ff14), spawn "glxgears")
 	
     -- WORKSPACE
     -- Go to previous workspace
