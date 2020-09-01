@@ -116,18 +116,18 @@
     systemPackages = with pkgs; [
       # Utils
       wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      nload iftop iotop nmap appimage-run openssl wipe
+      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils
       # Browsers
-      firefox chromium
+      firefox chromium tor-browser-bundle-bin
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
-      capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip autokey hicolor-icon-theme
-      pavucontrol gtk2 cbatticon
+      capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip hicolor-icon-theme
+      pavucontrol gtk2 cbatticon imagemagick
       # GUI programs
       mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus xfce.ristretto xfce.tumbler
-      transmission-gtk
+      transmission-gtk networkmanagerapplet
       # Unfree
       spotify dropbox-cli zoom-us
       # Language runtimes
@@ -137,7 +137,7 @@
       # Development libraries
       protobuf 
       # DevOps
-      docker-compose kubectl minikube k9s aws
+      docker-compose kubectl minikube k9s
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
@@ -278,10 +278,10 @@ delete.topic.enable = true
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
-      stalonetray -i 36 &disown
-      autokey-gtk &disown
+      stalonetray -i 48 &disown
       blueman-applet &disown
       cbatticon &disown
+      nm-applet &disown
       '';
     }; 
   };
