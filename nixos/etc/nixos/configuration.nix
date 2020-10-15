@@ -7,31 +7,15 @@
 {
   imports =
     [
-      #(import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
        <nixos-hardware/dell/xps/15-9500>
       ./hardware-configuration.nix
     ];
 
   ## Hardware config
 
-  #services.xserver.videoDrivers = lib.mkDefault ["nvidia"];
-  #hardware.nvidia.modesetting.enable = lib.mkDefault true;
-  #hardware.nvidia.optimus_prime.enable = lib.mkDefault true;
-  #hardware.nvidia.optimus_prime.nvidiaBusId = lib.mkDefault "PCI:1:0:0";
-  #hardware.nvidia.optimus_prime.intelBusId = lib.mkDefault "PCI:0:2:0";
-
-  #hardware.cpu.intel.updateMicrocode =
-    #lib.mkDefault config.hardware.enableRedistributableFirmware;
-  #
+  hardware.enableAllFirmware = true;
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
-
-  #hardware.opengl.extraPackages = with pkgs; [
-    #vaapiIntel
-    #vaapiVdpau
-    #libvdpau-va-gl
-    #intel-media-driver
-  #];
 
   ## Power management
 
@@ -43,15 +27,13 @@
 
   services.tlp = {
     enable = true;
-    # The following prevents the battery from charging fully to
-    # preserve lifetime. Run `tlp fullcharge` to temporarily force
-    # full charge.
     extraConfig = ''
       CPU_SCALING_GOVERNOR_ON_AC=performance
       CPU_SCALING_GOVERNOR_ON_BAT=powersave
       ENERGY_PERF_POLICY_ON_BAT=power
       #CPU_ENERGY_PERF_POLICY_ON_BAT=power
       SOUND_POWER_SAVE_ON_BAT=0
+      SOUND_POWER_SAVE_CONTROLLER=Y
       START_CHARGE_THRESH_BAT0=40
       STOP_CHARGE_THRESH_BAT0=80
       # Runtime Power Management for PCI(e) bus devices: on=disable, auto=enable.
@@ -66,13 +48,12 @@
       systemd-boot.enable = lib.mkDefault true;
       efi.canTouchEfiVariables = lib.mkDefault true;
     };
-    kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
+    #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
   };
 
   ## Networking
   
   networking.hostName = "arctic"; # Define your hostname.
-  #networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true;
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
@@ -115,25 +96,27 @@
     };
     systemPackages = with pkgs; [
       # Utils
-      wget tmux vim emacs git zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof
+      wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
+      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof ecryptfs
       # Hardware utils
-      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils
+      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
       firefox chromium tor-browser-bundle-bin
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
-      capitaine-cursors stalonetray xorg.xmodmap xorg.xev xclip hicolor-icon-theme
-      pavucontrol gtk2 cbatticon imagemagick
+      capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme
+      pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo
       # GUI programs
       mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus xfce.ristretto xfce.tumbler
-      transmission-gtk networkmanagerapplet
+      transmission-gtk networkmanagerapplet xfce.thunar-bare calibre nicotine-plus
       # Unfree
       spotify dropbox-cli zoom-us
       # Language runtimes
-      go openjdk11 python3 leiningen nodejs yarn
+      gcc go openjdk11 python3 leiningen nodejs yarn octaveFull 
+      # Python libs
+      python37Packages.pip
       # Databases
-      postgresql_12 apacheKafka_2_4
+      postgresql_12 #apacheKafka_2_4
       # Development libraries
       protobuf 
       # DevOps
@@ -178,15 +161,10 @@
       host all all ::1/128 trust
       host all all 0.0.0.0/0 trust
     '';
-    #initialScript = pkgs.writeText "backend-initScript" ''
-      #CREATE ROLE nixcloud WITH LOGIN PASSWORD 'nixcloud' CREATEDB;
-      #CREATE DATABASE nixcloud;
-      #GRANT ALL PRIVILEGES ON DATABASE nixcloud TO nixcloud;
-    #'';
   };
 
   services.apache-kafka = {
-    enable = true;
+    enable = false;
     extraProperties = ''
 offsets.topic.replication.factor = 1
 delete.topic.enable = true
@@ -194,23 +172,11 @@ delete.topic.enable = true
   };
 
   services.zookeeper = {
-    enable = true;
+    enable = false;
   };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  #   pinentryFlavor = "gnome3";
-  # };
-
-  # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
-
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
@@ -221,6 +187,9 @@ delete.topic.enable = true
     enable = true;
     extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
+    extraConfig = "
+      load-module module-switch-on-connect
+    ";
   };
 
   services.xserver = {
@@ -278,7 +247,7 @@ delete.topic.enable = true
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
-      stalonetray -i 48 &disown
+      stalonetray -i 48 -bg '#ffffff' &disown
       blueman-applet &disown
       cbatticon &disown
       nm-applet &disown
@@ -312,24 +281,7 @@ delete.topic.enable = true
     };
   };
 
-  #home-manager.users.alvatar = {
-    #programs.git = {
-      #enable = true;
-      #userName  = "Alvaro Castro-Castilla";
-      #userEmail = "a@fourthbit.com";
-      #extraConfig = {
-        #url."ssh://git@host".insteadOf = "http://github.com";
-      #};
-    #};
-    #programs.go.enable = true;
-  #};
-
   ## Systemd
-
-  # services.thermald = {
-    # enable = lib.mkDefault true;
-    # debug = true;
-  # };
 
   systemd.user.services.dropbox = {
     description = "Dropbox";
@@ -389,16 +341,16 @@ delete.topic.enable = true
     ## serviceConfig.ExecStart = "${pkgs.picom}/bin/picom -b --config /home/alvatar/.picom.conf";
   };
   
-   systemd.user.services."autocutsel" = {
-    enable = true;
-    description = "AutoCutSel";
-    wantedBy = [ "default.target" ];
-    serviceConfig.Type = "forking";
-    serviceConfig.Restart = "always";
-    serviceConfig.RestartSec = 2;
-    serviceConfig.ExecStartPre = "${pkgs.autocutsel}/bin/autocutsel -fork";
-    serviceConfig.ExecStart = "${pkgs.autocutsel}/bin/autocutsel -selection PRIMARY -fork";
-  };
+   #systemd.user.services."autocutsel" = {
+    #enable = true;
+    #description = "AutoCutSel";
+    #wantedBy = [ "default.target" ];
+    #serviceConfig.Type = "forking";
+    #serviceConfig.Restart = "always";
+    #serviceConfig.RestartSec = 2;
+    #serviceConfig.ExecStartPre = "${pkgs.autocutsel}/bin/autocutsel -fork";
+    #serviceConfig.ExecStart = "${pkgs.autocutsel}/bin/autocutsel -selection PRIMARY -fork";
+  #};
 
   ## Virtualization
 

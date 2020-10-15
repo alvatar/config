@@ -1,7 +1,7 @@
-set(0, "defaulttextfontsize", 48)  % title
-set(0, "defaultaxesfontsize", 32)  % axes labels
+set(0, "defaulttextfontsize", 36)  % title
+set(0, "defaultaxesfontsize", 24)  % axes labels
 
-set(0, "defaulttextfontname", "Courier")
-set(0, "defaultaxesfontname", "Courier")
+set(0, "defaulttextfontname", "Arial")
+set(0, "defaultaxesfontname", "Arial")
 
 set(0, "defaultlinelinewidth", 2)

@@ -117,26 +117,22 @@
 (use-package yaml-mode :ensure t)
 ;;(use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
-(use-package rust-mode
-  :ensure t
-  :init (progn
-          (setq rust-format-on-save t)
-          (racer-mode)
-          (smartparens-mode)
-          (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))))
-(use-package racer
-  :ensure t
-  :init (global-eldoc-mode))
-(use-package cargo
-  :ensure t
-  :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
-          (setenv "PATH" (concat (getenv "PATH") ":" path))
-          (setq exec-path (append exec-path (list path)))))
-(use-package rustic :ensure t)
-;; (use-package auto-complete
-;;   :ensure auto-complete)
-;; (use-package ac-cider
-;;   :ensure ac-cider)
+;; (use-package rust-mode
+;;   :ensure t
+;;   :init (progn
+;;           (setq rust-format-on-save t)
+;;           (racer-mode)
+;;           (smartparens-mode)
+;;           (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))))
+;; (use-package racer
+;;   :ensure t
+;;   :init (global-eldoc-mode))
+;; (use-package cargo
+;;   :ensure t
+;;   :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
+;;           (setenv "PATH" (concat (getenv "PATH") ":" path))
+;;           (setq exec-path (append exec-path (list path)))))
+;; (use-package rustic :ensure t)
 (use-package go-mode
   :ensure t
   :init (progn (setq gofmt-command "goimports")
@@ -218,8 +214,9 @@
        :args nil
        :env nil
        :envFile nil))
-(use-package matlab-mode :ensure t)
+;;(use-package matlab-mode)
 (use-package ac-octave :ensure t)
+(use-package ein :ensure t)
 ;; Themes
 ;;(use-package tron-theme)
 (use-package clues-theme :ensure t)
@@ -440,7 +437,7 @@
     ("e1d09f1b2afc2fed6feb1d672be5ec6ae61f84e058cb757689edb669be926896" "123a8dabd1a0eff6e0c48a03dc6fb2c5e03ebc7062ba531543dfbce587e86f2a" "de65dc21fefce202883a5071170962c73b4bf4b691156d0a28239765f71b23e5" "a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default)))
  '(package-selected-packages
    (quote
-    (ac-octave matlab-mode xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))))
+    (edit-server ac-octave matlab-mode xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
