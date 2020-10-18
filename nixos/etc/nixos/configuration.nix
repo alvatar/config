@@ -188,7 +188,8 @@ delete.topic.enable = true
     extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     extraConfig = "
-      load-module module-switch-on-connect
+load-module module-switch-on-connect
+load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70 sbc_min_bp=70 sbc_freq=44k\"
     ";
   };
 
