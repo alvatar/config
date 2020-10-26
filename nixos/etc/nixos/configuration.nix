@@ -48,6 +48,7 @@
       systemd-boot.enable = lib.mkDefault true;
       efi.canTouchEfiVariables = lib.mkDefault true;
     };
+    supportedFilesystems = ["ecryptfs"];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
   };
 
@@ -97,7 +98,7 @@
     systemPackages = with pkgs; [
       # Utils
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof ecryptfs
+      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof ecryptfs ecryptfs-helper encfs
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
@@ -107,8 +108,10 @@
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo
       # GUI programs
-      mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus xfce.ristretto xfce.tumbler
-      transmission-gtk networkmanagerapplet xfce.thunar-bare calibre nicotine-plus
+      mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus
+      xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
+      transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
+      anki texlive.combined.scheme-full
       # Unfree
       spotify dropbox-cli zoom-us
       # Language runtimes
