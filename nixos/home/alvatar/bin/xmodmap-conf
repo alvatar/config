@@ -1,0 +1,16 @@
+keycode 10 = 1 exclam exclamdown
+keycode 14 = 5 percent EuroSign
+keycode 61 = slash question questiondown
+keycode 38 = a A aacute Aacute ae AE ae
+keycode 26 = e E eacute Eacute EuroSign cent EuroSign
+keycode 30 = u U uacute Uacute downarrow uparrow downarrow
+keycode 31 = i I iacute Iacute rightarrow idotless rightarrow
+keycode 32 = o O oacute Oacute oslash Oslash oslash
+keycode 57 = n N ntilde Ntilde n N n
+keycode 54 = c C cent
+! Maps the Mode key to the right Alt key
+keycode 108 = Mode_switch
+! Turns Control_R into AltGr (not working, but should)
+remove control = Control_R
+clear mod5
+add mod5 = Control_R
