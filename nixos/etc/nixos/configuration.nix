@@ -5,87 +5,8 @@
 { config, pkgs, lib, ... }:
 
 {
-  imports =
-    [
-       <nixos-hardware/dell/xps/15-9500>
-      ./hardware-configuration.nix
-    ];
-
-  ## Hardware config
-
-  hardware.enableAllFirmware = true;
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
-
-  ## Power management
-
-  powerManagement = {
-    enable = true;
-    cpuFreqGovernor = lib.mkDefault "ondemand";
-    powertop.enable = false;
-  };
-
-  services.tlp = {
-    enable = true;
-    extraConfig = ''
-      CPU_SCALING_GOVERNOR_ON_AC=performance
-      CPU_SCALING_GOVERNOR_ON_BAT=powersave
-      ENERGY_PERF_POLICY_ON_BAT=power
-      #CPU_ENERGY_PERF_POLICY_ON_BAT=power
-      SOUND_POWER_SAVE_ON_BAT=0
-      SOUND_POWER_SAVE_CONTROLLER=Y
-      START_CHARGE_THRESH_BAT0=40
-      STOP_CHARGE_THRESH_BAT0=80
-      # Runtime Power Management for PCI(e) bus devices: on=disable, auto=enable.
-      RUNTIME_PM_ON_AC=on
-      RUNTIME_PM_ON_BAT=auto
-    '';
-  };
-
-  ## Boot
-  boot = {
-    loader = {
-      systemd-boot.enable = lib.mkDefault true;
-      efi.canTouchEfiVariables = lib.mkDefault true;
-    };
-    supportedFilesystems = ["ecryptfs"];
-    #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
-  };
-
-  ## Networking
-  
-  networking.hostName = "arctic"; # Define your hostname.
-  networking.networkmanager.enable = true;
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
-
-  # Open ports in the firewall.
-  networking.firewall = {
-    allowedTCPPorts = [ 17500 ];
-    allowedUDPPorts = [ 17500 ];
-  };
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  ## Environment
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
-    #font = "Lat2-Terminus16";
-    #keyMap = "us";
-    useXkbConfig = true;
-  };
-
-  time.timeZone = "Europe/Athens";
-
+  ## Packages
   nixpkgs.config.allowUnfree = true;
-
   environment = {
     variables = {
       EDITOR = pkgs.lib.mkOverride 0 "vim";
@@ -111,7 +32,7 @@
       mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
       transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
-      anki texlive.combined.scheme-full
+      anki texlive.combined.scheme-full maim
       # Unfree
       spotify dropbox-cli zoom-us
       # Language runtimes
@@ -126,6 +47,111 @@
       docker-compose kubectl minikube k9s
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
+
+  ## Boot
+
+  boot = {
+    loader = {
+      systemd-boot.enable = lib.mkDefault true;
+      efi.canTouchEfiVariables = lib.mkDefault true;
+    };
+    supportedFilesystems = ["ecryptfs"];
+    #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
+  };
+
+  ## Hardware
+
+  imports =
+    [
+       <nixos-hardware/dell/xps/15-9500/nvidia>
+      ./hardware-configuration.nix
+    ];
+
+  hardware.enableAllFirmware = true;
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
+  # Power management
+  powerManagement = {
+    enable = true;
+    #cpuFreqGovernor = lib.mkDefault "ondemand";
+    cpuFreqGovernor = "ondemand";
+    powertop.enable = false;
+  };
+
+  services.tlp = {
+    enable = true;
+    settings = {
+      "CPU_SCALING_GOVERNOR_ON_AC"= "performance";
+      "CPU_SCALING_GOVERNOR_ON_BAT"= "powersave";
+      "ENERGY_PERF_POLICY_ON_BAT"= "power";
+      "CPU_ENERGY_PERF_POLICY_ON_BAT"="power";
+      "SOUND_POWER_SAVE_ON_BAT"= 0;
+      "SOUND_POWER_SAVE_CONTROLLER"= "Y";
+      "START_CHARGE_THRESH_BAT0"= 40;
+      "STOP_CHARGE_THRESH_BAT0"= 80;
+      # Runtime Power Management for PCI(e) bus devices: on=disable, auto=enable.
+      "RUNTIME_PM_ON_AC"= "on";
+      "RUNTIME_PM_ON_BAT"= "auto";
+    };
+  };
+
+  # Virtualization
+  virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+
+  # Networking
+  networking.hostName = "arctic"; # Define your hostname.
+  networking.networkmanager.enable = true;
+  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
+  # Per-interface useDHCP will be mandatory in the future, so this generated config
+  # replicates the default behaviour.
+  networking.useDHCP = false;
+  networking.interfaces.wlp0s20f3.useDHCP = true;
+  # Open ports in the firewall.
+  networking.firewall = {
+    allowedTCPPorts = [ 17500 ];
+    allowedUDPPorts = [ 17500 ];
+  };
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
+
+  # Sound
+  sound.enable = true;
+  hardware.pulseaudio = {
+    enable = true;
+    extraModules = [ pkgs.pulseaudio-modules-bt ];
+    package = pkgs.pulseaudioFull;
+    extraConfig = "
+load-module module-switch-on-connect
+load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70 sbc_min_bp=70 sbc_freq=44k\"
+    ";
+  };
+
+  ## Environment
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users = {
+    defaultUserShell = pkgs.zsh;
+    users = {
+      alvatar = {
+        isNormalUser = true;
+        extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
+        initialPassword = "1234";
+      };
+    };
+  };
+
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "${pkgs.terminus_font}/share/consolefonts/ter-u28n.psf.gz";
+    #font = "Lat2-Terminus16";
+    #keyMap = "us";
+    useXkbConfig = true;
+  };
+
+  time.timeZone = "Europe/Athens";
 
   location = {
     provider = "manual";
@@ -142,58 +168,6 @@
       day = 6500;
       night = 3700;
     };
-  };
-
-  programs.ssh.startAgent = true;
-  programs.slock.enable = true;
-  programs = {
-    zsh.ohMyZsh = {
-      enable = true;
-      plugins = [ "git" "python" "man" ];
-      theme = "agnoster";
-    };
-    light.enable = true;
-  };  
-
-  services.postgresql = {
-    enable = true;
-    package = pkgs.postgresql_12;
-    enableTCPIP = true;
-    authentication = pkgs.lib.mkOverride 10 ''
-      local all all trust
-      host all all ::1/128 trust
-      host all all 0.0.0.0/0 trust
-    '';
-  };
-
-  services.apache-kafka = {
-    enable = false;
-    extraProperties = ''
-offsets.topic.replication.factor = 1
-delete.topic.enable = true
-    '';
-  };
-
-  services.zookeeper = {
-    enable = false;
-  };
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio = {
-    enable = true;
-    extraModules = [ pkgs.pulseaudio-modules-bt ];
-    package = pkgs.pulseaudioFull;
-    extraConfig = "
-load-module module-switch-on-connect
-load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70 sbc_min_bp=70 sbc_freq=44k\"
-    ";
   };
 
   services.xserver = {
@@ -273,16 +247,38 @@ load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70
     iosevka
   ];
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users = {
-    defaultUserShell = pkgs.zsh;
-    users = {
-      alvatar = {
-        isNormalUser = true;
-        extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
-        initialPassword = "1234";
-      };
+  programs.ssh.startAgent = true;
+  programs.slock.enable = true;
+  programs = {
+    zsh.ohMyZsh = {
+      enable = true;
+      plugins = [ "git" "python" "man" ];
+      theme = "agnoster";
     };
+    light.enable = true;
+  };  
+
+  services.postgresql = {
+    enable = true;
+    package = pkgs.postgresql_12;
+    enableTCPIP = true;
+    authentication = pkgs.lib.mkOverride 10 ''
+      local all all trust
+      host all all ::1/128 trust
+      host all all 0.0.0.0/0 trust
+    '';
+  };
+
+  services.apache-kafka = {
+    enable = false;
+    extraProperties = ''
+offsets.topic.replication.factor = 1
+delete.topic.enable = true
+    '';
+  };
+
+  services.zookeeper = {
+    enable = false;
   };
 
   ## Systemd
@@ -356,18 +352,13 @@ load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70
     #serviceConfig.ExecStart = "${pkgs.autocutsel}/bin/autocutsel -selection PRIMARY -fork";
   #};
 
-  ## Virtualization
-
-  virtualisation.docker.enable = true;
-  virtualisation.virtualbox.host.enable = true;
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.03"; # Did you read the comment?
+  system.stateVersion = "20.09"; # Did you read the comment?
 
 }
 

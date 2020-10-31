@@ -106,6 +106,7 @@ export PATH=$PATH:$GOPATH/bin:/$HOME/bin
 export PATH=$PATH:$HOME/.linkerd2/bin
 
 alias k=kubectl
+alias shot="sleep 1 && maim  -s | xclip -selection clipboard -t image/png"
 
 function countdown(){
    date1=$((`date +%s` + $1)); 
