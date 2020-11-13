@@ -251,15 +251,9 @@ myManageHook = composeAll
     , className =? "Gliv"           --> doFloat
     , className =? "Xchm"           --> doFloat
     , className =? "Wine"           --> doFloat
-    , className =? "sun-awt-X11-XFramePeer"       --> doFloat
     , title =? "opengl"  --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore ]
-
--- Whether focus follows the mouse pointer.
-myFocusFollowsMouse :: Bool
-myFocusFollowsMouse = True
-
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -284,27 +278,16 @@ myLogHook = return ()
 myStartupHook = return ()
 
 ------------------------------------------------------------------------
--- Now run xmonad with all the defaults we set up.
-
 -- Run xmonad with the settings you specify. No need to modify this.
---
 main = xmonad defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will 
 -- use the defaults defined in xmonad/XMonad/Config.hs
--- 
--- No need to modify this.
---
-
-
-
-
---
 defaults = defaultConfig {
       -- simple stuff
         terminal           = myTerminal,
-        focusFollowsMouse  = myFocusFollowsMouse,
+        focusFollowsMouse  = False,
         borderWidth        = myBorderWidth,
         modMask            = myModMask,
         handleEventHook    = fullscreenEventHook,

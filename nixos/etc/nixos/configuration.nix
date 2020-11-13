@@ -1,4 +1,4 @@
-# Edit this configuration file to define what should be installed on
+
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
@@ -7,6 +7,7 @@
 {
   ## Packages
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
   environment = {
     variables = {
       EDITOR = pkgs.lib.mkOverride 0 "vim";
@@ -23,7 +24,7 @@
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
-      firefox chromium tor-browser-bundle-bin
+      firefox chromium tor-browser-bundle-bin brave
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme
@@ -124,7 +125,7 @@
     package = pkgs.pulseaudioFull;
     extraConfig = "
 load-module module-switch-on-connect
-load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=70 sbc_min_bp=70 sbc_freq=44k\"
+load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=150 sbc_min_bp=150 sbc_freq=44k\"
     ";
   };
 
