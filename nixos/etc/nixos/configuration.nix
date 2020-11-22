@@ -1,7 +1,3 @@
-
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, lib, ... }:
 
 {
@@ -17,10 +13,15 @@
       QT_AUTO_SCREEN_SCALE_FACTOR = "1";
       #_JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
     };
-    systemPackages = with pkgs; [
+    systemPackages = with pkgs; let
+      nvidia-chromium = pkgs.writeScriptBin "nvidia-chromium" ''
+        nvidia-offload chromium 
+      '';
+    in [
       # Utils
-      wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall silver-searcher
-      nload iftop iotop nmap appimage-run openssl wipe groff steam-run lsof ecryptfs ecryptfs-helper encfs
+      wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
+      silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
+      lsof ecryptfs ecryptfs-helper encfs
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
@@ -28,7 +29,7 @@
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme
-      pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo
+      pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
       # GUI programs
       mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
@@ -46,6 +47,8 @@
       protobuf 
       # DevOps
       docker-compose kubectl minikube k9s
+      # Custom bins
+      nvidia-chromium
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
