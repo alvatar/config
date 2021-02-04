@@ -115,3 +115,5 @@ function countdown(){
      sleep 0.1
    done
 }
+
+eval "$(direnv hook zsh)"

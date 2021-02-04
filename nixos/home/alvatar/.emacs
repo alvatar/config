@@ -32,6 +32,10 @@
 
 ;; Packages
 
+; Load direnv current directory configuration into environemnt
+(use-package direnv
+  :config
+  (direnv-mode))
 (use-package expand-region
   :ensure t
   :bind ("C-=" . er/expand-region))
@@ -55,7 +59,7 @@
           (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
 (use-package avy
   :ensure t
-  :bind ("M-p" . 'avy-goto-char-timer))
+  :bind ("M-p" . avy-goto-char-timer))
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
@@ -79,11 +83,11 @@
   :ensure t
   :init (helm-cider-mode 1))
 (use-package helm-swoop :ensure t)
-;; (use-package flycheck
-;;   :ensure flycheck
-;;   :init (progn
-;;           (global-flycheck-mode)
-;;           (setq-default flycheck-disabled-checkers '(go-golint))))
+(use-package flycheck
+  :ensure flycheck
+  :init (progn
+          (global-flycheck-mode)
+          (setq-default flycheck-disabled-checkers '(go-golint))))
 ;; (use-package flycheck-golangci-lint
 ;;   :ensure flycheck-golangci-lint
 ;;   :hook (go-mode . flycheck-golangci-lint-setup))
@@ -115,7 +119,7 @@
 (use-package js2-mode :ensure t)
 (use-package markdown-mode :ensure t)
 (use-package yaml-mode :ensure t)
-;;(use-package protobuf-mode :ensure t)
+(use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
 ;; (use-package rust-mode
 ;;   :ensure t
@@ -123,16 +127,27 @@
 ;;           (setq rust-format-on-save t)
 ;;           (racer-mode)
 ;;           (smartparens-mode)
-;;           (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))))
-;; (use-package racer
-;;   :ensure t
-;;   :init (global-eldoc-mode))
-;; (use-package cargo
-;;   :ensure t
-;;   :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
-;;           (setenv "PATH" (concat (getenv "PATH") ":" path))
-;;           (setq exec-path (append exec-path (list path)))))
-;; (use-package rustic :ensure t)
+;;           ;; (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))
+;;           ))
+(use-package racer
+  :ensure t
+  :init (global-eldoc-mode))
+(use-package cargo
+  :ensure t
+  :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
+          (setenv "PATH" (concat (getenv "PATH") ":" path))
+          (setq exec-path (append exec-path (list path)))))
+(use-package rustic
+  :ensure t
+  :init (progn
+          (add-hook 'rustic-mode-hook 'smartparens-mode)
+          (add-hook 'rustic-mode-hook 'racer-mode)
+          ;;(remove-hook 'rustic-mode-hook 'flycheck-mode)
+          ;;(push 'rustic-clippy flycheck-checkers)
+          ;;(setq rustic-flycheck-clippy-params "--message-format=json")
+          )
+  :bind (("<f10>" . 'rustic-format-file)
+         ("C-c C-v" . 'lsp-execute-code-action)))
 (use-package go-mode
   :ensure t
   :init (progn (setq gofmt-command "goimports")
@@ -140,8 +155,23 @@
                          (lambda ()
                            (setq gofmt-command "goimports")
                            (local-set-key (kbd "<f10>") 'gofmt)
-                           (smartparens-mode))))
-)
+                           (smartparens-mode)))
+               ;; (let* ((home (getenv "HOME"))
+               ;;        (go-path (concat home "/go")))
+               ;;   (setenv "GOPATH" go-path)
+               ;;   ;;(setenv "GOROOT" go-path)
+               ;;   (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
+               ;;   (setenv "PATH" (concat home "/go/bin:" (getenv "PATH")))
+               ;;   (setq exec-path (cons (concat go-path "/bin") exec-path)))
+               ;; (setq exec-path (append
+               ;;   (list
+               ;;    "/usr/local/bin"
+               ;;    ;; (or (getenv "GOVERSION") "1.14")
+               ;;    (concat (getenv "HOME") "/go/" "/bin")
+               ;;    (concat (getenv "HOME") "go/bin"))
+               ;;   exec-path))
+               ;; (setenv "PATH" (concat (getenv "HOME") "/go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
+               ))
 ;; (use-package go-autocomplete
 ;;   :ensure go-autocomplete)
 ;; Auto-completion
@@ -167,10 +197,11 @@
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
-  :init (progn
-          (global-set-key (kbd "<f8>") 'lsp-treemacs-errors-list)
-          (global-set-key (kbd "C-c 1") 'lsp-ui-peek-find-definitions)
-          (global-set-key (kbd "C-c 2") 'lsp-ui-peek-find-references)))
+  :bind (("<f6>" . rust-test)
+         ("<f7>" . rust-compile)
+         ("<f8>" . 'lsp-treemacs-errors-list)
+         ("C-c 1" . 'lsp-ui-peek-find-definitions)
+         ("C-c 2" . 'lsp-ui-peek-find-references)))
 ;; (use-package company-lsp
 ;;   :ensure t
 ;;   :commands company-lsp
@@ -214,28 +245,11 @@
        :args nil
        :env nil
        :envFile nil))
-;;(use-package matlab-mode)
-(use-package ac-octave :ensure t)
 (use-package ein :ensure t)
 ;; Themes
-;;(use-package tron-theme)
 (use-package clues-theme :ensure t)
 (use-package night-owl-theme :ensure t)
-(use-package gruvbox-theme
-  :ensure t
-  ;;:init (load-theme 'gruvbox-dark-hard)
-  )
-
-
-;; PATH
-(setq exec-path (append
-                 (list
-                  "/usr/local/bin"
-                  ;; (or (getenv "GOVERSION") "1.14")
-                  (concat (getenv "HOME") "/go/" "/bin")
-                  (concat (getenv "HOME") "go/bin"))
-                 exec-path))
-(setenv "PATH" (concat (getenv "HOME") "/go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
+(use-package gruvbox-theme :ensure t)
 
 
 ;;------------------------------------------------------------------------------
@@ -257,7 +271,7 @@
 ;; Startup screen
 (setq inhibit-startup-buffer-menu t)
 (setq inhibit-splash-screen t)
-;; Show matching parentecies globaly.
+;; Show matching parenthesis globaly.
 (show-paren-mode 1)
 ;; Use UTF-8 by default
 (set-language-environment "UTF-8")
@@ -267,6 +281,8 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 ;; Transient mark
 (transient-mark-mode 1)
+;; Allow downcase region (?)
+(put 'downcase-region 'disabled nil)
 ;; Look & feel
 (menu-bar-mode 0)
 (column-number-mode 1)
@@ -305,7 +321,8 @@
               (let ((use-dialog-box nil)) ad-do-it)))
         ;; Linux
         (progn
-          (set-default-font "Hack")
+          ;(set-default-font "Hack")
+          (set-face-attribute 'default t :font "Hack")
           (set-face-attribute 'default nil :height 100))))
   ;; Console
   (progn
@@ -334,8 +351,6 @@
         (replace-match "" nil nil))
       (goto-char current))))
 
-(put 'downcase-region 'disabled nil)
-
 (defun filter-with-shell-command (command arg)
   "Run a command with the buffer as input and replace it."
   (interactive (list (read-from-minibuffer "Shell command: " nil nil nil 'shell-command-history)
@@ -357,67 +372,43 @@
 ;; Key bindings
 
 (global-unset-key (kbd "C-x C-c"))
+
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
-(global-set-key (kbd "C-S-k") 'delete-region)
-(global-set-key (kbd "C-c C-c") 'comment-or-uncomment-region)
-;; (global-set-key (kbd "<f7>")
-;;         (lambda ()
-;;           (interactive)
-;;           (shell-command "/usr/local/Cellar/ctags/5.8_1/bin/ctags --languages=Go -e -R .")))
-;; (global-set-key (kbd "<f7>") 'compile)
+(global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
+(global-set-key (kbd "C-x t") 'treemacs)
 ;; (global-set-key (kbd "<f8>") 'flycheck-list-errors)
-;; (global-set-key (kbd "<f9>") 'flycheck-next-error)
-(global-set-key (kbd "<f9>") 'flymake-goto-next-error)
-;;(global-set-key (kbd "<f10>") 'gofmt)
-;; (global-set-key (kbd "C-c 1") 'xref-find-definitions)
-;; (global-set-key (kbd "C-c 2") 'xref-find-references)
+(global-set-key (kbd "<f9>") 'flycheck-next-error)
+;; (global-set-key (kbd "<f9>") 'flymake-goto-next-error)
 (global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
-(global-set-key (kbd "C-c 4") 'helm-do-ag-project-root)
 
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 ;; Languages
 
-;; Shell
-(add-hook 'shell-mode-hook (lambda ()
-                             (compilation-shell-minor-mode 1)
-                             (setq compilation-auto-jump-to-first-error 1)))
-
 ;; C
 (setq c-default-style "linux"
       c-basic-offset 4)
 
-;; Go
-(let* ((home (getenv "HOME"))
-       (go-path (concat home "/go")))
-  (setenv "GOPATH" go-path)
-  ;;(setenv "GOROOT" go-path)
-  (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-  (setenv "PATH" (concat home "/go/bin:" (getenv "PATH")))
-  (setq exec-path (cons (concat go-path "/bin") exec-path)))
-;; (add-hook 'go-mode-hook
-;;           (lambda ()
-;;             (autopair-mode)
-;;             (set (make-local-variable 'company-backends) '(company-go))
-;;             ;; (global-set-key (kbd "C-c 1") 'go-guru-definition)
-;;             ;; (global-set-key (kbd "C-c 2") 'go-guru-callers)
-;;             ))
+;; Shell
+;; (add-hook 'shell-mode-hook (lambda ()
+;;                              (compilation-shell-minor-mode 1)
+;;                              (setq compilation-auto-jump-to-first-error 1)))
 
 ;; Scheme
-(add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-(add-hook 'scheme-mode-hook
-          (lambda ()
-            (local-unset-key (kbd "C-c C-c"))
-            (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
-(font-lock-add-keywords 'scheme-mode
-                        '(("(\\(lambda\\)\\>" (0 (prog1 ()
-                                                   (compose-region (match-beginning 1)
-                                                                    (match-end 1)
-                                                                   ?λ))))))
-(global-set-key "\C-c\C-qr" 'run-scheme)
-;; (add-hook 'scheme-mode-hook (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file))
+;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
+;; (add-hook 'scheme-mode-hook
+;;           (lambda ()
+;;             (local-unset-key (kbd "C-c C-c"))
+;;             (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
+;; (font-lock-add-keywords 'scheme-mode
+;;                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
+;;                                                    (compose-region (match-beginning 1)
+;;                                                                     (match-end 1)
+;;                                                                    ?λ))))))
+;; (global-set-key "\C-c\C-qr" 'run-scheme)
+;; ;; (add-hook 'scheme-mode-hook (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file))
 ;; ;; Load remote SchemeSpheres remote debugging if installed
 ;; (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"))
 ;;   (when (file-exists-p sense-emacs)
@@ -433,11 +424,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   (quote
-    ("e1d09f1b2afc2fed6feb1d672be5ec6ae61f84e058cb757689edb669be926896" "123a8dabd1a0eff6e0c48a03dc6fb2c5e03ebc7062ba531543dfbce587e86f2a" "de65dc21fefce202883a5071170962c73b4bf4b691156d0a28239765f71b23e5" "a06658a45f043cd95549d6845454ad1c1d6e24a99271676ae56157619952394a" "79485bab8bb220562d4acd003e4b6f1c9005af41e91f81b7a0e89b7e3a301203" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" default)))
+   '("78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(package-selected-packages
-   (quote
-    (edit-server ac-octave matlab-mode xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))))
+   '(direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -446,3 +435,5 @@
  )
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
+
+(load-theme 'gruvbox-dark-hard)

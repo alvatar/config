@@ -21,28 +21,29 @@
       # Utils
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
-      lsof ecryptfs ecryptfs-helper encfs
+      lsof ecryptfs ecryptfs-helper encfs openssl direnv tcpdump
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
       firefox chromium tor-browser-bundle-bin brave
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
-      capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme
+      capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
       # GUI programs
       mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
       transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
-      anki texlive.combined.scheme-full maim
+      anki texlive.combined.scheme-full nicotine-plus signal-desktop bluejeans-gui
+      element-desktop alarm-clock-applet wireshark
       # Unfree
       spotify dropbox-cli zoom-us
-      # Language runtimes
-      gcc go openjdk11 python3 leiningen nodejs yarn octaveFull 
-      # Python libs
-      python37Packages.pip
+      # Language
+      gcc go openjdk11 python3 leiningen nodejs rustup
+      # Python packages
+      python37Packages.pip python37Packages.pylint
       # Databases
-      postgresql_12 #apacheKafka_2_4
+      postgresql_12 apacheKafka_2_4
       # Development libraries
       protobuf 
       # DevOps
@@ -274,7 +275,7 @@ load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=15
   };
 
   services.apache-kafka = {
-    enable = false;
+    enable = true;
     extraProperties = ''
 offsets.topic.replication.factor = 1
 delete.topic.enable = true
@@ -282,7 +283,7 @@ delete.topic.enable = true
   };
 
   services.zookeeper = {
-    enable = false;
+    enable = true;
   };
 
   ## Systemd
