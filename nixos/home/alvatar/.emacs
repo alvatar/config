@@ -121,14 +121,15 @@
 (use-package yaml-mode :ensure t)
 (use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
-;; (use-package rust-mode
-;;   :ensure t
-;;   :init (progn
-;;           (setq rust-format-on-save t)
-;;           (racer-mode)
-;;           (smartparens-mode)
-;;           ;; (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))
-;;           ))
+(use-package rust-mode
+  :ensure t
+  ;; :init (progn
+  ;;         (setq rust-format-on-save t)
+  ;;         (racer-mode)
+  ;;         (smartparens-mode)
+  ;;         ;; (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))
+  ;;         )
+  )
 (use-package racer
   :ensure t
   :init (global-eldoc-mode))
@@ -140,14 +141,19 @@
 (use-package rustic
   :ensure t
   :init (progn
-          (add-hook 'rustic-mode-hook 'smartparens-mode)
-          (add-hook 'rustic-mode-hook 'racer-mode)
+          (setq racer-rust-src-path (concat (shell-command-to-string "rustc +nightly --print sysroot") "/lib/rustlib/src/rust/library"))
+          (setq racer-cmd "/home/alvatar/.carg/bin/racer")
+          (add-hook 'rustic-mode-hook #'smartparens-mode)
+          (add-hook 'rustic-mode-hook #'racer-mode)
+          (add-hook 'rustic-mode-hook #'eldoc-mode)
+          (setq company-tooltip-align-annotations t)
           ;;(remove-hook 'rustic-mode-hook 'flycheck-mode)
           ;;(push 'rustic-clippy flycheck-checkers)
           ;;(setq rustic-flycheck-clippy-params "--message-format=json")
           )
   :bind (("<f10>" . 'rustic-format-file)
-         ("C-c C-v" . 'lsp-execute-code-action)))
+         ("C-c C-v" . 'lsp-execute-code-action)
+         ("TAB" . 'company-indent-or-complete-common)))
 (use-package go-mode
   :ensure t
   :init (progn (setq gofmt-command "goimports")
@@ -179,7 +185,7 @@
   :ensure t
   :init (global-company-mode)
   :config
-  (setq company-idle-delay 0)
+  (setq company-idle-delay 1)
   (setq company-minimum-prefix-length 1))
 (use-package company-go :ensure t)
 (use-package company-fuzzy
@@ -369,7 +375,7 @@
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 
-;; Key bindings
+;; Global Key bindings
 
 (global-unset-key (kbd "C-x C-c"))
 
@@ -426,7 +432,7 @@
  '(custom-safe-themes
    '("78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(package-selected-packages
-   '(direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
