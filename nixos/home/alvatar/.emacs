@@ -141,7 +141,9 @@
 (use-package rustic
   :ensure t
   :init (progn
-          (setq racer-rust-src-path (concat (shell-command-to-string "rustc +nightly --print sysroot") "/lib/rustlib/src/rust/library"))
+          ;; Using echo to avoid the inserted newline at the end
+          (setq racer-rust-src-path (shell-command-to-string "echo -n $(rustc +nightly --print sysroot)/lib/rustlib/src/rust/library"))
+          ;; Completions with Racer are Alt-Tab
           (setq racer-cmd "/home/alvatar/.carg/bin/racer")
           (add-hook 'rustic-mode-hook #'smartparens-mode)
           (add-hook 'rustic-mode-hook #'racer-mode)
@@ -203,9 +205,10 @@
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
-  :bind (("<f6>" . rust-test)
-         ("<f7>" . rust-compile)
-         ("<f8>" . 'lsp-treemacs-errors-list)
+  :bind (;;("<f6>" . 'lsp-treemacs-errors-list)
+         ("<f6>" . 'next-error)
+         ("<f7>" . rust-test)
+         ("<f8>" . rust-compile)
          ("C-c 1" . 'lsp-ui-peek-find-definitions)
          ("C-c 2" . 'lsp-ui-peek-find-references)))
 ;; (use-package company-lsp
