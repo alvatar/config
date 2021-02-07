@@ -144,7 +144,7 @@
           ;; Using echo to avoid the inserted newline at the end
           (setq racer-rust-src-path (shell-command-to-string "echo -n $(rustc +nightly --print sysroot)/lib/rustlib/src/rust/library"))
           ;; Completions with Racer are Alt-Tab
-          (setq racer-cmd "/home/alvatar/.carg/bin/racer")
+          (setq racer-cmd "/home/alvatar/.cargo/bin/racer")
           (add-hook 'rustic-mode-hook #'smartparens-mode)
           (add-hook 'rustic-mode-hook #'racer-mode)
           (add-hook 'rustic-mode-hook #'eldoc-mode)
@@ -433,7 +433,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(package-selected-packages
    '(company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces

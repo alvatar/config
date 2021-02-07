@@ -25,7 +25,7 @@
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
-      firefox chromium tor-browser-bundle-bin brave
+      firefox chromium brave
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme maim 
@@ -129,7 +129,7 @@
     package = pkgs.pulseaudioFull;
     extraConfig = "
 load-module module-switch-on-connect
-load-module module-bluetooth-discover a2dp_config=\"sbc_cmode=dual sbc_min_bp=150 sbc_min_bp=150 sbc_freq=44k\"
+load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=250 sbc_min_bp=250\"
     ";
   };
 
