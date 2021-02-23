@@ -21,7 +21,7 @@
       # Utils
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
-      lsof ecryptfs ecryptfs-helper encfs openssl direnv tcpdump
+      lsof ecryptfs ecryptfs-helper encfs openssl direnv tcpdump pstree
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
@@ -35,17 +35,19 @@
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
       transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
       anki texlive.combined.scheme-full nicotine-plus signal-desktop bluejeans-gui
-      element-desktop alarm-clock-applet wireshark
+      element-desktop alarm-clock-applet wireshark slack
       # Unfree
       spotify dropbox-cli zoom-us
       # Language
-      gcc go openjdk11 python3 leiningen nodejs rustup
+      gcc go openjdk11 python3 leiningen nodejs yarn rustup 
       # Python packages
       python37Packages.pip python37Packages.pylint
       # Databases
       postgresql_12 apacheKafka_2_4
+      # Development tools
+      jq
       # Development libraries
-      protobuf 
+      protobuf binutils.bintools llvm clang llvmPackages.libclang libudev
       # DevOps
       docker-compose kubectl minikube k9s
       # Custom bins
@@ -88,9 +90,10 @@
     enable = true;
     settings = {
       "CPU_SCALING_GOVERNOR_ON_AC"= "performance";
-      "CPU_SCALING_GOVERNOR_ON_BAT"= "powersave";
-      "ENERGY_PERF_POLICY_ON_BAT"= "power";
-      "CPU_ENERGY_PERF_POLICY_ON_BAT"="power";
+      "CPU_SCALING_GOVERNOR_ON_BAT"= "performance";
+      #"ENERGY_PERF_POLICY_ON_BAT"= "power";
+      "CPU_ENERGY_PERF_POLICY_ON_AC"="performance";
+      "CPU_ENERGY_PERF_POLICY_ON_BAT"="balance_power";
       "SOUND_POWER_SAVE_ON_BAT"= 0;
       "SOUND_POWER_SAVE_CONTROLLER"= "Y";
       "START_CHARGE_THRESH_BAT0"= 40;
@@ -262,6 +265,18 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=250
     };
     light.enable = true;
   };  
+
+  services.avahi = {
+    nssmdns = true;
+    enable = true;
+    ipv4 = true;
+    ipv6 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
+  };
 
   services.postgresql = {
     enable = true;

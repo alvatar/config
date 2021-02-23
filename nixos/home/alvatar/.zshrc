@@ -103,7 +103,11 @@ source $ZSH/oh-my-zsh.sh
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin:/$HOME/bin
-export PATH=$PATH:$HOME/.linkerd2/bin
+export PATH=$PATH:$HOME/.npm-global/bin
+export PATH=$PATH:$HOME/.cargo/bin
+
+export LIBCLANG_PATH=/run/current-system/sw/lib/
+export PROTOC=`which protoc`
 
 alias k=kubectl
 alias shot="sleep 1 && maim  -s | xclip -selection clipboard -t image/png"

@@ -93,7 +93,7 @@
 ;;   :hook (go-mode . flycheck-golangci-lint-setup))
 (use-package moe-theme :ensure t)
 (use-package beacon :ensure t)
-(use-package smart-tab :ensure t)
+;; (use-package smart-tab :ensure t)
 (use-package powerline
   :ensure t
   :init (powerline-default-theme))
@@ -155,7 +155,8 @@
           )
   :bind (("<f10>" . 'rustic-format-file)
          ("C-c C-v" . 'lsp-execute-code-action)
-         ("TAB" . 'company-indent-or-complete-common)))
+         ;;("TAB" . 'company-indent-or-complete-common)
+	 ))
 (use-package go-mode
   :ensure t
   :init (progn (setq gofmt-command "goimports")
@@ -273,7 +274,7 @@
 ;; Silent bell
 (setq ring-bell-function 'ignore)
 ;; It makes indentation use spaces.
-(setq-default indent-tabs-mode nil)
+;;(setq-default indent-tabs-mode nil)
 ;; Sometimes the mini-buffer becomes multi-line, and it can be a bit annoying as
 ;; you type in it. This makes it stay one line.
 (setq resize-mini-windows nil)
@@ -374,6 +375,14 @@
     (progn
       (set-register '_ (list (current-window-configuration)))
       (delete-other-windows))))
+
+;; Ref: http://ergoemacs.org/emacs/emacs_tabs_space_indentation_setup.html
+(defun my-insert-tab-char ()
+  "Insert a tab char. (ASCII 9, \t)"
+  (interactive)
+  (insert "\t"))
+
+;; (global-set-key (kbd "TAB") 'my-insert-tab-char)
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
