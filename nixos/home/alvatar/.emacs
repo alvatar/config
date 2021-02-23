@@ -32,8 +32,10 @@
 
 ;; Packages
 
-; Load direnv current directory configuration into environemnt
-(use-package direnv
+;;------------------------------------------------------------------------------
+;; Basic
+
+(use-package direnv ; Load direnv current directory configuration into environemnt
   :config
   (direnv-mode))
 (use-package expand-region
@@ -50,28 +52,12 @@
 (use-package goto-last-change
   :ensure t
   :bind ("C-x C-/" . goto-last-change))
-(use-package paredit
-  :ensure t
-  :init (progn
-          (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
-          (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
-          (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
-          (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
 (use-package avy
   :ensure t
   :bind ("M-p" . avy-goto-char-timer))
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
-(use-package cider
-  :ensure t
-  :init (progn
-          (setq cider-show-error-buffer nil)
-          (setq cider-show-error-buffer 'only-in-repl)
-          (setq cider-repl-display-help-banner nil)
-          (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
-          (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-          (setenv "LEIN_USE_BOOTCLASSPATH" "no")))
 ;; Helm, Projectile
 (use-package helm
   :ensure t
@@ -79,24 +65,10 @@
 (use-package helm-projectile
   :ensure t
   :bind ("C-x C-f" . helm-projectile-find-file))
-(use-package helm-cider
-  :ensure t
-  :init (helm-cider-mode 1))
 (use-package helm-swoop :ensure t)
-(use-package flycheck
-  :ensure flycheck
-  :init (progn
-          (global-flycheck-mode)
-          (setq-default flycheck-disabled-checkers '(go-golint))))
-;; (use-package flycheck-golangci-lint
-;;   :ensure flycheck-golangci-lint
-;;   :hook (go-mode . flycheck-golangci-lint-setup))
-(use-package moe-theme :ensure t)
-(use-package beacon :ensure t)
+(use-package beacon :ensure t :init (beacon-mode))
 ;; (use-package smart-tab :ensure t)
-(use-package powerline
-  :ensure t
-  :init (powerline-default-theme))
+(use-package powerline :ensure t :init (powerline-default-theme))
 (use-package  multiple-cursors
   :ensure t
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
@@ -110,162 +82,280 @@
   ;;         )
   )
 (use-package git-timemachine :ensure t)
-;; (use-package autopair
-;;   :ensure t
-;;   :init (autopair-global-mode))
-(use-package smartparens :ensure t)
-;; Languages
-(use-package dockerfile-mode :ensure t)
-(use-package js2-mode :ensure t)
-(use-package markdown-mode :ensure t)
-(use-package yaml-mode :ensure t)
-(use-package protobuf-mode :ensure t)
-(use-package emmet-mode :ensure t)
-(use-package rust-mode
-  :ensure t
-  ;; :init (progn
-  ;;         (setq rust-format-on-save t)
-  ;;         (racer-mode)
-  ;;         (smartparens-mode)
-  ;;         ;; (add-hook 'rust-mode-hook (lambda () (local-set-key (kbd "<f10>") 'rust-format-buffer)))
-  ;;         )
-  )
-(use-package racer
-  :ensure t
-  :init (global-eldoc-mode))
-(use-package cargo
-  :ensure t
-  :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
-          (setenv "PATH" (concat (getenv "PATH") ":" path))
-          (setq exec-path (append exec-path (list path)))))
-(use-package rustic
-  :ensure t
-  :init (progn
-          ;; Using echo to avoid the inserted newline at the end
-          (setq racer-rust-src-path (shell-command-to-string "echo -n $(rustc +nightly --print sysroot)/lib/rustlib/src/rust/library"))
-          ;; Completions with Racer are Alt-Tab
-          (setq racer-cmd "/home/alvatar/.cargo/bin/racer")
-          (add-hook 'rustic-mode-hook #'smartparens-mode)
-          (add-hook 'rustic-mode-hook #'racer-mode)
-          (add-hook 'rustic-mode-hook #'eldoc-mode)
-          (setq company-tooltip-align-annotations t)
-          ;;(remove-hook 'rustic-mode-hook 'flycheck-mode)
-          ;;(push 'rustic-clippy flycheck-checkers)
-          ;;(setq rustic-flycheck-clippy-params "--message-format=json")
-          )
-  :bind (("<f10>" . 'rustic-format-file)
-         ("C-c C-v" . 'lsp-execute-code-action)
-         ;;("TAB" . 'company-indent-or-complete-common)
-	 ))
-(use-package go-mode
-  :ensure t
-  :init (progn (setq gofmt-command "goimports")
-               (add-hook 'go-mode-hook
-                         (lambda ()
-                           (setq gofmt-command "goimports")
-                           (local-set-key (kbd "<f10>") 'gofmt)
-                           (smartparens-mode)))
-               ;; (let* ((home (getenv "HOME"))
-               ;;        (go-path (concat home "/go")))
-               ;;   (setenv "GOPATH" go-path)
-               ;;   ;;(setenv "GOROOT" go-path)
-               ;;   (setenv "PATH" (concat go-path "/bin:" (getenv "PATH")))
-               ;;   (setenv "PATH" (concat home "/go/bin:" (getenv "PATH")))
-               ;;   (setq exec-path (cons (concat go-path "/bin") exec-path)))
-               ;; (setq exec-path (append
-               ;;   (list
-               ;;    "/usr/local/bin"
-               ;;    ;; (or (getenv "GOVERSION") "1.14")
-               ;;    (concat (getenv "HOME") "/go/" "/bin")
-               ;;    (concat (getenv "HOME") "go/bin"))
-               ;;   exec-path))
-               ;; (setenv "PATH" (concat (getenv "HOME") "/go/bin:/usr/local/bin:/usr/local/Gambit/bin:" (getenv "PATH")))
-               ))
-;; (use-package go-autocomplete
-;;   :ensure go-autocomplete)
-;; Auto-completion
+;; (use-package autopair :ensure t :init (autopair-global-mode))
+;; (use-package smartparens :ensure t)
+;; Themes
+(use-package clues-theme :ensure t)
+(use-package night-owl-theme :ensure t)
+(use-package gruvbox-theme :ensure t)
+
+(defun rk/open-compilation-buffer (&optional buffer-or-name shackle-alist shackle-plist)
+  "Helper for selecting window for opening *compilation* buffers."
+  ;; find existing compilation window left of the current window or left-most window
+  (let ((win (or (loop for win = (if win (window-left win) (get-buffer-window))
+                       when (or (not (window-left win))
+                                (string-prefix-p "*compilation" (buffer-name (window-buffer win))))
+                       return win)
+                 (get-buffer-window))))
+    ;; if the window is dedicated to a non-compilation buffer, use the current one instead
+    (when (window-dedicated-p win)
+      (let ((buf-name (buffer-name (window-buffer win))))
+        (unless (string-prefix-p "*compilation" buf-name)
+          (setq win (get-buffer-window)))))
+    (set-window-buffer win (get-buffer buffer-or-name))
+    (set-frame-selected-window (window-frame win) win)))
+(use-package shackle
+  :ensure
+  :diminish
+  :custom
+  (shackle-rules '((compilation-mode :custom rk/open-compilation-buffer :select t)
+		   ("\\*Apropos\\|Help\\|Occur\\|tide-references\\*" :regexp t :same t :select t :inhibit-window-quit t)
+		   ("\\*magit" :regexp t :same t :select t)
+		   ("\\*shell.*" :regexp t :same t :select t)
+		   ("\\*PowerShell.*" :regexp t :same t :select t)
+		   ("\\*Cargo.*" :regexp t :other t :select nil)
+		   ("*Messages*" :select nil :other t)
+		   ("*go-guru-output*" :select t :same t)
+		   ("*Proced*" :select t :same t)
+		   ("*Buffer List*" :select t :same t)
+		   ("\\*Pp Eval" :regexp t :same nil :select t :other t)
+		   ("*Messages*" :same nil :other t :select t :inhibit-window-quit t)
+		   ;; slime
+		   ("*slime-source*" :select nil :same nil :other t)
+		   ("*slime-description*" :select nil :other t :inhibit-window-quit t)
+		   ("\\*slime-repl" :regexp t :same nil :select nil :other t)
+		   ;; ("\\*sldb" :regexp t :other t :inhibit-window-quit t :select t)
+		   ("\\*slime-compilation" :regexp t :same nil :select nil :other t)
+		   ("*slime-scratch*" :same nil :select t :other t)
+		   ;; ert
+		   ("*ert*" :select nil :same nil :other t)
+		   ;; clojure
+		   ("*sesman CIDER browser*" :inhibit-window-quit t :select t :same t)
+		   ("\\*cider-repl" :regexp t :same nil :other t)))
+  (shackle-default-rule nil))
+
+;;------------------------------------------------------------------------------
+;; Language tools
+
+;; General
 (use-package company
   :ensure t
-  :init (global-company-mode)
-  :config
-  (setq company-idle-delay 1)
-  (setq company-minimum-prefix-length 1))
-(use-package company-go :ensure t)
-(use-package company-fuzzy
-  :ensure t
-  :init (global-company-fuzzy-mode 1))
-;; LSP
-(use-package lsp-mode
-  :ensure t
-  :hook (go-mode . lsp-deferred)
-  :commands (lsp lsp-deferred)
-  :init (progn
-          (setq lsp-gopls-staticcheck t)
-          (setq lsp-eldoc-render-all t)
-          (setq lsp-gopls-complete-unimported t)))
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode
-  :bind (;;("<f6>" . 'lsp-treemacs-errors-list)
-         ("<f6>" . 'next-error)
-         ("<f7>" . rust-test)
-         ("<f8>" . rust-compile)
-         ("C-c 1" . 'lsp-ui-peek-find-definitions)
-         ("C-c 2" . 'lsp-ui-peek-find-references)))
-;; (use-package company-lsp
-;;   :ensure t
-;;   :commands company-lsp
-;;   )
+  :custom
+  (company-idle-delay 0.5) ;; how long to wait until popup
+  ;; (company-begin-commands nil) ;; uncomment to disable popup
+  ;; (setq company-minimum-prefix-length 1)
+  :bind
+  (:map company-active-map
+	("C-n". company-select-next)
+	("C-p". company-select-previous)
+	("M-<". company-select-first)
+	("M->". company-select-last)
+	("<tab>". tab-indent-or-complete)
+	("TAB". tab-indent-or-complete)))
 (use-package helm-lsp
   :ensure t
   :commands helm-lsp-workspace-symbol)
 (use-package lsp-treemacs
   :ensure t
   :commands lsp-treemacs-errors-list)
-(use-package dap-mode :ensure t)
+(use-package exec-path-from-shell ; used by dap-mode
+  :ensure
+  :init (exec-path-from-shell-initialize))
+;; LSP
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode
+  :bind (("C-c 1" . 'lsp-ui-peek-find-definitions)
+         ("C-c 2" . 'lsp-ui-peek-find-references)
+	 ("C-c 3" . 'helm-do-grep-ag))
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable nil))
+(use-package flycheck :ensure t) ; (setq-default flycheck-disabled-checkers '(go-golint))
 (use-package yasnippet
   :ensure t
-  :commands yas-minor-mode
-  :hook (go-mode . yas-minor-mode))
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook 'yas-minor-mode)
+  (add-hook 'text-mode-hook 'yas-minor-mode))
 (use-package posframe :ensure t)
-(use-package dap-mode
+
+;; ---- Python
+(use-package ein :ensure t)
+
+;; ---- Clojure
+(use-package paredit
   :ensure t
   :init (progn
-          (dap-mode 1)
-          (dap-ui-mode 1)
-          (require 'dap-go)
-          ;; enables mouse hover support
-          (dap-tooltip-mode 1)
-          ;; use tooltips for mouse hover
-          ;; if it is not enabled `dap-mode' will use the minibuffer.
-          (tooltip-mode 1)
-          ;; displays floating panel with debug buttons
-          (dap-ui-controls-mode 1)
-          (add-hook 'dap-stopped-hook
-                    (lambda (arg) (call-interactively #'dap-hydra)))))
-(dap-register-debug-template
- "Launch Exchange"
- (list :type "go"
-       :request "launch"
-       :name "Launch Exchange"
-       :mode "debug"
-       :program "/Users/alvatar/projects/infra/cmd/myprogram/main.go"
-       :buildFlags "-gcflags '-N -l'"
-       :dlvToolPath "/Users/alvatar/go/bin/dlv"
-       :args nil
-       :env nil
-       :envFile nil))
-(use-package ein :ensure t)
-;; Themes
-(use-package clues-theme :ensure t)
-(use-package night-owl-theme :ensure t)
-(use-package gruvbox-theme :ensure t)
+          (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
+          (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
+(use-package cider
+  :ensure t
+  :init (progn
+          (setq cider-show-error-buffer nil)
+          (setq cider-show-error-buffer 'only-in-repl)
+          (setq cider-repl-display-help-banner nil)
+          (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+          (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
+          (setenv "LEIN_USE_BOOTCLASSPATH" "no")))
+(use-package helm-cider
+  :ensure t
+  :init (helm-cider-mode 1))
+
+;; ---- Go
+(use-package go-mode
+  :ensure t
+  :config
+  (setq gofmt-command "goimports")
+  (setq exec-path (append
+                   (list
+                    "/usr/local/bin"
+                    ;; (or (getenv "GOVERSION") "1.14")
+                    (concat (getenv "HOME") "/go/" "/bin")
+                    (concat (getenv "HOME") "go/bin"))
+                   exec-path))
+  (smartparens-mode)
+  :bind (:map go-mode-map
+	      ("<f10>" . 'gofmt)))
+;; (use-package company-go :ensure t)
+;; (use-package go-autocomplete
+;;   :ensure go-autocomplete)
+
+;; ---- Rust
+(use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status)
+              ("<f6>" . rust-test)
+              ("<f7>" . rust-compile)
+	      ("<f8>" . 'next-error)
+	      ("<f10>" . 'rustic-format-file))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm
+  (setq-local buffer-save-without-query t))
+
+(use-package cargo
+  :ensure t
+  :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
+          (setenv "PATH" (concat (getenv "PATH") ":" path))
+          (setq exec-path (append exec-path (list path)))))
+
+;; ---- Other
+(use-package dockerfile-mode :ensure t)
+(use-package js2-mode :ensure t)
+(use-package markdown-mode :ensure t)
+(use-package yaml-mode :ensure t)
+(use-package protobuf-mode :ensure t)
+(use-package emmet-mode :ensure t)
+
+;; ---- C
+(setq c-default-style "linux"
+      c-basic-offset 4)
+
+;; ---- Shell
+;; (add-hook 'shell-mode-hook (lambda ()
+;;                              (compilation-shell-minor-mode 1)
+;;                              (setq compilation-auto-jump-to-first-error 1)))
+
+;; ---- Scheme
+;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
+;; (add-hook 'scheme-mode-hook
+;;           (lambda ()
+;;             (local-unset-key (kbd "C-c C-c"))
+;;             (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
+;; (font-lock-add-keywords 'scheme-mode
+;;                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
+;;                                                    (compose-region (match-beginning 1)
+;;                                                                     (match-end 1)
+;;                                                                    ?λ))))))
+;; (global-set-key "\C-c\C-qr" 'run-scheme)
+;; ;; (add-hook 'scheme-mode-hook (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file))
+;; ;; Load remote SchemeSpheres remote debugging if installed
+;; (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"))
+;;   (when (file-exists-p sense-emacs)
+;;     (load-file sense-emacs)
+;;     (message "Emacs Sense loaded")))
+
+;; ---- Debugging
+(use-package dap-mode
+  :ensure t
+  :config
+  (dap-ui-mode)
+  (dap-ui-controls-mode 1)
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  ;; installs .extension/vscode
+  (dap-gdb-lldb-setup)
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb"
+         :request "launch"
+         :name "LLDB::Run"
+	 :gdbpath "rust-lldb"
+         :target nil
+         :cwd nil)))
+;; Go config
+;; (use-package dap-mode
+;;   :ensure t
+;;   :init (progn
+;;           (dap-mode 1)
+;;           (dap-ui-mode 1)
+;;           (require 'dap-go)
+;;           ;; enables mouse hover support
+;;           (dap-tooltip-mode 1)
+;;           ;; use tooltips for mouse hover
+;;           ;; if it is not enabled `dap-mode' will use the minibuffer.
+;;           (tooltip-mode 1)
+;;           ;; displays floating panel with debug buttons
+;;           (dap-ui-controls-mode 1)
+;;           (add-hook 'dap-stopped-hook
+;;                     (lambda (arg) (call-interactively #'dap-hydra)))))
+;; (dap-register-debug-template
+;;  "Launch Exchange"
+;;  (list :type "go"
+;;        :request "launch"
+;;        :name "Launch Exchange"
+;;        :mode "debug"
+;;        :program "/Users/alvatar/projects/infra/cmd/myprogram/main.go"
+;;        :buildFlags "-gcflags '-N -l'"
+;;        :dlvToolPath "/Users/alvatar/go/bin/dlv"
+;;        :args nil
+;;        :env nil
+;;        :envFile nil))
 
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 
-;; General Config
+;; Extra Config
 
 ;; No backups
 (setq backup-inhibited t)
@@ -285,7 +375,7 @@
 (show-paren-mode 1)
 ;; Use UTF-8 by default
 (set-language-environment "UTF-8")
-;; Show  trailing whitespace
+;; Show trailing whitespace
 (add-hook 'find-file-hook (lambda () (setf show-trailing-whitespace t)))
 ;; Confirmation menu
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -376,17 +466,40 @@
       (set-register '_ (list (current-window-configuration)))
       (delete-other-windows))))
 
+;; Tab: force just tab
 ;; Ref: http://ergoemacs.org/emacs/emacs_tabs_space_indentation_setup.html
 (defun my-insert-tab-char ()
   "Insert a tab char. (ASCII 9, \t)"
   (interactive)
   (insert "\t"))
-
 ;; (global-set-key (kbd "TAB") 'my-insert-tab-char)
 
-;;------------------------------------------------------------------------------
-;;------------------------------------------------------------------------------
+;; Tab: yasnippet, indent or complete
+(defun company-yasnippet-or-completion ()
+  (interactive)
+  (or (do-yas-expand)
+      (company-complete-common)))
+(defun check-expansion ()
+  (save-excursion
+    (if (looking-at "\\_>") t
+      (backward-char 1)
+      (if (looking-at "\\.") t
+        (backward-char 1)
+        (if (looking-at "::") t nil)))))
+(defun do-yas-expand ()
+  (let ((yas/fallback-behavior 'return-nil))
+    (yas/expand)))
+(defun tab-indent-or-complete ()
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas/minor-mode)
+            (null (do-yas-expand)))
+        (if (check-expansion)
+            (company-complete-common)
+          (indent-for-tab-command)))))
 
+;;------------------------------------------------------------------------------
 ;; Global Key bindings
 
 (global-unset-key (kbd "C-x C-c"))
@@ -395,44 +508,11 @@
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
 (global-set-key (kbd "C-x t") 'treemacs)
-;; (global-set-key (kbd "<f8>") 'flycheck-list-errors)
-(global-set-key (kbd "<f9>") 'flycheck-next-error)
-;; (global-set-key (kbd "<f9>") 'flymake-goto-next-error)
-(global-set-key (kbd "C-c 3") 'helm-do-grep-ag)
-
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
-;; Languages
-
-;; C
-(setq c-default-style "linux"
-      c-basic-offset 4)
-
-;; Shell
-;; (add-hook 'shell-mode-hook (lambda ()
-;;                              (compilation-shell-minor-mode 1)
-;;                              (setq compilation-auto-jump-to-first-error 1)))
-
-;; Scheme
-;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-;; (add-hook 'scheme-mode-hook
-;;           (lambda ()
-;;             (local-unset-key (kbd "C-c C-c"))
-;;             (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
-;; (font-lock-add-keywords 'scheme-mode
-;;                         '(("(\\(lambda\\)\\>" (0 (prog1 ()
-;;                                                    (compose-region (match-beginning 1)
-;;                                                                     (match-end 1)
-;;                                                                    ?λ))))))
-;; (global-set-key "\C-c\C-qr" 'run-scheme)
-;; ;; (add-hook 'scheme-mode-hook (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file))
-;; ;; Load remote SchemeSpheres remote debugging if installed
-;; (let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"))
-;;   (when (file-exists-p sense-emacs)
-;;     (load-file sense-emacs)
-;;     (message "Emacs Sense loaded")))
-
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 
 (provide '.emacs)
@@ -442,9 +522,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(package-selected-packages
-   '(company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
