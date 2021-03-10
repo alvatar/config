@@ -21,27 +21,27 @@
       # Utils
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
-      lsof ecryptfs ecryptfs-helper encfs openssl direnv tcpdump pstree
+      lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
-      firefox chromium brave
+      firefox chromium
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
       # GUI programs
-      mplayer vlc libreoffice zathura imv mupdf gimp pinta darktable scribus
+      mplayer vlc zathura imv mupdf gimp pinta darktable scribus
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
       transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
-      anki texlive.combined.scheme-full nicotine-plus signal-desktop bluejeans-gui
+      anki texlive.combined.scheme-full nicotine-plus signal-desktop 
       element-desktop alarm-clock-applet wireshark slack
       # Unfree
       spotify dropbox-cli zoom-us
       # Language
-      gcc go openjdk11 python3 leiningen nodejs yarn rustup 
-      # Python packages
-      python37Packages.pip python37Packages.pylint
+      gcc go openjdk11 python37Full leiningen nodejs yarn rustup 
+      # Global Python packages
+      python37Packages.pip python37Packages.pylint python37Packages.black
       # Databases
       postgresql_12 apacheKafka_2_4
       # Development tools
@@ -75,7 +75,14 @@
     ];
 
   hardware.enableAllFirmware = true;
-  hardware.bluetooth.enable = true;
+  hardware.bluetooth = {
+    enable = true;
+    config = {
+      General = {
+        Enable = "Source,Sink,Media,Socket";
+      };
+    };
+  };
   services.blueman.enable = true;
 
   # Power management
@@ -131,8 +138,9 @@
     extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     extraConfig = "
+load-module module-udev-detect tsched=0
 load-module module-switch-on-connect
-load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=250 sbc_min_bp=250\"
+load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 sbc_min_bp=53\"
     ";
   };
 
@@ -290,7 +298,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=250
   };
 
   services.apache-kafka = {
-    enable = true;
+    enable = false;
     extraProperties = ''
 offsets.topic.replication.factor = 1
 delete.topic.enable = true
@@ -298,7 +306,7 @@ delete.topic.enable = true
   };
 
   services.zookeeper = {
-    enable = true;
+    enable = false;
   };
 
   ## Systemd

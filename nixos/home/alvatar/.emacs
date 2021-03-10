@@ -88,6 +88,10 @@
 (use-package clues-theme :ensure t)
 (use-package night-owl-theme :ensure t)
 (use-package gruvbox-theme :ensure t)
+(use-package humanoid-themes :ensure t)
+(use-package emojify
+  :ensure t
+  :hook (after-init . global-emojify-mode))
 
 (defun rk/open-compilation-buffer (&optional buffer-or-name shackle-alist shackle-plist)
   "Helper for selecting window for opening *compilation* buffers."
@@ -170,6 +174,7 @@
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all t)
   (lsp-idle-delay 0.6)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 (use-package lsp-ui
@@ -192,7 +197,12 @@
 (use-package posframe :ensure t)
 
 ;; ---- Python
-(use-package ein :ensure t)
+(use-package elpy
+  :ensure t
+  :init
+  (progn
+    (elpy-enable)
+    (setq elpy-shell-starting-directory 'current-directory)))
 
 ;; ---- Clojure
 (use-package paredit
@@ -214,6 +224,7 @@
 (use-package helm-cider
   :ensure t
   :init (helm-cider-mode 1))
+
 
 ;; ---- Go
 (use-package go-mode
@@ -255,8 +266,8 @@
   ;; (setq lsp-eldoc-hook nil)
   ;; (setq lsp-enable-symbol-highlighting nil)
   ;; (setq lsp-signature-auto-activate nil)
-  ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t)
+  ;; uncomment to enable rustfmt on save
+  ;; (setq rustic-format-on-save t)
   (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
 (defun rk/rustic-mode-hook ()
   ;; so that run C-c C-c C-r works without having to confirm
@@ -275,6 +286,7 @@
 (use-package yaml-mode :ensure t)
 (use-package protobuf-mode :ensure t)
 (use-package emmet-mode :ensure t)
+(use-package solidity-mode :ensure t)
 
 ;; ---- C
 (setq c-default-style "linux"
@@ -497,7 +509,21 @@
             (null (do-yas-expand)))
         (if (check-expansion)
             (company-complete-common)
+	  ;; This is just the requirement of Snowfork
           (indent-for-tab-command)))))
+
+(defun tab-indent-or-complete-force-tab ()
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas/minor-mode)
+            (null (do-yas-expand)))
+        (if (check-expansion)
+            (company-complete-common)
+	  ;; This is just the requirement of Snowfork
+	  (my-insert-tab-char)
+          ;;(indent-for-tab-command)
+	  ))))
 
 ;;------------------------------------------------------------------------------
 ;; Global Key bindings
@@ -508,6 +534,25 @@
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
 (global-set-key (kbd "C-x t") 'treemacs)
+
+
+;;------------------------------------------------------------------------------
+;; Snippets
+
+(defun snowfork ()
+  (interactive)
+  (add-to-list 'compilation-search-path "/home/alvatar/projects/snowfork/polkadot-ethereum/parachain")
+  (global-set-key (kbd "TAB") #'tab-indent-or-complete-force-tab)
+  (global-set-key (kbd "<tab>") #'tab-indent-or-complete-force-tab)
+  (setenv "LIBCLANG_PATH" "/run/current-system/sw/lib/")
+  (setenv "PROTOC" "/run/current-system/sw/bin/protoc")
+  (setenv "ARTEMIS_ETHEREUM_KEY" "0x4e9444a6efd6d42725a250b650a781da2737ea308c839eaccb0f7f3dbd2fea77")
+  (setenv "ARTEMIS_SUBSTRATE_KEY" "//Relay"))
+
+(defun unsnowfork ()
+  (interactive)
+  (global-set-key (kbd "TAB") #'tab-indent-or-complete)
+  (global-set-key (kbd "<tab>") #'tab-indent-or-complete))
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
@@ -522,9 +567,11 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+ '(global-company-mode t)
+ '(global-emojify-mode t)
  '(package-selected-packages
-   '(shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
