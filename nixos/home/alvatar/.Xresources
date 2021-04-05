@@ -52,10 +52,10 @@ Xcursor*size: 64
 *.color15: #fdf6e3
 
 !! URxvt Appearance
-URxvt.font: xft:Iosevka:style=Regular:size=11, xft:Noto Emoji
-URxvt.boldFont: xft:Iosevka:style=Bold:size=11
-URxvt.italicFont: xft:Iosevka:style=Italic:size=11
-URxvt.boldItalicFont: xft:Iosevka:style=Bold Italic:size=11
+URxvt.font: xft:Iosevka:style=Regular:size=11,xft:Noto Emoji,xft:Symbola:style=Regular:size=11
+URxvt.boldFont: xft:Iosevka:style=Bold:size=11,xft:Noto Emoji,xft:Symbola:style=Regular:size=11
+URxvt.italicFont: xft:Iosevka:style=Italic:size=11,xft:Noto Emoji,xft:Symbola:style=Regular:size=11
+URxvt.boldItalicFont: xft:Iosevka:style=Bold Italic:size=11,xft:Noto Emoji,xft:Symbola:style=Regular:size=11
 URxvt.letterSpace: 0
 URxvt.lineSpace: 0
 URxvt.geometry: 92x24

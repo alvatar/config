@@ -36,8 +36,8 @@
 ;; Basic
 
 (use-package direnv ; Load direnv current directory configuration into environemnt
-  :config
-  (direnv-mode))
+  :ensure t
+  :config (direnv-mode))
 (use-package expand-region
   :ensure t
   :bind ("C-=" . er/expand-region))
@@ -64,10 +64,12 @@
   :bind ("C-x M-f" . helm-find-files))
 (use-package helm-projectile
   :ensure t
-  :bind ("C-x C-f" . helm-projectile-find-file))
+  :bind (("C-x C-f" . helm-projectile-find-file)
+	 ("C-c 3" . 'helm-do-grep-ag)
+	 ("C-c 4" . 'helm-projectile-ag)
+	 ("C-c 5" . 'helm-multi-swoop-projectile)))
 (use-package helm-swoop :ensure t)
 (use-package beacon :ensure t :init (beacon-mode))
-;; (use-package smart-tab :ensure t)
 (use-package powerline :ensure t :init (powerline-default-theme))
 (use-package  multiple-cursors
   :ensure t
@@ -83,7 +85,6 @@
   )
 (use-package git-timemachine :ensure t)
 ;; (use-package autopair :ensure t :init (autopair-global-mode))
-;; (use-package smartparens :ensure t)
 ;; Themes
 (use-package clues-theme :ensure t)
 (use-package night-owl-theme :ensure t)
@@ -147,7 +148,7 @@
   :custom
   (company-idle-delay 0.5) ;; how long to wait until popup
   ;; (company-begin-commands nil) ;; uncomment to disable popup
-  ;; (setq company-minimum-prefix-length 1)
+  ;; (company-minimum-prefix-length 1)
   :bind
   (:map company-active-map
 	("C-n". company-select-next)
@@ -156,6 +157,9 @@
 	("M->". company-select-last)
 	("<tab>". tab-indent-or-complete)
 	("TAB". tab-indent-or-complete)))
+;; (use-package company-lsp
+;;   :ensure t
+;;   :commands company-lsp)
 (use-package helm-lsp
   :ensure t
   :commands helm-lsp-workspace-symbol)
@@ -169,21 +173,34 @@
 (use-package lsp-mode
   :ensure t
   :commands lsp
+  :commands (lsp lsp-deferred)
+  ;;:hook (go-mode . lsp-deferred))
   :custom
+  ;; Rust
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all t)
   (lsp-idle-delay 0.6)
   (lsp-rust-analyzer-server-display-inlay-hints t)
+  ;; Go
+  (lsp-gopls-staticcheck t)
+  (lsp-gopls-complete-unimported t)
   :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+  (add-hook 'go-mode 'lsp-deferred))
 (use-package lsp-ui
   :ensure t
   :commands lsp-ui-mode
   :bind (("C-c 1" . 'lsp-ui-peek-find-definitions)
-         ("C-c 2" . 'lsp-ui-peek-find-references)
-	 ("C-c 3" . 'helm-do-grep-ag))
+         ("C-c 2" . 'lsp-ui-peek-find-references))
   :custom
+
+  ;; Testing--
+  (lsp-ui-peek-enable t)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-imenu-enable t)
+  (lsp-ui-flycheck-enable t)
+  ;;----
   (lsp-ui-peek-always-show t)
   (lsp-ui-sideline-show-hover t)
   (lsp-ui-doc-enable nil))
@@ -201,6 +218,11 @@
   :ensure t
   :init
   (progn
+    ;; Note: use pyvenv-activate and point to .venv folder
+    ;; C-c C-c evaluates the current python script (or region if something is selected) in an interactive python shell. The python shell is automatically displayed aside of your script.
+    ;; C-RET evaluates the current statement (current line plus the following nested lines).
+    ;; C-c C-z switches between your script and the interactive shell.
+    ;; C-c C-d displays documentation for the thing under cursor. The documentation will pop in a different buffer, that can be closed with q
     (elpy-enable)
     (setq elpy-shell-starting-directory 'current-directory)))
 
@@ -238,7 +260,7 @@
                     (concat (getenv "HOME") "/go/" "/bin")
                     (concat (getenv "HOME") "go/bin"))
                    exec-path))
-  (smartparens-mode)
+  ;; (smartparens-mode)
   :bind (:map go-mode-map
 	      ("<f10>" . 'gofmt)))
 ;; (use-package company-go :ensure t)
@@ -262,8 +284,9 @@
 	      ("<f8>" . 'next-error)
 	      ("<f10>" . 'rustic-format-file))
   :config
+  (setq rustic-indent-method-chain nil)
   ;; uncomment for less flashiness
-  ;; (setq lsp-eldoc-hook nil)
+  (setq lsp-eldoc-hook nil)
   ;; (setq lsp-enable-symbol-highlighting nil)
   ;; (setq lsp-signature-auto-activate nil)
   ;; uncomment to enable rustfmt on save
@@ -554,6 +577,17 @@
   (global-set-key (kbd "TAB") #'tab-indent-or-complete)
   (global-set-key (kbd "<tab>") #'tab-indent-or-complete))
 
+
+;;------------------------------------------------------------------------------
+;; Notes of installation
+
+;; -- Go
+;; go get golang.org/x/tools/gopls@latest
+;; go get golang.org/x/tools/cmd/goimports
+;; Add to workspace with lsp-workspace-folders-add
+;; -- Rust
+;; git clone https://github.com/rust-analyzer/rust-analyzer.git && cd rust-analyzer && cargo xtask install --server
+
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
@@ -571,7 +605,7 @@
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
-   '(elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme smartparens cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

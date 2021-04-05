@@ -28,16 +28,16 @@
       firefox chromium
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
-      capitaine-cursors stalonetray xorg.xmodmap xorg.xev hicolor-icon-theme maim 
+      capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
       # GUI programs
       mplayer vlc zathura imv mupdf gimp pinta darktable scribus
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
-      transmission-gtk networkmanagerapplet calibre nicotine-plus imgcat
+      transmission-gtk networkmanagerapplet calibre nicotine-plus soulseekqt imgcat
       anki texlive.combined.scheme-full nicotine-plus signal-desktop 
-      element-desktop alarm-clock-applet wireshark slack
+      element-desktop alarm-clock-applet wireshark slack uhk-agent
       # Unfree
-      spotify dropbox-cli zoom-us
+      spotify dropbox-cli zoom-us skype
       # Language
       gcc go openjdk11 python37Full leiningen nodejs yarn rustup 
       # Global Python packages
@@ -54,6 +54,14 @@
       nvidia-chromium
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
+
+  ## Overlays
+  nixpkgs.overlays = [
+  (self: super:
+  {
+    uhk-agent = super.callPackage ./packages/uhk-agent.nix { };
+  }
+  )];
 
   ## Boot
 
@@ -73,6 +81,11 @@
        <nixos-hardware/dell/xps/15-9500/nvidia>
       ./hardware-configuration.nix
     ];
+
+  hardware.opengl = {
+    enable = true;
+    setLdLibraryPath = true;
+  };
 
   hardware.enableAllFirmware = true;
   hardware.bluetooth = {
@@ -144,6 +157,14 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     ";
   };
 
+  # Udev rules for Ultimate Hacking Keyboard
+  services.udev.extraRules = ''
+      # uhk
+      SUBSYSTEM=="input", GROUP="input", MODE="0666"
+      SUBSYSTEMS=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="612[0-7]", MODE:="0666", GROUP="plugdev"
+      KERNEL=="hidraw*", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="612[0-7]", MODE="0666", GROUP="plugdev"
+'';
+
   ## Environment
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -167,7 +188,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     useXkbConfig = true;
   };
 
-  time.timeZone = "Europe/Athens";
+  time.timeZone = "Europe/Madrid";
 
   location = {
     provider = "manual";
@@ -261,6 +282,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     proggyfonts
     hack-font
     iosevka
+    symbola
   ];
 
   programs.ssh.startAgent = true;
