@@ -12,6 +12,7 @@
       GDK_DPI_SCALE = "0.5";
       QT_AUTO_SCREEN_SCALE_FACTOR = "1";
       #_JAVA_OPTIONS = "-Dawt.useSystemAAFontSettings=lcd";
+      _JAVA_AWT_WM_NONREPARENTING = "1";
     };
     systemPackages = with pkgs; let
       nvidia-chromium = pkgs.writeScriptBin "nvidia-chromium" ''
@@ -21,7 +22,7 @@
       # Utils
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
-      lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar
+      lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar hfsprogs
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
@@ -31,25 +32,30 @@
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
       # GUI programs
-      mplayer vlc zathura imv mupdf gimp pinta darktable scribus
+      mplayer vlc zathura imv mupdf gimp 
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
       transmission-gtk networkmanagerapplet calibre nicotine-plus soulseekqt imgcat
-      anki texlive.combined.scheme-full nicotine-plus signal-desktop 
+      anki texlive.combined.scheme-full nicotine-plus signal-desktop xournal okular
       element-desktop alarm-clock-applet wireshark slack uhk-agent
+      tdesktop discord
+      rclone rclone-browser
       # Unfree
-      spotify dropbox-cli zoom-us skype
+      spotify
       # Language
-      gcc go openjdk11 python37Full leiningen nodejs yarn rustup 
+      gcc openjdk11 python37Full leiningen nodejs
+      go_1_16
+      rustup 
       # Global Python packages
       python37Packages.pip python37Packages.pylint python37Packages.black
       # Databases
-      postgresql_12 apacheKafka_2_4
+      postgresql_12 apacheKafka_2_4 
       # Development tools
       jq
       # Development libraries
       protobuf binutils.bintools llvm clang llvmPackages.libclang libudev
       # DevOps
-      docker-compose kubectl minikube k9s
+      docker-compose kubectl minikube kustomize k9s
+      nvidia-docker
       # Custom bins
       nvidia-chromium
     ] ++ [ config.boot.kernelPackages.cpupower ];
@@ -60,6 +66,7 @@
   (self: super:
   {
     uhk-agent = super.callPackage ./packages/uhk-agent.nix { };
+    pcloud = super.callPackage ./packages/pcloud.nix { };
   }
   )];
 
@@ -70,7 +77,8 @@
       systemd-boot.enable = lib.mkDefault true;
       efi.canTouchEfiVariables = lib.mkDefault true;
     };
-    supportedFilesystems = ["ecryptfs"];
+    supportedFilesystems = ["ecryptfs" "zfs"];
+    extraModulePackages = with config.boot.kernelPackages; [ zfs ];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
   };
 
@@ -85,12 +93,13 @@
   hardware.opengl = {
     enable = true;
     setLdLibraryPath = true;
+    driSupport32Bit = true;
   };
 
   hardware.enableAllFirmware = true;
   hardware.bluetooth = {
     enable = true;
-    config = {
+    settings = {
       General = {
         Enable = "Source,Sink,Media,Socket";
       };
@@ -125,24 +134,30 @@
   };
 
   # Virtualization
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    enableNvidia = true;
+  };
   virtualisation.virtualbox.host.enable = true;
 
   # Networking
-  networking.hostName = "arctic"; # Define your hostname.
-  networking.networkmanager.enable = true;
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
-  # Open ports in the firewall.
-  networking.firewall = {
-    allowedTCPPorts = [ 17500 ];
-    allowedUDPPorts = [ 17500 ];
+  networking = {
+    hostName = "arctic";
+    hostId = "71c88239";
+    networkmanager.enable = true;
+    # The global useDHCP flag is deprecated, therefore explicitly set to false here.
+    # Per-interface useDHCP will be mandatory in the future, so this generated config
+    # replicates the default behaviour.
+    useDHCP = false;
+    interfaces.wlp0s20f3.useDHCP = true;
+    # Open ports in the firewall.
+    firewall = {
+      allowedTCPPorts = [ 17500 62571 62572 ];
+      allowedUDPPorts = [ 17500 62571 62572 ];
+    };
+    # Or disable the firewall altogether.
+    # networking.firewall.enable = false;
   };
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # Sound
   sound.enable = true;
@@ -173,7 +188,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     users = {
       alvatar = {
         isNormalUser = true;
-        extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
+        extraGroups = [ "wheel" "video" "networkmanager" "docker" "adbusers"];
         initialPassword = "1234";
       };
     };
@@ -188,7 +203,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     useXkbConfig = true;
   };
 
-  time.timeZone = "Europe/Madrid";
+  time.timeZone = "Europe/Tallinn";
 
   location = {
     provider = "manual";
@@ -215,12 +230,17 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     # Enable touchpad support.
     libinput = {
       enable = true;
-      accelSpeed = "16.0";
-      naturalScrolling = true;
-      clickMethod = "clickfinger";
-      tapping = false;
-      disableWhileTyping = true;
-    };
+      touchpad = {
+        accelSpeed = "16.0";
+        naturalScrolling = true;
+        clickMethod = "clickfinger";
+        tapping = false;
+        disableWhileTyping = true;
+      };
+      mouse = {
+        naturalScrolling = true;
+      };
+   };
     windowManager.xmonad = {
       enable = true;
       enableContribAndExtras = true;
@@ -262,7 +282,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
-      stalonetray -i 48 -bg '#ffffff' &disown
+      stalonetray -i 48 -bg '#ffffff' --kludges=force_icons_size,fix_window_pos  &disown
       blueman-applet &disown
       cbatticon &disown
       nm-applet &disown
@@ -334,6 +354,7 @@ delete.topic.enable = true
   ## Systemd
 
   systemd.user.services.dropbox = {
+    enable = false;
     description = "Dropbox";
     wantedBy = [ "graphical-session.target" ];
     environment = {

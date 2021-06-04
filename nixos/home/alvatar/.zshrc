@@ -101,16 +101,19 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 
+export GOVERSION="1.16.3"
 export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin:/$HOME/bin
-export PATH=$PATH:$HOME/.npm-global/bin
-export PATH=$PATH:$HOME/.cargo/bin
+export PATH=$GOPATH/bin:$GOPATH/go$GOVERSION/bin:/$HOME/bin:$PATH
+export PATH=$HOME/.npm-global/bin:$PATH
+export PATH=$HOME/.cargo/bin:$PATH
 
 export LIBCLANG_PATH=/run/current-system/sw/lib/
 export PROTOC=`which protoc`
 
 alias k=kubectl
 alias shot="sleep 1 && maim  -s | xclip -selection clipboard -t image/png"
+alias disable-screen-off="xset -dpms && xset s off"
+alias enable-screen-off="xset dpms && xset s on"
 
 function countdown(){
    date1=$((`date +%s` + $1)); 

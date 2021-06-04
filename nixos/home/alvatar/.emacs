@@ -12,7 +12,7 @@
        (proto (if no-ssl "http" "https")))
   (when no-ssl (warn "Your version of Emacs does not support SSL connections"))
   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  (add-to-list 'package-archives (cons "marmalade" (concat proto "://marmalade-repo.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "marmalade" (concat proto "://marmalade-repo.org/packages/")) t)
   ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
@@ -576,6 +576,14 @@
   (interactive)
   (global-set-key (kbd "TAB") #'tab-indent-or-complete)
   (global-set-key (kbd "<tab>") #'tab-indent-or-complete))
+
+(defun set-large-font ()
+  (interactive)
+  (set-face-attribute 'default nil :height 100))
+
+(defun set-small-font ()
+  (interactive)
+  (set-face-attribute 'default nil :height 70))
 
 
 ;;------------------------------------------------------------------------------
