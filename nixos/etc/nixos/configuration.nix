@@ -31,14 +31,20 @@
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
-      # GUI programs
-      mplayer vlc zathura imv mupdf gimp 
-      xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter xfce.thunar-bare 
-      transmission-gtk networkmanagerapplet calibre nicotine-plus soulseekqt imgcat
-      anki texlive.combined.scheme-full nicotine-plus signal-desktop xournal okular
-      element-desktop alarm-clock-applet wireshark slack uhk-agent
-      tdesktop discord
-      rclone rclone-browser
+      # Image & Video
+      mplayer vlc imv gimp 
+      xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter
+      # Pdf
+      mupdf zathura xournal okular
+      # Documents
+      zotero calibre texlive.combined.scheme-full anki 
+      # GUI (other)
+      xfce.thunar-bare transmission-gtk networkmanagerapplet soulseekqt imgcat
+      element-desktop alarm-clock-applet wireshark uhk-agent
+      # Communications
+      tdesktop discord slack signal-desktop 
+      # File sync
+      rclone rclone-browser maestral-gui
       # Unfree
       spotify
       # Language
@@ -80,6 +86,10 @@
     supportedFilesystems = ["ecryptfs" "zfs"];
     extraModulePackages = with config.boot.kernelPackages; [ zfs ];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
+    # For Dropbox with many files
+    # kernel.sysctl = {
+    #   "fs.inotify.max_user_watches"   = 1048576;   # default:  8192
+    # };
   };
 
   ## Hardware
