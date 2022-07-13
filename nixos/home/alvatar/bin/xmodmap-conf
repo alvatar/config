@@ -11,6 +11,6 @@ keycode 54 = c C cent
 ! Maps the Mode key to the right Alt key
 keycode 108 = Mode_switch
 ! Turns Control_R into AltGr (not working, but should)
-remove control = Control_R
-clear mod5
-add mod5 = Control_R
+!remove control = Control_R
+!clear mod5
+!add mod5 = Control_R

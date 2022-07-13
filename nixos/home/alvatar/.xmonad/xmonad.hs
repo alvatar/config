@@ -93,6 +93,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- LAUNCH PROGRAMS
     -- launch a terminal
     [ ((modMask,                xK_Return), spawn $ XMonad.terminal conf)
+    , ((modMask .|. shiftMask,                xK_Return), spawn "thunar" )
     -- launch dmenu
     -- , ((modMask,               xK_m     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
     , ((modMask,               xK_m     ), spawn "dmenu_run -fn 'xft:Monoid:size=10'")

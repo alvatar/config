@@ -23,6 +23,8 @@
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
       lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar hfsprogs
+      nethogs bash unison cachix pinentry-curses
+      tinc_pre sshpass
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
       # Browsers
@@ -30,40 +32,44 @@
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
-      pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill
+      pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill imgcat gparted
+      gsettings-desktop-schemas
+      gvfs
+      libGL libGLU
       # Image & Video
-      mplayer vlc imv gimp 
+      mplayer vlc imv gimp inkscape youtube-dl
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter
       # Pdf
       mupdf zathura xournal okular
       # Documents
-      zotero calibre texlive.combined.scheme-full anki 
+      zotero calibre texlive.combined.scheme-full anki pdf2svg qdigidoc
       # GUI (other)
-      xfce.thunar-bare transmission-gtk networkmanagerapplet soulseekqt imgcat
-      element-desktop alarm-clock-applet wireshark uhk-agent
+      xfce.thunar-bare transmission-gtk networkmanagerapplet soulseekqt nicotine-plus
+      alarm-clock-applet wireshark uhk-agent
+      ledger-live-desktop
       # Communications
-      tdesktop discord slack signal-desktop 
+      tdesktop discord slack signal-desktop element-desktop
       # File sync
-      rclone rclone-browser maestral-gui
+      rclone rclone-browser maestral-gui dropbox
       # Unfree
       spotify
       # Language
-      gcc openjdk11 python37Full leiningen nodejs
+      gcc openjdk11 python38Full leiningen nodejs cmake pkg-config
       go_1_16
       rustup 
       # Global Python packages
-      python37Packages.pip python37Packages.pylint python37Packages.black
+      python38Packages.pip python38Packages.pylint python38Packages.black
       # Databases
-      postgresql_12 apacheKafka_2_4 
+      postgresql_12
       # Development tools
-      jq
+      jq vscode
       # Development libraries
       protobuf binutils.bintools llvm clang llvmPackages.libclang libudev
       # DevOps
       docker-compose kubectl minikube kustomize k9s
       nvidia-docker
       # Custom bins
-      nvidia-chromium
+      nvidia-chromium obsidian
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
@@ -86,11 +92,16 @@
     supportedFilesystems = ["ecryptfs" "zfs"];
     extraModulePackages = with config.boot.kernelPackages; [ zfs ];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
+    # To get nvidia-docker to work (is a temporary bug.. in theory)
+    kernelParams = [ "systemd.unified_cgroup_hierarchy=0" ];
     # For Dropbox with many files
     # kernel.sysctl = {
     #   "fs.inotify.max_user_watches"   = 1048576;   # default:  8192
     # };
   };
+
+  ## Increase tmpfs for Rust compilation primarily
+  services.logind.extraConfig = "RuntimeDirectorySize=8G";
 
   ## Hardware
 
@@ -117,6 +128,15 @@
   };
   services.blueman.enable = true;
 
+  # Flatpak
+  services.flatpak.enable = true;
+
+  # For digidoc
+  services.pcscd.enable = true;
+
+  # Ledger X
+  services.udev.packages = with pkgs; [ ledger-udev-rules ];
+
   # Power management
   powerManagement = {
     enable = true;
@@ -125,11 +145,13 @@
     powertop.enable = false;
   };
 
+  services.gvfs.enable = true;
+
   services.tlp = {
     enable = true;
     settings = {
       "CPU_SCALING_GOVERNOR_ON_AC"= "performance";
-      "CPU_SCALING_GOVERNOR_ON_BAT"= "performance";
+      "CPU_SCALING_GOVERNOR_ON_BAT"= "powersave";
       #"ENERGY_PERF_POLICY_ON_BAT"= "power";
       "CPU_ENERGY_PERF_POLICY_ON_AC"="performance";
       "CPU_ENERGY_PERF_POLICY_ON_BAT"="balance_power";
@@ -149,6 +171,8 @@
     enableNvidia = true;
   };
   virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "alvatar" ];
+  virtualisation.virtualbox.host.enableExtensionPack = true;
 
   # Networking
   networking = {
@@ -162,12 +186,35 @@
     interfaces.wlp0s20f3.useDHCP = true;
     # Open ports in the firewall.
     firewall = {
-      allowedTCPPorts = [ 17500 62571 62572 ];
-      allowedUDPPorts = [ 17500 62571 62572 ];
+      allowedTCPPorts = [ 655 2234 8000 8080 17500 62571 62572 ];
+      allowedUDPPorts = [ 655 2234 8000 8080 17500 62571 62572 ];
     };
+    #interfaces.
     # Or disable the firewall altogether.
     # networking.firewall.enable = false;
   };
+
+  environment.etc = {
+    "tinc/lab/tinc-up".source = pkgs.writeScript "tinc-up-lab" ''
+        #!${pkgs.stdenv.shell}
+        ${pkgs.nettools}/bin/ifconfig $INTERFACE 10.0.0.3 netmask 255.255.0.0
+    '';
+    "tinc/lab/tinc-down".source = pkgs.writeScript "tinc-down-lab" ''
+        #!${pkgs.stdenv.shell}
+        /run/wrappers/bin/sudo ${pkgs.nettools}/bin/ifconfig $INTERFACE down
+    '';
+  };
+  security.sudo.extraRules = [
+    {
+      users    = [ "tinc.lab" ];
+      commands = [
+        {
+          command  = "${pkgs.nettools}/bin/ifconfig";
+          options  = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
   # Sound
   sound.enable = true;
@@ -178,9 +225,9 @@
     extraConfig = "
 load-module module-udev-detect tsched=0
 load-module module-switch-on-connect
-load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 sbc_min_bp=53\"
     ";
   };
+#load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 sbc_min_bp=53\"
 
   # Udev rules for Ultimate Hacking Keyboard
   services.udev.extraRules = ''
@@ -217,8 +264,8 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
 
   location = {
     provider = "manual";
-    latitude = 40.4;
-    longitude = -3.4;
+    latitude = 59.44;
+    longitude = 24.75;
   }; 
   services.redshift = {
     enable = true;
@@ -228,7 +275,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     };
     temperature = {
       day = 6500;
-      night = 3700;
+      night = 2700;
     };
   };
 
@@ -237,6 +284,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
     layout = "us";
     dpi = 180;
     xkbOptions = "eurosign:e grp:alt_space_toggle, ctrl:swapcaps";
+    # xkbOptions = "eurosign:e grp:alt_space_toggle";
     # Enable touchpad support.
     libinput = {
       enable = true;
@@ -316,6 +364,7 @@ load-module module-bluetooth-discover a2dp_config=\"ldac_eqmid=hq sbc_min_bp=53 
   ];
 
   programs.ssh.startAgent = true;
+  programs.gnupg.agent.enable = true;
   programs.slock.enable = true;
   programs = {
     zsh.ohMyZsh = {
@@ -364,7 +413,7 @@ delete.topic.enable = true
   ## Systemd
 
   systemd.user.services.dropbox = {
-    enable = false;
+    enable = true;
     description = "Dropbox";
     wantedBy = [ "graphical-session.target" ];
     environment = {

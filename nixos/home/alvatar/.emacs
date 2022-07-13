@@ -214,6 +214,7 @@
 (use-package posframe :ensure t)
 
 ;; ---- Python
+(use-package jedi :ensure t)
 (use-package elpy
   :ensure t
   :init
@@ -224,6 +225,7 @@
     ;; C-c C-z switches between your script and the interactive shell.
     ;; C-c C-d displays documentation for the thing under cursor. The documentation will pop in a different buffer, that can be closed with q
     (elpy-enable)
+    (add-to-list 'process-coding-system-alist '("python" . (utf-8 . utf-8)))
     (setq elpy-shell-starting-directory 'current-directory)))
 
 ;; ---- Clojure
@@ -613,7 +615,7 @@
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
-   '(helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
