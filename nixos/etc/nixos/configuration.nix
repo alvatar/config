@@ -48,7 +48,7 @@
       alarm-clock-applet wireshark uhk-agent
       ledger-live-desktop
       # Communications
-      tdesktop discord slack signal-desktop element-desktop
+      discord slack signal-desktop element-desktop
       # File sync
       rclone rclone-browser maestral-gui dropbox
       # Unfree
@@ -129,6 +129,8 @@
   services.blueman.enable = true;
 
   # Flatpak
+  xdg.portal.enable = true;
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   services.flatpak.enable = true;
 
   # For digidoc

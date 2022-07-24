@@ -114,6 +114,7 @@ alias k=kubectl
 alias shot="sleep 1 && maim  -s | xclip -selection clipboard -t image/png"
 alias disable-screen-off="xset -dpms && xset s off"
 alias enable-screen-off="xset dpms && xset s on"
+alias telegram="flatpak run org.telegram.desktop &disown"
 
 function countdown(){
    date1=$((`date +%s` + $1)); 
