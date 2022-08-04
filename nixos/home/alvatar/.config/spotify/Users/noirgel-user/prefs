@@ -1,7 +1,6 @@
 audio.play_bitrate_non_metered_migrated=true
-gaia.attached_device_id="dab5898dfede758426587c618eda757b31b38e7e"
+gaia.attached_device_id="eec1d0d4c6ca943e12f72b79027199aefc2fb621"
 ui.track_notifications_enabled=false
 ui.show_friend_feed=false
-app.player.volume=50053
 app.player.autoplay=false
 app.browser.zoom-level=400

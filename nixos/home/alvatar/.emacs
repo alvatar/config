@@ -559,25 +559,25 @@
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
 (global-set-key (kbd "C-x t") 'treemacs)
-
+(global-set-key (kbd "C-x K") (lambda () (interactive) (kill-this-buffer) (delete-window)))
 
 ;;------------------------------------------------------------------------------
 ;; Snippets
 
-(defun snowfork ()
-  (interactive)
-  (add-to-list 'compilation-search-path "/home/alvatar/projects/snowfork/polkadot-ethereum/parachain")
-  (global-set-key (kbd "TAB") #'tab-indent-or-complete-force-tab)
-  (global-set-key (kbd "<tab>") #'tab-indent-or-complete-force-tab)
-  (setenv "LIBCLANG_PATH" "/run/current-system/sw/lib/")
-  (setenv "PROTOC" "/run/current-system/sw/bin/protoc")
-  (setenv "ARTEMIS_ETHEREUM_KEY" "0x4e9444a6efd6d42725a250b650a781da2737ea308c839eaccb0f7f3dbd2fea77")
-  (setenv "ARTEMIS_SUBSTRATE_KEY" "//Relay"))
+;; (defun snowfork ()
+;;   (interactive)
+;;   (add-to-list 'compilation-search-path "/home/alvatar/projects/snowfork/polkadot-ethereum/parachain")
+;;   (global-set-key (kbd "TAB") #'tab-indent-or-complete-force-tab)
+;;   (global-set-key (kbd "<tab>") #'tab-indent-or-complete-force-tab)
+;;   (setenv "LIBCLANG_PATH" "/run/current-system/sw/lib/")
+;;   (setenv "PROTOC" "/run/current-system/sw/bin/protoc")
+;;   (setenv "ARTEMIS_ETHEREUM_KEY" "0x4e9444a6efd6d42725a250b650a781da2737ea308c839eaccb0f7f3dbd2fea77")
+;;   (setenv "ARTEMIS_SUBSTRATE_KEY" "//Relay"))
 
-(defun unsnowfork ()
-  (interactive)
-  (global-set-key (kbd "TAB") #'tab-indent-or-complete)
-  (global-set-key (kbd "<tab>") #'tab-indent-or-complete))
+;; (defun unsnowfork ()
+;;   (interactive)
+;;   (global-set-key (kbd "TAB") #'tab-indent-or-complete)
+;;   (global-set-key (kbd "<tab>") #'tab-indent-or-complete))
 
 (defun set-large-font ()
   (interactive)
@@ -615,7 +615,7 @@
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
-   '(jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(writeroom-mode jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
