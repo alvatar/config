@@ -101,7 +101,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 
-export GOVERSION="1.16.3"
+export GOVERSION="1.18.2"
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOPATH/go$GOVERSION/bin:/$HOME/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
@@ -125,3 +125,4 @@ function countdown(){
 }
 
 eval "$(direnv hook zsh)"
+export PROMPT="|$PROMPT"

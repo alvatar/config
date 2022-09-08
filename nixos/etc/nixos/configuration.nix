@@ -26,16 +26,19 @@
       nethogs bash unison cachix pinentry-curses
       tinc_pre sshpass
       # Hardware utils
-      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils pulseaudio-modules-bt
+      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils # pulseaudio-modules-bt
       # Browsers
-      firefox chromium
+      firefox chromium brave
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill imgcat gparted
       gsettings-desktop-schemas
       gvfs
+      # Visual dev
       libGL libGLU
+      xorg.libxcb xorg.libXfixes
+      alsa-lib
       # Image & Video
       mplayer vlc imv gimp inkscape youtube-dl
       xfce.ristretto xfce.tumbler xfce.xfce4-screenshooter
@@ -55,7 +58,7 @@
       spotify
       # Language
       gcc openjdk11 python38Full leiningen nodejs cmake pkg-config
-      go_1_16
+      go_1_18
       rustup 
       # Global Python packages
       python38Packages.pip python38Packages.pylint python38Packages.black
@@ -64,7 +67,7 @@
       # Development tools
       jq vscode
       # Development libraries
-      protobuf binutils.bintools llvm clang llvmPackages.libclang libudev
+      protobuf binutils.bintools llvm lldb clang llvmPackages.libclang udev
       # DevOps
       docker-compose kubectl minikube kustomize k9s
       nvidia-docker
@@ -128,9 +131,16 @@
   };
   services.blueman.enable = true;
 
-  # Flatpak
+  # XDG & Flatpak
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  xdg.mime.defaultApplications = {
+    "text/html" = "org.qutebrowser.qutebrowser.desktop";
+    "x-scheme-handler/http" = "brave";
+    "x-scheme-handler/https" = "brave";
+    "x-scheme-handler/about" = "brave";
+    "x-scheme-handler/unknown" = "brave";
+  };
   services.flatpak.enable = true;
 
   # For digidoc
@@ -148,6 +158,10 @@
   };
 
   services.gvfs.enable = true;
+
+  services.gnome.gnome-keyring.enable = true;
+  programs.seahorse.enable = true;
+  programs.dconf.enable = true;
 
   services.tlp = {
     enable = true;
@@ -222,7 +236,7 @@
   sound.enable = true;
   hardware.pulseaudio = {
     enable = true;
-    extraModules = [ pkgs.pulseaudio-modules-bt ];
+    #extraModules = [ pkgs.pulseaudio-modules-bt ];
     package = pkgs.pulseaudioFull;
     extraConfig = "
 load-module module-udev-detect tsched=0
@@ -338,7 +352,7 @@ load-module module-switch-on-connect
       sessionCommands = with pkgs; lib.mkAfter
       ''
       ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
-      ${xlibs.xsetroot}/bin/xsetroot -xcf ${pkgs.vanilla-dmz}/share/icons/Vanilla-DMZ/cursors/left_ptr 128 &disown
+      ${xorg.xsetroot}/bin/xsetroot -xcf ${pkgs.vanilla-dmz}/share/icons/Vanilla-DMZ/cursors/left_ptr 128 &disown
       if test -e $HOME/.Xresources; then
         ${pkgs.xorg.xrdb}/bin/xrdb -merge $HOME/.Xresources &disown
       fi
@@ -346,6 +360,7 @@ load-module module-switch-on-connect
       blueman-applet &disown
       cbatticon &disown
       nm-applet &disown
+      ${lib.getBin pkgs.dbus}/bin/dbus-update-activation-environment --systemd --all
       '';
     }; 
   };
@@ -357,7 +372,7 @@ load-module module-switch-on-connect
     liberation_ttf
     fira-code
     fira-code-symbols
-    mplus-outline-fonts
+    #mplus-outline-fonts
     dina-font
     proggyfonts
     hack-font
