@@ -74,15 +74,15 @@
 (use-package  multiple-cursors
   :ensure t
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
-(use-package sublimity
-  :ensure sublimity
-  :init (progn
-          ;; (sublimity-mode)
-          ;; (require 'sublimity-scroll)
-          (require 'sublimity-attractive)
-          ;;(setq sublimity-auto-hscroll-mode 't)
-          )
-  )
+;; (use-package sublimity
+;;   :ensure sublimity
+;;   :init (progn
+;;           ;; (sublimity-mode)
+;;           ;; (require 'sublimity-scroll)
+;;           (require 'sublimity-attractive)
+;;           ;;(setq sublimity-auto-hscroll-mode 't)
+;;           )
+;;   )
 (use-package git-timemachine :ensure t)
 ;; (use-package autopair :ensure t :init (autopair-global-mode))
 ;; Themes
@@ -143,48 +143,45 @@
 ;; Language tools
 
 ;; General
+
 (use-package company
   :ensure t
-  :custom
-  (company-idle-delay 0.5) ;; how long to wait until popup
-  ;; (company-begin-commands nil) ;; uncomment to disable popup
-  ;; (company-minimum-prefix-length 1)
-  :bind
-  (:map company-active-map
-	("C-n". company-select-next)
-	("C-p". company-select-previous)
-	("M-<". company-select-first)
-	("M->". company-select-last))
-  (:map company-mode-map
-        ("<tab>". tab-indent-or-complete)
-        ("TAB". tab-indent-or-complete)))
-;; (use-package company-lsp
-;;   :ensure t
-;;   :commands company-lsp)
-(use-package helm-lsp
-  :ensure t
-  :commands helm-lsp-workspace-symbol)
-(use-package lsp-treemacs
-  :ensure t
-  :commands lsp-treemacs-errors-list)
-(use-package exec-path-from-shell ; used by dap-mode
-  :ensure
-  :init (exec-path-from-shell-initialize))
+  :bind (:map company-mode-map
+	      ("<tab>". tab-indent-or-complete)
+	      ("TAB". tab-indent-or-complete)))
+(defun company-yasnippet-or-completion ()
+  (interactive)
+  (or (do-yas-expand)
+      (company-complete-common)))
+(defun check-expansion ()
+  (save-excursion
+    (if (looking-at "\\_>") t
+      (backward-char 1)
+      (if (looking-at "\\.") t
+        (backward-char 1)
+        (if (looking-at "::") t nil)))))
+(defun do-yas-expand ()
+  (let ((yas/fallback-behavior 'return-nil))
+    (yas/expand)))
+(defun tab-indent-or-complete ()
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas/minor-mode)
+            (null (do-yas-expand)))
+        (if (check-expansion)
+            (company-complete-common)
+          (indent-for-tab-command)))))
 ;; LSP
 (use-package lsp-mode
-  :ensure t
+  :ensure
   :commands lsp
-  :commands (lsp lsp-deferred)
-  ;;:hook (go-mode . lsp-deferred))
   :custom
-  ;;;; Rust
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all t)
   (lsp-idle-delay 0.6)
-  ;; This controls the overlays that display type and other hints inline. Enable
-  ;; / disable as you prefer. Well require a `lsp-workspace-restart' to have an
-  ;; effect on open projects.
+  ;; enable / disable the hints as you prefer:
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
   (lsp-rust-analyzer-display-chaining-hints t)
@@ -192,35 +189,45 @@
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints nil)
   (lsp-rust-analyzer-display-reborrow-hints nil)
-  ;;;; Go
-  (lsp-gopls-staticcheck t)
-  (lsp-gopls-complete-unimported t)
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-  (add-hook 'go-mode 'lsp-deferred))
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode
-  :bind (("C-c 1" . 'lsp-ui-peek-find-definitions)
-         ("C-c 2" . 'lsp-ui-peek-find-references))
-  :custom
-
-  ;; Testing--
-  (lsp-ui-peek-enable t)
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-imenu-enable t)
-  (lsp-ui-flycheck-enable t)
-  ;;----
-  (lsp-ui-peek-always-show t)
-  (lsp-ui-sideline-show-hover t)
-  (lsp-ui-doc-enable nil))
+  )
+;; With Go (review)
+;; (use-package lsp-mode
+;;   :ensure t
+;;   :commands lsp
+;;   :commands (lsp lsp-deferred)
+;;   ;;:hook (go-mode . lsp-deferred))
+;;   :custom
+;; ;;;; Rust
+;;   ;; what to use when checking on-save. "check" is default, I prefer clippy
+;;   (lsp-rust-analyzer-cargo-watch-command "clippy")
+;;   (lsp-eldoc-render-all t)
+;;   (lsp-idle-delay 0.6)
+;;   ;; This controls the overlays that display type and other hints inline. Enable
+;;   ;; / disable as you prefer. Well require a `lsp-workspace-restart' to have an
+;;   ;; effect on open projects.
+;;   (lsp-rust-analyzer-server-display-inlay-hints t)
+;;   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+;;   (lsp-rust-analyzer-display-chaining-hints t)
+;;   (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+;;   (lsp-rust-analyzer-display-closure-return-type-hints t)
+;;   (lsp-rust-analyzer-display-parameter-hints nil)
+;;   (lsp-rust-analyzer-display-reborrow-hints nil)
+;; ;;;; Go
+;;   (lsp-gopls-staticcheck t)
+;;   (lsp-gopls-complete-unimported t)
+;;   :config
+;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+;;   (add-hook 'go-mode 'lsp-deferred))
 (use-package flycheck :ensure t) ; (setq-default flycheck-disabled-checkers '(go-golint))
 (use-package yasnippet
   :ensure t
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
-  (add-hook 'text-mode-hook 'yas-minor-mode))
+  (add-hook 'text-mode-hook 'yas-minor-mode)
+  (add-hook 'lsp-mode 'yas-minor-mode))
 (use-package posframe :ensure t)
 
 ;; ---- Python
@@ -283,8 +290,6 @@
 (use-package rustic
   :ensure
   :bind (:map rustic-mode-map
-              ("M-j" . lsp-ui-imenu)
-              ("M-?" . lsp-find-references)
 	      ("C-c C-c l" . flycheck-list-errors)
               ("C-c C-c a" . lsp-execute-code-action)
               ("C-c C-c r" . lsp-rename)
@@ -296,8 +301,7 @@
               ("C-c C-c h" . lsp-ui-doc-glance)
               ("<f6>" . rust-test)
               ("<f7>" . rust-compile)
-	      ("<f8>" . 'next-error)
-	      ("<f10>" . 'rustic-format-file))
+	      ("C-c 0" . 'flycheck-next-error))
   :config
   (setq rustic-indent-method-chain nil)
   ;; uncomment for less flashiness
@@ -314,7 +318,29 @@
   ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
   ;; no longer be necessary.
   (when buffer-file-name
-    (setq-local buffer-save-without-query t)))
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode
+  :bind (("C-c 1" . 'lsp-ui-peek-find-definitions)
+         ("C-c 2" . 'lsp-ui-peek-find-references)
+	 ("C-c 3" . lsp-ui-imenu))
+  :custom
+
+  ;; Testing--
+  (lsp-ui-peek-enable t)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-imenu-enable t)
+  (lsp-ui-flycheck-enable t)
+  ;;----
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-delay 1)
+  (lsp-ui-doc-enable t))
 
 (use-package cargo
   :ensure t
@@ -361,26 +387,38 @@
 ;;     (message "Emacs Sense loaded")))
 
 ;; ---- Debugging
-(when (executable-find "lldb-mi")
-  (use-package dap-mode
-    :ensure
-    :config
-    (dap-ui-mode)
-    (dap-ui-controls-mode 1)
+(use-package exec-path-from-shell ; used by dap-mode
+  :ensure
+  :init (exec-path-from-shell-initialize))
 
-    (require 'dap-lldb)
-    (require 'dap-gdb-lldb)
-    ;; installs .extension/vscode
-    (dap-gdb-lldb-setup)
-    (dap-register-debug-template
-     "Rust::LLDB Run Configuration"
-     (list :type "lldb"
-           :request "launch"
-           :name "LLDB::Run"
-	   :gdbpath "rust-lldb"
-           ;; uncomment if lldb-mi is not in PATH
-           ;; :lldbmipath "path/to/lldb-mi"
-           ))))
+(use-package dap-mode
+  :ensure
+  :config
+  (dap-ui-mode)
+  (dap-ui-controls-mode 1)
+
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  ;; installs .extension/vscode
+  (dap-gdb-lldb-setup)
+  (dap-register-debug-template
+   "Rust::GDB Run Configuration"
+   (list :type "gdb"
+         :request "launch"
+         :name "GDB::Run"
+	 :gdbpath "rust-gdb"
+         :target nil
+         :cwd nil))
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb"
+         :request "launch"
+         :name "LLDB::Run"
+	 :gdbpath "rust-lldb"
+	 ;; uncomment if lldb-mi is not in PATH
+         ;; :lldbmipath "path/to/lldb-mi"
+         :target nil
+         :cwd nil)))
 
 ;; Go config
 ;; (use-package dap-mode
@@ -1040,11 +1078,12 @@ form syntax, but that would take parsing.)"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("fa49766f2acb82e0097e7512ae4a1d6f4af4d6f4655a48170d0a00bcb7183970" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "51ec7bfa54adf5fff5d466248ea6431097f5a18224788d0bd7eb1257a4f7b773" "57a29645c35ae5ce1660d5987d3da5869b048477a7801ce7ab57bfb25ce12d3e" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "4c56af497ddf0e30f65a7232a8ee21b3d62a8c332c6b268c81e9ea99b11da0d3" "f5b6be56c9de9fd8bdd42e0c05fecb002dedb8f48a5f00e769370e4517dde0e8" "47e6f8c23eaea064b89ed1361b5824ee4f9562a8c4a30774ee9ee69f9b9d4f69" "19a2c0b92a6aa1580f1be2deb7b8a8e3a4857b6c6ccf522d00547878837267e7" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
-   '(writeroom-mode jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package)))
+   '(solarized-theme writeroom-mode jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))
+ '(warning-suppress-types '((comp) (comp) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1054,4 +1093,4 @@ form syntax, but that would take parsing.)"
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-(load-theme 'gruvbox-dark-hard)
+(load-theme 'gruvbox-light-hard)

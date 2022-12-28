@@ -3,7 +3,7 @@ Description=Urbit
 ConditionPathIsDirectory=/home/alvatar/togtyr-roplux//
 
 [Service]
-Type=forking
+Type=simple
 Restart=on-failure
 RestartSec=3
 ExecStart=/usr/bin/screen -DmS urbit /home/alvatar/togtyr-roplux/.run --http-port 8080 -p 34543

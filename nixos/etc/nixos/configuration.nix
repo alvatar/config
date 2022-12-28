@@ -23,8 +23,9 @@
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
       lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar hfsprogs
-      nethogs bash unison cachix pinentry-curses
+      nethogs bash unison cachix pinentry-curses tokei grpcurl websocat ntfs3g btrfs-progs
       tinc_pre sshpass
+      ripgrep fd
       # Hardware utils
       lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils # pulseaudio-modules-bt
       # Browsers
@@ -48,8 +49,9 @@
       zotero calibre texlive.combined.scheme-full anki pdf2svg qdigidoc
       # GUI (other)
       xfce.thunar-bare transmission-gtk networkmanagerapplet soulseekqt nicotine-plus
-      alarm-clock-applet wireshark uhk-agent
+      wireshark uhk-agent
       ledger-live-desktop
+      postman
       # Communications
       discord slack signal-desktop element-desktop
       # File sync
@@ -57,19 +59,19 @@
       # Unfree
       spotify
       # Language
-      gcc openjdk11 python38Full leiningen nodejs cmake pkg-config
+      gcc openjdk11 python3Full leiningen nodejs cmake pkg-config
       go_1_18
       rustup 
       # Global Python packages
-      python38Packages.pip python38Packages.pylint python38Packages.black
+      python310Packages.pip
       # Databases
       postgresql_12
       # Development tools
       jq vscode
       # Development libraries
-      protobuf binutils.bintools llvm lldb clang llvmPackages.libclang udev
+      protobuf binutils.bintools gdb llvm lldb clang llvmPackages.libclang udev
       # DevOps
-      docker-compose kubectl minikube kustomize k9s
+      docker-compose kubectl minikube 
       nvidia-docker
       # Custom bins
       nvidia-chromium obsidian
@@ -83,7 +85,19 @@
     uhk-agent = super.callPackage ./packages/uhk-agent.nix { };
     pcloud = super.callPackage ./packages/pcloud.nix { };
   }
-  )];
+  )
+  # Temporary change until https://github.com/NixOS/nixpkgs/issues/197408 is closed
+  (final: prev: {
+    python3 = prev.python3.override {
+      packageOverrides = self: super: {
+        # https://github.com/NixOS/nixpkgs/issues/197408
+        dbus-next = super.dbus-next.overridePythonAttrs (old: {
+          checkPhase = builtins.replaceStrings ["not test_peer_interface"] ["not test_peer_interface and not test_tcp_connection_with_forwarding"] old.checkPhase;
+        });
+      };
+    };
+  })
+];
 
   ## Boot
 
@@ -95,7 +109,7 @@
     supportedFilesystems = ["ecryptfs" "zfs"];
     extraModulePackages = with config.boot.kernelPackages; [ zfs ];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
-    # To get nvidia-docker to work (is a temporary bug.. in theory)
+    # To get nvidia-docker to work (is a temporary bug.. in theory) (unified cgroup)
     kernelParams = [ "systemd.unified_cgroup_hierarchy=0" ];
     # For Dropbox with many files
     # kernel.sysctl = {
@@ -119,6 +133,9 @@
     setLdLibraryPath = true;
     driSupport32Bit = true;
   };
+  services.xserver.videoDrivers = [ "nvidia" ];
+  # It doesn't work. Find out why.
+  # hardware.nvidia.prime.offload.enable = false;
 
   hardware.enableAllFirmware = true;
   hardware.bluetooth = {
@@ -134,13 +151,6 @@
   # XDG & Flatpak
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  xdg.mime.defaultApplications = {
-    "text/html" = "org.qutebrowser.qutebrowser.desktop";
-    "x-scheme-handler/http" = "brave";
-    "x-scheme-handler/https" = "brave";
-    "x-scheme-handler/about" = "brave";
-    "x-scheme-handler/unknown" = "brave";
-  };
   services.flatpak.enable = true;
 
   # For digidoc
@@ -276,12 +286,13 @@ load-module module-switch-on-connect
     useXkbConfig = true;
   };
 
-  time.timeZone = "Europe/Tallinn";
+  time.timeZone = "Europe/Madrid";
+  #time.timeZone = "Europe/Tallinn";
 
   location = {
     provider = "manual";
-    latitude = 59.44;
-    longitude = 24.75;
+    latitude = 37.53;
+    longitude = -4.46;
   }; 
   services.redshift = {
     enable = true;

@@ -101,9 +101,10 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 
-export GOVERSION="1.18.2"
-export GOPATH=$HOME/go
-export PATH=$GOPATH/bin:$GOPATH/go$GOVERSION/bin:/$HOME/bin:$PATH
+#export GOVERSION="1.18.2"
+#export GOPATH=$HOME/go
+#export PATH=$GOPATH/bin:$GOPATH/go$GOVERSION/bin
+export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
 export PATH=$HOME/.cargo/bin:$PATH
 
@@ -115,6 +116,8 @@ alias shot="sleep 1 && maim  -s | xclip -selection clipboard -t image/png"
 alias disable-screen-off="xset -dpms && xset s off"
 alias enable-screen-off="xset dpms && xset s on"
 alias telegram="flatpak run org.telegram.desktop &disown"
+alias nixsearch="nix --extra-experimental-features \"nix-command flakes\" search nixpkgs"
+alias synchd="rsync -ah --acls --delete --stats --progress"
 
 function countdown(){
    date1=$((`date +%s` + $1)); 
@@ -126,3 +129,5 @@ function countdown(){
 
 eval "$(direnv hook zsh)"
 export PROMPT="|$PROMPT"
+
+export VAGRANT_DEFAULT_PROVIDER=virtualbox

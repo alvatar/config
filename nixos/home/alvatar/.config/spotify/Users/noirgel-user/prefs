@@ -1,6 +1,6 @@
-gaia.attached_device_id="e6b22d5410f8d95c70b0ae24cf25465dee1780e0"
 audio.play_bitrate_non_metered_migrated=true
 ui.track_notifications_enabled=false
 ui.show_friend_feed=false
+app.player.volume=50130
 app.player.autoplay=false
 app.browser.zoom-level=400
