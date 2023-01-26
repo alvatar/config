@@ -100,10 +100,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+export HISTSIZE=1000000000
+export SAVEHIST=1000000000
+setopt EXTENDED_HISTORY
 
-#export GOVERSION="1.18.2"
-#export GOPATH=$HOME/go
-#export PATH=$GOPATH/bin:$GOPATH/go$GOVERSION/bin
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
 export PATH=$HOME/.cargo/bin:$PATH

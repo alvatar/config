@@ -7,92 +7,115 @@
 
 ;; Init
 
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (proto (if no-ssl "http" "https")))
-  (when no-ssl (warn "Your version of Emacs does not support SSL connections"))
-  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "marmalade" (concat proto "://marmalade-repo.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
-  (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
-    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+;; (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+;;                     (not (gnutls-available-p))))
+;;        (proto (if no-ssl "http" "https")))
+;;   (when no-ssl (warn "Your version of Emacs does not support SSL connections"))
+;;   (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+;;   ;;(add-to-list 'package-archives (cons "marmalade" (concat proto "://marmalade-repo.org/packages/")) t)
+;;   ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+;;   (when (< emacs-major-version 24)
+;;     ;; For important compatibility libraries like cl-lib
+;;     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
 
+;; (package-initialize)
+
+;; (if (not (package-installed-p 'use-package))
+;;     (progn
+;;       (package-refresh-contents)
+;;       (package-install 'use-package)))
+
+;; (require 'use-package)
+
+(require 'package)
+(add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
-(if (not (package-installed-p 'use-package))
-    (progn
-      (package-refresh-contents)
-      (package-install 'use-package)))
-
-(require 'use-package)
-
-;;------------------------------------------------------------------------------
-;;------------------------------------------------------------------------------
-
-;; Packages
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-and-compile
+  (setq use-package-always-ensure t
+        use-package-expand-minimally t))
 
 ;;------------------------------------------------------------------------------
-;; Basic
+;;------------------------------------------------------------------------------
+;; Basic configuration
 
+(use-package diminish)
 (use-package direnv ; Load direnv current directory configuration into environemnt
-  :ensure t
   :config (direnv-mode))
 (use-package expand-region
-  :ensure t
   :bind ("C-=" . er/expand-region))
 (use-package smex
-  :ensure t
   :init (setq smex-save-file "~/.emacs.d/.smex-items")
   :bind (("M-x" . smex)
          ("M-X" . smex-major-mode-commands)))
 (use-package magit
-  :ensure t
   :bind ("C-x C-z" . magit-status))
 (use-package goto-last-change
-  :ensure t
   :bind ("C-x C-/" . goto-last-change))
 (use-package avy
-  :ensure t
   :bind ("M-p" . avy-goto-char-timer))
 (use-package ace-window
-  :ensure t
   :bind ("C-x o" . ace-window))
-;; Helm, Projectile
+;;
+;; Navigation
+;;
 (use-package helm
-  :ensure t
   :bind ("C-x M-f" . helm-find-files))
+(use-package helm-ag)
+(use-package projectile
+  :init (setq projectile-indexing-method 'hybrid))
 (use-package helm-projectile
-  :ensure t
   :bind (("C-x C-f" . helm-projectile-find-file)
-	 ("C-c 3" . 'helm-do-grep-ag)
-	 ("C-c 4" . 'helm-projectile-ag)
-	 ("C-c 5" . 'helm-multi-swoop-projectile)))
-(use-package helm-swoop :ensure t)
-(use-package beacon :ensure t :init (beacon-mode))
-(use-package powerline :ensure t :init (powerline-default-theme))
+	 ("C-c 3" . 'helm-multi-swoop-projectile)
+	 ("C-c 4" . 'helm-do-grep-ag)
+	 ("C-c 5" . 'helm-projectile-ag)))
+(use-package helm-swoop)
+(use-package beacon :init (beacon-mode))
+(use-package powerline :init (powerline-default-theme))
+(use-package goto-last-point
+ :bind (("C-x w" . goto-last-point-record)
+	("C-x e" . goto-last-point)))
 (use-package  multiple-cursors
-  :ensure t
   :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
-;; (use-package sublimity
-;;   :ensure sublimity
-;;   :init (progn
-;;           ;; (sublimity-mode)
-;;           ;; (require 'sublimity-scroll)
-;;           (require 'sublimity-attractive)
-;;           ;;(setq sublimity-auto-hscroll-mode 't)
-;;           )
-;;   )
-(use-package git-timemachine :ensure t)
-;; (use-package autopair :ensure t :init (autopair-global-mode))
-;; Themes
-(use-package clues-theme :ensure t)
-(use-package night-owl-theme :ensure t)
-(use-package gruvbox-theme :ensure t)
-(use-package humanoid-themes :ensure t)
+(use-package bm
+  :demand t
+  :config
+  ;; Allow cross-buffer 'next'
+  (setq bm-cycle-all-buffers t)
+  (setq temporary-bookmark-p t)
+  :bind (("C-c C-h C-h" . bm-next)
+         ("C-c C-j C-j" . bm-previous)
+         ("C-c C-g C-g" . bm-toggle)))
+(use-package sublimity
+  :disabled
+  :init
+  (progn
+    ;; (sublimity-mode)
+    ;; (require 'sublimity-scroll)
+    (require 'sublimity-attractive)
+    ;;(setq sublimity-auto-hscroll-mode 't)
+    ))
+(use-package git-timemachine)
+(use-package autopair
+  :disabled
+  :init (autopair-global-mode))
 (use-package emojify
-  :ensure t
+  :disabled
   :hook (after-init . global-emojify-mode))
+;; Themes
+(use-package clues-theme)
+(use-package night-owl-theme)
+(use-package gruvbox-theme)
+(use-package humanoid-themes)
+(use-package one-themes)
+
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+;; Window management magic
 
 (defun rk/open-compilation-buffer (&optional buffer-or-name shackle-alist shackle-plist)
   "Helper for selecting window for opening *compilation* buffers."
@@ -109,9 +132,20 @@
           (setq win (get-buffer-window)))))
     (set-window-buffer win (get-buffer buffer-or-name))
     (set-frame-selected-window (window-frame win) win)))
+
+;; Use the same buffer for opening errors in compilation window
+(defvar display-buffer-same-window-commands
+  '(occur-mode-goto-occurrence compile-goto-error))
+(add-to-list 'display-buffer-alist
+             '((lambda (&rest _)
+                 (memq this-command display-buffer-same-window-commands))
+               (display-buffer-reuse-window
+                display-buffer-same-window)
+               (inhibit-same-window . nil)))
+
 (use-package shackle
-  :ensure
   :diminish
+  :init (shackle-mode)
   :custom
   (shackle-rules '((compilation-mode :custom rk/open-compilation-buffer :select t)
 		   ("\\*Apropos\\|Help\\|Occur\\|tide-references\\*" :regexp t :same t :select t :inhibit-window-quit t)
@@ -119,6 +153,7 @@
 		   ("\\*shell.*" :regexp t :same t :select t)
 		   ("\\*PowerShell.*" :regexp t :same t :select t)
 		   ("\\*Cargo.*" :regexp t :other t :select nil)
+		   ("\\*rustic.*" :regexp t :same t :select nil :align 'right)
 		   ("*Messages*" :select nil :other t)
 		   ("*go-guru-output*" :select t :same t)
 		   ("*Proced*" :select t :same t)
@@ -140,12 +175,11 @@
   (shackle-default-rule nil))
 
 ;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
 ;; Language tools
 
-;; General
-
+;; Completion
 (use-package company
-  :ensure t
   :bind (:map company-mode-map
 	      ("<tab>". tab-indent-or-complete)
 	      ("TAB". tab-indent-or-complete)))
@@ -172,9 +206,9 @@
         (if (check-expansion)
             (company-complete-common)
           (indent-for-tab-command)))))
+
 ;; LSP
 (use-package lsp-mode
-  :ensure
   :commands lsp
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
@@ -185,55 +219,28 @@
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
   (lsp-rust-analyzer-display-chaining-hints t)
-  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
   (lsp-rust-analyzer-display-closure-return-type-hints t)
-  (lsp-rust-analyzer-display-parameter-hints nil)
-  (lsp-rust-analyzer-display-reborrow-hints nil)
+  ;; these were nil
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
+  (lsp-rust-analyzer-display-parameter-hints t)
+  (lsp-rust-analyzer-display-reborrow-hints t)
   :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-  )
-;; With Go (review)
-;; (use-package lsp-mode
-;;   :ensure t
-;;   :commands lsp
-;;   :commands (lsp lsp-deferred)
-;;   ;;:hook (go-mode . lsp-deferred))
-;;   :custom
-;; ;;;; Rust
-;;   ;; what to use when checking on-save. "check" is default, I prefer clippy
-;;   (lsp-rust-analyzer-cargo-watch-command "clippy")
-;;   (lsp-eldoc-render-all t)
-;;   (lsp-idle-delay 0.6)
-;;   ;; This controls the overlays that display type and other hints inline. Enable
-;;   ;; / disable as you prefer. Well require a `lsp-workspace-restart' to have an
-;;   ;; effect on open projects.
-;;   (lsp-rust-analyzer-server-display-inlay-hints t)
-;;   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
-;;   (lsp-rust-analyzer-display-chaining-hints t)
-;;   (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
-;;   (lsp-rust-analyzer-display-closure-return-type-hints t)
-;;   (lsp-rust-analyzer-display-parameter-hints nil)
-;;   (lsp-rust-analyzer-display-reborrow-hints nil)
-;; ;;;; Go
-;;   (lsp-gopls-staticcheck t)
-;;   (lsp-gopls-complete-unimported t)
-;;   :config
-;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-;;   (add-hook 'go-mode 'lsp-deferred))
-(use-package flycheck :ensure t) ; (setq-default flycheck-disabled-checkers '(go-golint))
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+(use-package flycheck) ; (setq-default flycheck-disabled-checkers '(go-golint))
 (use-package yasnippet
-  :ensure t
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
   (add-hook 'text-mode-hook 'yas-minor-mode)
   (add-hook 'lsp-mode 'yas-minor-mode))
-(use-package posframe :ensure t)
+(use-package posframe)
 
 ;; ---- Python
-(use-package jedi :ensure t)
+(use-package jedi
+  :disabled)
 (use-package elpy
-  :ensure t
+  :mode ("\\.py\\'" . elpy-enable)
+  :disabled
   :init
   (progn
     ;; Note: use pyvenv-activate and point to .venv folder
@@ -241,20 +248,19 @@
     ;; C-RET evaluates the current statement (current line plus the following nested lines).
     ;; C-c C-z switches between your script and the interactive shell.
     ;; C-c C-d displays documentation for the thing under cursor. The documentation will pop in a different buffer, that can be closed with q
-    (elpy-enable)
+    ;; (elpy-enable)
     (add-to-list 'process-coding-system-alist '("python" . (utf-8 . utf-8)))
     (setq elpy-shell-starting-directory 'current-directory)))
 
 ;; ---- Clojure
 (use-package paredit
-  :ensure t
   :init (progn
           (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
           (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
           (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
           (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
 (use-package cider
-  :ensure t
+  :disabled
   :init (progn
           (setq cider-show-error-buffer nil)
           (setq cider-show-error-buffer 'only-in-repl)
@@ -263,13 +269,12 @@
           (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
           (setenv "LEIN_USE_BOOTCLASSPATH" "no")))
 (use-package helm-cider
-  :ensure t
+  :disabled
   :init (helm-cider-mode 1))
-
 
 ;; ---- Go
 (use-package go-mode
-  :ensure t
+  :disabled
   :config
   (setq gofmt-command "goimports")
   (setq exec-path (append
@@ -282,14 +287,11 @@
   ;; (smartparens-mode)
   :bind (:map go-mode-map
 	      ("<f10>" . 'gofmt)))
-;; (use-package company-go :ensure t)
-;; (use-package go-autocomplete
-;;   :ensure go-autocomplete)
 
 ;; ---- Rust
 (use-package rustic
-  :ensure
-  :bind (:map rustic-mode-map
+  :bind
+  (:map rustic-mode-map
 	      ("C-c C-c l" . flycheck-list-errors)
               ("C-c C-c a" . lsp-execute-code-action)
               ("C-c C-c r" . lsp-rename)
@@ -299,9 +301,8 @@
               ("C-c C-c e" . lsp-rust-analyzer-expand-macro)
               ("C-c C-c d" . dap-hydra)
               ("C-c C-c h" . lsp-ui-doc-glance)
-              ("<f6>" . rust-test)
-              ("<f7>" . rust-compile)
-	      ("C-c 0" . 'flycheck-next-error))
+	      ("C-c 9" . 'flycheck-next-error)
+	      ("C-c 0" . 'next-error))
   :config
   (setq rustic-indent-method-chain nil)
   ;; uncomment for less flashiness
@@ -322,11 +323,10 @@
   (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 
 (use-package lsp-ui
-  :ensure t
   :commands lsp-ui-mode
   :bind (("C-c 1" . 'lsp-ui-peek-find-definitions)
          ("C-c 2" . 'lsp-ui-peek-find-references)
-	 ("C-c 3" . lsp-ui-imenu))
+	 ("C-c 6" . 'lsp-ui-imenu))
   :custom
 
   ;; Testing--
@@ -343,24 +343,71 @@
   (lsp-ui-doc-enable t))
 
 (use-package cargo
-  :ensure t
   :init (let ((path (concat (getenv "HOME") "/.cargo/bin")))
           (setenv "PATH" (concat (getenv "PATH") ":" path))
           (setq exec-path (append exec-path (list path)))))
 
-;; ---- Other
-(use-package dockerfile-mode :ensure t)
-(use-package js2-mode :ensure t)
-(use-package markdown-mode :ensure t)
-(use-package yaml-mode :ensure t)
-(use-package protobuf-mode :ensure t)
-(use-package emmet-mode :ensure t)
-(use-package solidity-mode :ensure t)
-(use-package toml-mode :ensure)
+;; Debugging Rust
+(use-package exec-path-from-shell ; used by dap-mode
+  :init (exec-path-from-shell-initialize))
+(use-package dap-mode
+  :config
+  (dap-ui-mode 1)
+  ;; enables mouse hover support
+  (dap-tooltip-mode 1)
+  ;; use tooltips for mouse hover
+  ;; if it is not enabled `dap-mode' will use the minibuffer.
+  (tooltip-mode 1)
+  ;; displays floating panel with debug buttons
+  ;; requies emacs 26+
+  (dap-ui-controls-mode 1)
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  ;; installs .extension/vscode
+  (dap-gdb-lldb-setup)
+  ;; (dap-register-debug-template
+  ;;  "Rust::GDB Run Configuration"
+  ;;  (list :type "gdb"
+  ;;        :request "launch"
+  ;;        :name "GDB::Run"
+  ;; 	 :gdbpath "rust-gdb"
+  ;;        :target "target/debug/osmosis_cex_bot --enable-osmosis-binance-atom-stables"
+  ;;        :cwd nil))
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb"
+         :request "launch"
+         :name "LLDB::Run"
+	 :gdbpath "rust-lldb"
+	 ;; uncomment if lldb-mi is not in PATH
+         ;; :lldbmipath "path/to/lldb-mi"
+         :target "target/debug/osmosis_cex_bot --enable-osmosis-binance-atom-stables"
+         :cwd nil)))
 
 ;; ---- C
 (setq c-default-style "linux"
       c-basic-offset 4)
+
+;; ---- HTML
+(use-package emmet-mode
+  :disabled
+  :mode ("\\.html\\'" . emmet-mode))
+
+;; ---- Other (TODO: setup mode for automatic loading (see python))
+(use-package dockerfile-mode)
+(use-package js2-mode
+  :mode ("\\.js\\'" . js2-mode))
+(use-package markdown-mode
+  :mode ("\\.md\\'" . markdown-mode))
+(use-package yaml-mode
+  :mode ("\\.yaml\\'" . yaml-mode))
+(use-package protobuf-mode
+  :mode ("\\.proto\\'" . protobuf-mode))
+(use-package toml-mode
+  :mode ("\\.toml\\'" . toml-mode))
+(use-package solidity-mode
+  :disabled
+  :mode ("\\.sol\\'" . solidity-mode))
 
 ;; ---- Shell
 ;; (add-hook 'shell-mode-hook (lambda ()
@@ -386,74 +433,10 @@
 ;;     (load-file sense-emacs)
 ;;     (message "Emacs Sense loaded")))
 
-;; ---- Debugging
-(use-package exec-path-from-shell ; used by dap-mode
-  :ensure
-  :init (exec-path-from-shell-initialize))
-
-(use-package dap-mode
-  :ensure
-  :config
-  (dap-ui-mode)
-  (dap-ui-controls-mode 1)
-
-  (require 'dap-lldb)
-  (require 'dap-gdb-lldb)
-  ;; installs .extension/vscode
-  (dap-gdb-lldb-setup)
-  (dap-register-debug-template
-   "Rust::GDB Run Configuration"
-   (list :type "gdb"
-         :request "launch"
-         :name "GDB::Run"
-	 :gdbpath "rust-gdb"
-         :target nil
-         :cwd nil))
-  (dap-register-debug-template
-   "Rust::LLDB Run Configuration"
-   (list :type "lldb"
-         :request "launch"
-         :name "LLDB::Run"
-	 :gdbpath "rust-lldb"
-	 ;; uncomment if lldb-mi is not in PATH
-         ;; :lldbmipath "path/to/lldb-mi"
-         :target nil
-         :cwd nil)))
-
-;; Go config
-;; (use-package dap-mode
-;;   :ensure t
-;;   :init (progn
-;;           (dap-mode 1)
-;;           (dap-ui-mode 1)
-;;           (require 'dap-go)
-;;           ;; enables mouse hover support
-;;           (dap-tooltip-mode 1)
-;;           ;; use tooltips for mouse hover
-;;           ;; if it is not enabled `dap-mode' will use the minibuffer.
-;;           (tooltip-mode 1)
-;;           ;; displays floating panel with debug buttons
-;;           (dap-ui-controls-mode 1)
-;;           (add-hook 'dap-stopped-hook
-;;                     (lambda (arg) (call-interactively #'dap-hydra)))))
-;; (dap-register-debug-template
-;;  "Launch Exchange"
-;;  (list :type "go"
-;;        :request "launch"
-;;        :name "Launch Exchange"
-;;        :mode "debug"
-;;        :program "/Users/alvatar/projects/infra/cmd/myprogram/main.go"
-;;        :buildFlags "-gcflags '-N -l'"
-;;        :dlvToolPath "/Users/alvatar/go/bin/dlv"
-;;        :args nil
-;;        :env nil
-;;        :envFile nil))
-
-
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
 
-;; Extra Config
+;; Misc config
 
 ;; No backups
 (setq backup-inhibited t)
@@ -498,7 +481,6 @@
     (progn
       (scroll-bar-mode 0)
       (tool-bar-mode 0)
-      ;;(color-theme-sanityinc-tomorrow-day)
       ;; Fonts
       (if (eq system-type 'darwin)
           ;; OSX
@@ -519,9 +501,9 @@
               (let ((use-dialog-box nil)) ad-do-it)))
         ;; Linux
         (progn
-          ;(set-default-font "Hack")
-          (set-face-attribute 'default t :font "Hack")
-          (set-face-attribute 'default nil :height 100))))
+	  (print "Running on Linux")
+          (set-face-attribute 'default nil :font "FiraCode")
+          (set-face-attribute 'default nil :height 90))))
   ;; Console
   (progn
     (custom-set-variables
@@ -536,8 +518,15 @@
 
 ;;------------------------------------------------------------------------------
 ;;------------------------------------------------------------------------------
+;; Interactive functions
 
-;; Custom functions
+(defun set-large-font ()
+  (interactive)
+  (set-face-attribute 'default nil :height 100))
+
+(defun set-small-font ()
+  (interactive)
+  (set-face-attribute 'default nil :height 70))
 
 (defun rm-trailing-spaces ()
   "Remove spaces at ends of all lines."
@@ -555,6 +544,12 @@
                      current-prefix-arg))
   (shell-command-on-region (point-min) (point-max) command t t))
 
+;;------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------
+;; Global Key bindings
+
+(global-unset-key (kbd "C-x C-c"))
+
 (defun toggle-maximize-buffer ()
   "Maximize buffer."
   (interactive)
@@ -563,66 +558,14 @@
     (progn
       (set-register '_ (list (current-window-configuration)))
       (delete-other-windows))))
-
-;; Tab: force just tab
-;; Ref: http://ergoemacs.org/emacs/emacs_tabs_space_indentation_setup.html
-(defun my-insert-tab-char ()
-  "Insert a tab char. (ASCII 9, \t)"
-  (interactive)
-  (insert "\t"))
-;; (global-set-key (kbd "TAB") 'my-insert-tab-char)
-
-;; Tab: yasnippet, indent or complete
-(defun company-yasnippet-or-completion ()
-  (interactive)
-  (or (do-yas-expand)
-      (company-complete-common)))
-
-(defun check-expansion ()
-  (save-excursion
-    (if (looking-at "\\_>") t
-      (backward-char 1)
-      (if (looking-at "\\.") t
-        (backward-char 1)
-        (if (looking-at "::") t nil)))))
-
-(defun do-yas-expand ()
-  (let ((yas/fallback-behavior 'return-nil))
-    (yas/expand)))
-
-(defun tab-indent-or-complete ()
-  (interactive)
-  (if (minibufferp)
-      (minibuffer-complete)
-    (if (or (not yas/minor-mode)
-            (null (do-yas-expand)))
-        (if (check-expansion)
-            (company-complete-common)
-          (indent-for-tab-command)))))
-
-;;------------------------------------------------------------------------------
-;; Global Key bindings
-
-(global-unset-key (kbd "C-x C-c"))
-
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
+
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
 (global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
 (global-set-key (kbd "C-x t") 'treemacs)
 (global-set-key (kbd "C-x K") (lambda () (interactive) (kill-this-buffer) (delete-window)))
 
 ;;------------------------------------------------------------------------------
-;; Snippets
-
-(defun set-large-font ()
-  (interactive)
-  (set-face-attribute 'default nil :height 100))
-
-(defun set-small-font ()
-  (interactive)
-  (set-face-attribute 'default nil :height 70))
-
-
 ;;------------------------------------------------------------------------------
 ;; Notes of installation
 
@@ -632,424 +575,6 @@
 ;; Add to workspace with lsp-workspace-folders-add
 ;; -- Rust
 ;; git clone https://github.com/rust-analyzer/rust-analyzer.git && cd rust-analyzer && cargo xtask install --server
-
-
-
-
-;;; hoon-mode.el --- Major mode for editing hoon files for urbit
-
-;; Copyright (C) 2014–2016 Urbit
-
-;; Author:
-;;    * Adam Bliss        https://github.com/abliss         <abliss@gmail.com>
-;; Contributors:
-;;    * N Gvrnd           https://github.com/ngvrnd
-;;    * TJamesCorcoran    https://github.com/TJamesCorcoran <jamescorcoran@gmail.com>
-;;    * Rastus Vernon     https://github.com/rastus-vernon  <rastus.vernon@protonmail.ch>
-;;    * Elliot Glaysher   https://github.com/eglaysher      <erg@google.com>
-;;    * David Kerschner   https://github.com/baudtack       <dkerschner@hcoop.net>
-;;    * Johnathan Maudlin https://github.com/jcmdln         <jcmdln@gmail.com>
-;;
-;; URL: https://github.com/urbit/hoon-mode.el
-;; Version: 0.1
-;; Keywords: extensions, hoon, nock, urbit, Mars
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-;; Boston, MA 02111-1307, USA.
-
-;;; Commentary:
-
-;; This is my first Major Mode, so don't expect much. It's heavily based on
-;; SampleMode from the emacs wiki.
-
-;;; Code:
-
-(require 'cl-lib)
-
-(defvar hoon-mode-syntax-table
-  (let ((st (make-syntax-table)))
-    ;; Basic quoting support
-    (modify-syntax-entry ?\' "\"" st)
-    (modify-syntax-entry ?\" "\"" st)
-    (modify-syntax-entry ?\\ "\\" st)
-    ;; Hoon comments. Also mark ':' as a normal punctuation character.
-    (modify-syntax-entry ?: ". 12b" st)
-    (modify-syntax-entry ?\n "> b" st)
-
-    ;; Add dash to the symbol class since it can be part of identifier.
-    (modify-syntax-entry ?- "_" st)
-
-    ;; Put all other characters which can be part of runes in the punctuation
-    ;; class so that forward and backward work properly.
-    (modify-syntax-entry ?! "." st)
-    (modify-syntax-entry '(?\# . ?\&) "." st)
-    (modify-syntax-entry '(?* . ?\,) "." st)
-    (modify-syntax-entry '(?. . ?/) "." st)
-    (modify-syntax-entry '(?\; . ?@) "." st)
-    (modify-syntax-entry '(?^ . ?_) "." st)
-    (modify-syntax-entry ?| "." st)
-    (modify-syntax-entry ?~ "." st)
-    st)
-  "Syntax table for `hoon-mode'.")
-
-(eval-and-compile
-  (defconst hoon-rx-constituents
-    `((gap . ,(rx (and space (one-or-more space))))
-      (identifier . ,(rx (and lower (zero-or-more (or lower digit "-")))))
-      (mold . ,(rx (or "*"
-                       "?"
-                       "^"
-                       (and "@" (zero-or-more word))
-                       (and (opt "$-")
-                            "("
-                            (one-or-more
-                             (or (or alphanumeric "(" ")" "*" "?" "@" "-" ":"
-                                     "^" "_")
-                                 ;; Spaces must be single.
-                                 (and space (or alphanumeric "(" ")" "*" "?"
-                                                "@" "-" ":" "^" "_"))))
-                            ")")
-                       (and lower (one-or-more (or lower digit "-" ":" "^")))
-                       "$-"
-                       )))
-      (wing . ,(rx (one-or-more (or "." lower digit "-" "+" "<" ">"))))
-      )
-    "Common patterns used in font locking hoon code.")
-
-  (defmacro hoon-rx (&rest regexps)
-    "Hoon mode specialized rx macro."
-    (let ((rx-constituents (append hoon-rx-constituents rx-constituents)))
-      (cond ((null regexps)
-             (error "No regexp"))
-            ((cdr regexps)
-             (rx-to-string `(and ,@regexps) t))
-            (t
-             (rx-to-string (car regexps) t))))))
-
-
-
-(defconst hoon-font-lock-arm-declarations-rx
-  (hoon-rx (and (group "+" (or "+" "-" "$" "*")) gap
-                (group (or "$" identifier))))
-  "Regexp of declarations")
-
-
-(defconst hoon-font-lock-face-mold-old-rx
-  (hoon-rx
-   (and (group word (zero-or-more (or word "-")))
-        "/"
-        (group mold)))
-  "Regexp to old style name/mold in declarations.")
-
-(defconst hoon-font-lock-tisfas-rx
-  (hoon-rx (and "=/" gap (group wing) (opt "=") (opt (group mold))))
-  "Regexp to match =/.")
-
-(defconst hoon-font-lock-bar-mold-rx
-  (hoon-rx (group (or "|=" "=|")))
-  "Regexp to match |= or =|. Used for syntax highlighting the molds on
-lines like |=  [a=@t b=wire].")
-
-(defconst hoon-font-lock-face-mold-rx
-  (hoon-rx
-   (and (group word (zero-or-more (or word "-")))
-        "="
-        (group mold)))
-  "Regexp to match name=mold in declarations")
-
-(defconst hoon-font-lock-kethep-rx
-  (hoon-rx (and "^-  "
-                (opt "{")
-                (group (or mold) (zero-or-more space (or mold)))
-                (opt "}")))
-  "Regexp to match ^- in long form. Note the `or' around
-  `mold'. We need to wrap the imported stuff in that context.")
-
-(defconst hoon-font-lock-kethep-irregular-rx
-  (hoon-rx (and "`" (group mold) "`")))
-
-(defconst hoon-font-lock-kettis-rx
-  (hoon-rx (and "^=" gap (group identifier))))
-
-(defconst hoon-font-lock-kettis-irregular-rx
-  (hoon-rx (and (group identifier) "="))
-  "Regexp of faces.")
-
-(defconst hoon-font-lock-mold-shorthand-rx
-  (hoon-rx (and (or "[" "(" line-start space)
-                (group (and (and "=" identifier)
-                            (zero-or-more (or "." ":" identifier))))))
-  "Regexp to match =same-name-as-mold in declarations")
-
-(defconst hoon-font-lock-tis-wing-rx
-  (hoon-rx (and (or "=." "=?" "=*") gap (group wing)))
-  "Several runes start with <rune> <gap> term/wing. Combine these into one
-regexp. Because of =/, this rule must run after the normal mold rule.")
-
-(defconst hoon-font-lock-tisket-rx
-  (hoon-rx (and "=^" gap (group-n 1 wing) (opt "=") (opt (group-n 3 mold)) gap (group-n 2 wing))))
-
-(defconst hoon-font-lock-symbols-rx
-  (rx (and "%" (or (and word (zero-or-more (any word "-")))
-                   "|" "&" "$" ".n" ".y")))
-  "Regexp of symbols. This must be run before runes, or %.n and %.y will
- partially be highlighted as runes.")
-
-(defconst hoon-font-lock-runes-rx
-  ;; This could be `regexp-opt' and added statically for more speed
-  (rx (or
-       "$@" "$_" "$:" "$%" "$-" "$^" "$?" "$=" "$|" "$," "$&" "$+"
-       "|_" "|:" "|%" "|." "|^" "|-" "|~" "|*" "|=" "|?" "|$"
-       ":_" ":^" ":-" ":+" ":~" ":*"
-       "%_" "%." "%-" "%*" "%^" "%+" "%~" "%="
-       ".^" ".+" ".*" ".=" ".?"
-       "^|" "^." "^+" "^-" "^&" "^~" "^=" "^?"
-       "~|" "~_" "~%" "~/" "~<" "~>" "~$" "~+" "~&" "~=" "~?" "~!"
-       ";:" ";/" ";~" ";;"
-       "=|" "=:" "=/" "=;" "=." "=?" "=<" "=-" "=>" "=^" "=+" "=~" "=*" "=,"
-       "?|" "?-" "?:" "?." "?^" "?<" "?>" "?+" "?&" "?@" "?~" "?=" "?!"
-       "!," "!>" "!;" "!=" "!?" "!^" "!:" "!<"
-       "+|"
-       ;; Not technically runes, but we highlight them like that.
-       "=="
-       "--"
-       ))
-  "Regexp of runes.")
-
-(defconst hoon-font-lock-preprocessor-rx
-  (rx (or "/?" "/-" "/+" "//" "/="))
-  "Ford preprocessor 'runes'.")
-
-(defconst hoon-font-lock-zapzap-rx
-  (rx "!!")
-  "Highlight the crash rune in red.")
-
-(defconst hoon-font-lock-numbers-rx
-  ;; Numbers are in decimal, binary, hex, base32, or base64, and they must
-  ;; contain dots (optionally followed by whitespace), as in the German manner.
-  (rx (or
-       (and "0w"
-            (repeat 1 5 (in "-~0-9a-zA-Z"))
-            (zero-or-more "." (repeat 5 (in "-~0-9a-zA-Z"))))
-       (and "0v"
-            (repeat 1 5 (in "0-9a-v"))
-            (zero-or-more "." (repeat 5 (in "0-9a-v"))))
-       (and "0b"
-            (repeat 1 4 (in "0-1"))
-            (zero-or-more "." (repeat 4 (in "0-1"))))
-       (and "0x"
-            (repeat 1 4 hex)
-            (zero-or-more "." (repeat 4 hex)))
-       (and (repeat 1 3 digit)
-            (zero-or-more "." (repeat 3 digit)))
-       ))
-  "Regexp of numbers")
-
-(defconst hoon-font-lock-todos-rx
-  (rx (or "XX" "XXX" "TODO" "FIXME"))
-  "Regexp of todo notes.")
-
-;; This is a start, but we still occasionally miss some complex mold declarations.
-(defvar hoon-font-lock-keywords
-  `(
-    (,hoon-font-lock-arm-declarations-rx ;; "++  arm"
-     (1 font-lock-constant-face)
-     (2 font-lock-function-name-face))
-    (,hoon-font-lock-face-mold-old-rx    ;; name/mold
-     (1 font-lock-variable-name-face)
-     (2 font-lock-type-face))
-    (,hoon-font-lock-bar-mold-rx         ;; (=| |=)  name=mold
-     (1 font-lock-constant-face)
-     (,hoon-font-lock-face-mold-rx
-      nil
-      nil
-      (1 font-lock-variable-name-face)
-      (2 font-lock-type-face)))
-    (,hoon-font-lock-mold-shorthand-rx   ;; =same-name-as-mold
-     (1 font-lock-variable-name-face))
-    (,hoon-font-lock-kethep-rx           ;; ^-  mold
-     (1 font-lock-type-face))
-    (,hoon-font-lock-kethep-irregular-rx ;; `mold`
-     (1 font-lock-type-face))
-    (,hoon-font-lock-kettis-rx           ;; ^=  face
-     (1 font-lock-variable-name-face))
-    (,hoon-font-lock-kettis-irregular-rx ;; face=
-     (1 font-lock-variable-name-face))
-    (,hoon-font-lock-tisfas-rx           ;; =/  wing=@t
-     (1 font-lock-variable-name-face
-     (2 font-lock-type-face nil t)))
-    (,hoon-font-lock-tis-wing-rx         ;; (=. =?)  wing
-     (1 font-lock-variable-name-face))
-    (,hoon-font-lock-tisket-rx           ;; =^  wing=@t  wing
-     (1 font-lock-variable-name-face)
-     (2 font-lock-variable-name-face)
-     (3 font-lock-type-face nil t))
-
-    (,hoon-font-lock-symbols-rx . font-lock-keyword-face)
-
-    ;; Highlights all other runes in other contexts.
-    (,hoon-font-lock-runes-rx . font-lock-constant-face)
-    (,hoon-font-lock-preprocessor-rx . font-lock-preprocessor-face)
-    (,hoon-font-lock-zapzap-rx . font-lock-warning-face)
-
-    ;; Highlight any auras in any other contexts. This must happen after all
-    ;; the above because it would otherwise stop the previous rules' execution.
-    ;; TODO: This rule causes false positives, highlighting ^ in contexts where
-    ;; it's used to reach up one namespace instead of being a mold.
-    ("\\(@\\w*\\)\\|\\^" . font-lock-type-face)
-
-    ;; These highlights don't have any issues.
-    (,hoon-font-lock-numbers-rx . font-lock-constant-face)
-    (,hoon-font-lock-todos-rx . font-lock-warning-face))
-  "Keyword highlighting specification for `hoon-mode'.")
-
-(defvar hoon-imenu-generic-expression ".*")
-
-(defvar hoon-outline-regexp ":::")
-
-;;;###autoload
-(define-derived-mode hoon-mode prog-mode "Hoon"
-  "A major mode for editing Hoon files."
-  :syntax-table hoon-mode-syntax-table
-  (set (make-local-variable 'comment-start) "::")
-  (set (make-local-variable 'comment-padding) 2)
-  (set (make-local-variable 'comment-end) "")
-  (set (make-local-variable 'comment-column) 56)   ;; zero based columns
-  (set (make-local-variable 'comment-use-syntax) t)
-  (set (make-local-variable 'comment-start-skip) "\\(::+\\)\\s-*")
-  (set (make-local-variable 'font-lock-defaults) '(hoon-font-lock-keywords))
-  (set (make-local-variable 'indent-tabs-mode) nil) ;; tabs zutiefst verboten
-  (set (make-local-variable 'indent-line-function) 'indent-relative)
-  (set (make-local-variable 'fill-paragraph-function) 'hoon-fill-paragraph)
-  (set (make-local-variable 'imenu-generic-expression)
-       hoon-imenu-generic-expression)
-  (set (make-local-variable 'outline-regexp) hoon-outline-regexp)
-
-  ;; Hoon files shouldn't have empty lines, but emacs expects them for
-  ;; navigation. Treat lines which are just `comment-start' at any margin as
-  ;; blank lines for paragraph navigation purposes.
-  (set (make-local-variable 'paragraph-start) "\\([ \t]*\:\:\\)*[ \t\f]*$")
-
-  ;; Hoon files often have the same file name in different
-  ;; directories. Previously, this was manually handled by hoon-mode instead of
-  ;; just setting the right variables and letting Emacs handle it.
-  (set (make-local-variable 'uniquify-buffer-name-style) 'forward)
-  (set (make-local-variable 'uniquify-strip-common-suffix) nil))
-
-(defun hoon-fill-paragraph (&optional justify)
-  "Only fill inside comments. (It might be neat to auto-convert short to long
-form syntax, but that would take parsing.)"
-  (interactive "P")
-  (or (fill-comment-paragraph justify)
-      ;; Never return nil; `fill-paragraph' will perform its default behavior
-      ;; if we do.
-      t))
-
-;;; Indentation
-
-(defun hoon-indent-line ()
-  "Indent current line of Hoon code."
-  (interactive)
-  (let ((savep (> (current-column) (current-indentation)))
-        (indent (condition-case nil (max (hoon-calculate-indentation) 0)
-                  (error 0))))
-    (if savep
-        (save-excursion (indent-line-to indent))
-      (indent-line-to indent))))
-
-(defun hoon-calculate-indentation ()
-  "Return the column to which the current line should be indented."
-  0) ;;TODO
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.hoon$" . hoon-mode))
-
-(defgroup hoon nil
-  "hoon mode for emacs"
-  :prefix "hoon-"
-  :group 'tools)
-
-(defcustom hoon-herb-path "/usr/bin/herb"
-  "Path to herb"
-  :group 'hoon
-  :type 'string)
-
-(defcustom hoon-herb-args "-d"
-  "args for herb"
-  :group 'hoon
-  :type 'string)
-
-(defcustom hoon-lsp-enable nil
-  "Enable hoon-language-server support. NOTE: requires lsp-mode and hoon-language-server to be installed"
-  :group 'hoon
-  :type 'boolean)
-
-(defcustom hoon-lsp-port "8080"
-  "Port for language server"
-  :group 'hoon
-  :type 'string)
-(defcustom hoon-lsp-code "miswyt-palnet-palnet-palnet"
-  "+code for planet running language-server"
-  :group 'hoon
-  :type 'string)
-(defcustom hoon-lsp-planet "sampel-palnet"
-  "Planet name running language-server"
-  :group 'hoon
-  :type 'string)
-
-(defcustom hoon-lsp-delay "0"
-  "Delay for language server"
-  :group 'hoon
-  :type 'string)
-
-(eval-after-load "lsp-mode"
-  (if hoon-lsp-enable
-    '(progn
-      (add-to-list 'lsp-language-id-configuration '(hoon-mode . "hoon"))
-      (lsp-register-client
-        (make-lsp-client :new-connection
-                        (lsp-stdio-connection `("hoon-language-server"
-                                                ,(concat "-p=" hoon-lsp-port)
-                                                ,(concat "-s=" hoon-lsp-planet)
-                                                ,(concat "-c=" hoon-lsp-code)
-                                                ,(concat "-d=" hoon-lsp-delay)))
-                         :major-modes '(hoon-mode)
-                         :server-id 'hoon-ls))
-      (add-hook 'hoon-mode-hook #'lsp))
-  '()))
-
-(defun hoon-eval-region-in-herb ()
-  (interactive)
-  (shell-command
-   (concat hoon-herb-path " " hoon-herb-args " "
-	   (shell-quote-argument (buffer-substring (region-beginning) (region-end)))
-	   " &")))
-
-(defun hoon-eval-buffer-in-herb ()
-  (interactive)
-  (shell-command
-   (concat hoon-herb-path " " hoon-herb-args " "
-	   (shell-quote-argument (buffer-substring-no-properties (point-min) (point-max)))
-	   " &")))
-
-(provide 'hoon-mode)
-;;; hoon-mode.el ends here
-
-
-
-
 
 
 
@@ -1078,11 +603,11 @@ form syntax, but that would take parsing.)"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("fa49766f2acb82e0097e7512ae4a1d6f4af4d6f4655a48170d0a00bcb7183970" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "51ec7bfa54adf5fff5d466248ea6431097f5a18224788d0bd7eb1257a4f7b773" "57a29645c35ae5ce1660d5987d3da5869b048477a7801ce7ab57bfb25ce12d3e" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "4c56af497ddf0e30f65a7232a8ee21b3d62a8c332c6b268c81e9ea99b11da0d3" "f5b6be56c9de9fd8bdd42e0c05fecb002dedb8f48a5f00e769370e4517dde0e8" "47e6f8c23eaea064b89ed1361b5824ee4f9562a8c4a30774ee9ee69f9b9d4f69" "19a2c0b92a6aa1580f1be2deb7b8a8e3a4857b6c6ccf522d00547878837267e7" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef" "830877f4aab227556548dc0a28bf395d0abe0e3a0ab95455731c9ea5ab5fe4e1" "1d89fcf0105dd8778e007239c481643cc5a695f2a029c9f30bd62c9d5df6418d" "41c478598f93d62f46ec0ef9fbf351a02012e8651e2a0786e0f85e6ac598f599" "0dd2666921bd4c651c7f8a724b3416e95228a13fca1aa27dc0022f4e023bf197" "f149d9986497e8877e0bd1981d1bef8c8a6d35be7d82cba193ad7e46f0989f6a" "90a6f96a4665a6a56e36dec873a15cbedf761c51ec08dd993d6604e32dd45940" "fa49766f2acb82e0097e7512ae4a1d6f4af4d6f4655a48170d0a00bcb7183970" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "51ec7bfa54adf5fff5d466248ea6431097f5a18224788d0bd7eb1257a4f7b773" "57a29645c35ae5ce1660d5987d3da5869b048477a7801ce7ab57bfb25ce12d3e" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "4c56af497ddf0e30f65a7232a8ee21b3d62a8c332c6b268c81e9ea99b11da0d3" "f5b6be56c9de9fd8bdd42e0c05fecb002dedb8f48a5f00e769370e4517dde0e8" "47e6f8c23eaea064b89ed1361b5824ee4f9562a8c4a30774ee9ee69f9b9d4f69" "19a2c0b92a6aa1580f1be2deb7b8a8e3a4857b6c6ccf522d00547878837267e7" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
-   '(solarized-theme writeroom-mode jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))
+   '(one-themes material-theme diminish e2wm bm ctrlf goto-last-point writeroom-mode jedi helm-ag elpy python-black emojify solidity-mode humanoid-themes shackle exec-path-from-shell company-racer direnv edit-server xwwp flymake-cursor flymake-diagnostic-at-point dap-go posframe uml-mode night-owl-theme gruvbox-theme abyss-theme clues-theme gotham-theme cargo helm-swoop protobuf-mde yasnippet helm-cider dap-mode helm-lsp helm-imenu lsp-mode moe-theme tron-theme company-fuzzy company-go company flycheck-golangci-lint emmet-mode go-mode yaml-mode markdown-mode js2-mode dockerfile-mode autopair git-timemachine sublimity multiple-cursors powerline smart-tab beacon flycheck helm-projectile helm cider ace-window avy paredit goto-last-change smex expand-region use-package))
  '(warning-suppress-types '((comp) (comp) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -1093,4 +618,4 @@ form syntax, but that would take parsing.)"
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-(load-theme 'gruvbox-light-hard)
+(load-theme 'gruvbox-dark-hard)

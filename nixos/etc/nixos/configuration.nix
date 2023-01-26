@@ -23,21 +23,22 @@
       wget tmux vim emacs git git-lfs zsh gnumake htop tree p7zip zip unzip file killall
       silver-searcher nload iftop iotop nmap appimage-run openssl wipe groff steam-run
       lsof ecryptfs ecryptfs-helper encfs direnv tcpdump pstree ffmpeg-full unrar hfsprogs
-      nethogs bash unison cachix pinentry-curses tokei grpcurl websocat ntfs3g btrfs-progs
-      tinc_pre sshpass
-      ripgrep fd
+      nethogs bash unison pinentry-curses tokei grpcurl websocat ntfs3g btrfs-progs
+      sshpass ripgrep fd
+      # NixOS utils
+      cachix nix-index
       # Hardware utils
-      lm_sensors acpitool pciutils glxinfo powertop tlp s-tui cpufrequtils # pulseaudio-modules-bt
+      lm_sensors acpitool pciutils glxinfo tlp s-tui cpufrequtils # pulseaudio-modules-bt
       # Browsers
       firefox chromium brave
       # GUI base
       picom rxvt_unicode urxvt_perls dmenu unclutter dunst autocutsel libnotify vanilla-dmz
       capitaine-cursors stalonetray xorg.xmodmap xorg.xev xorg.libxshmfence hicolor-icon-theme maim 
       pavucontrol gtk2 cbatticon imagemagick xdotool xclip xorg.xwininfo xorg.xkill imgcat gparted
-      gsettings-desktop-schemas
-      gvfs
+      gsettings-desktop-schemas feh v4l-utils gvfs
       # Visual dev
       libGL libGLU
+      cudaPackages.cuda_cudart cudaPackages_11.cudatoolkit cudaPackages_11.cudnn
       xorg.libxcb xorg.libXfixes
       alsa-lib
       # Image & Video
@@ -63,7 +64,7 @@
       go_1_18
       rustup 
       # Global Python packages
-      python310Packages.pip
+      python310Packages.pip conda
       # Databases
       postgresql_12
       # Development tools
@@ -86,17 +87,6 @@
     pcloud = super.callPackage ./packages/pcloud.nix { };
   }
   )
-  # Temporary change until https://github.com/NixOS/nixpkgs/issues/197408 is closed
-  (final: prev: {
-    python3 = prev.python3.override {
-      packageOverrides = self: super: {
-        # https://github.com/NixOS/nixpkgs/issues/197408
-        dbus-next = super.dbus-next.overridePythonAttrs (old: {
-          checkPhase = builtins.replaceStrings ["not test_peer_interface"] ["not test_peer_interface and not test_tcp_connection_with_forwarding"] old.checkPhase;
-        });
-      };
-    };
-  })
 ];
 
   ## Boot
@@ -106,19 +96,23 @@
       systemd-boot.enable = lib.mkDefault true;
       efi.canTouchEfiVariables = lib.mkDefault true;
     };
-    supportedFilesystems = ["ecryptfs" "zfs"];
-    extraModulePackages = with config.boot.kernelPackages; [ zfs ];
+    supportedFilesystems = ["ecryptfs"];
     #kernelParams = lib.mkDefault [ "acpi_rev_override" ]; 
     # To get nvidia-docker to work (is a temporary bug.. in theory) (unified cgroup)
-    kernelParams = [ "systemd.unified_cgroup_hierarchy=0" ];
+    # kernelParams = [ "systemd.unified_cgroup_hierarchy=0" ];
     # For Dropbox with many files
     # kernel.sysctl = {
     #   "fs.inotify.max_user_watches"   = 1048576;   # default:  8192
     # };
   };
 
-  ## Increase tmpfs for Rust compilation primarily
-  services.logind.extraConfig = "RuntimeDirectorySize=8G";
+  services.logind = {
+    # Increase tmpfs for Rust compilation primarily
+    extraConfig = "RuntimeDirectorySize=8G";
+  };
+
+  # Hibernation stopped working, and this seemed to fix it
+  security.protectKernelImage = false;
 
   ## Hardware
 
@@ -162,13 +156,11 @@
   # Power management
   powerManagement = {
     enable = true;
-    #cpuFreqGovernor = lib.mkDefault "ondemand";
     cpuFreqGovernor = "ondemand";
     powertop.enable = false;
   };
 
   services.gvfs.enable = true;
-
   services.gnome.gnome-keyring.enable = true;
   programs.seahorse.enable = true;
   programs.dconf.enable = true;
@@ -186,8 +178,8 @@
       "START_CHARGE_THRESH_BAT0"= 40;
       "STOP_CHARGE_THRESH_BAT0"= 80;
       # Runtime Power Management for PCI(e) bus devices: on=disable, auto=enable.
-      "RUNTIME_PM_ON_AC"= "on";
-      "RUNTIME_PM_ON_BAT"= "auto";
+      #"RUNTIME_PM_ON_AC"= "on";
+      #"RUNTIME_PM_ON_BAT"= "auto";
     };
   };
 
@@ -286,13 +278,16 @@ load-module module-switch-on-connect
     useXkbConfig = true;
   };
 
-  time.timeZone = "Europe/Madrid";
-  #time.timeZone = "Europe/Tallinn";
+  time.timeZone = "Europe/Tallinn";
 
   location = {
     provider = "manual";
-    latitude = 37.53;
-    longitude = -4.46;
+    # Cordoba
+    # latitude = 37.53;
+    # longitude = -4.46;
+    # Tallinn
+    latitude = 59.44;
+    longitude = 24.75;
   }; 
   services.redshift = {
     enable = true;
@@ -311,7 +306,6 @@ load-module module-switch-on-connect
     layout = "us";
     dpi = 180;
     xkbOptions = "eurosign:e grp:alt_space_toggle, ctrl:swapcaps";
-    # xkbOptions = "eurosign:e grp:alt_space_toggle";
     # Enable touchpad support.
     libinput = {
       enable = true;
@@ -362,6 +356,7 @@ load-module module-switch-on-connect
       sddm.enableHidpi = true;
       sessionCommands = with pkgs; lib.mkAfter
       ''
+      feh --bg-fill .background-image
       ${pkgs.xorg.xmodmap}/bin/xmodmap ${myCustomLayout}
       ${xorg.xsetroot}/bin/xsetroot -xcf ${pkgs.vanilla-dmz}/share/icons/Vanilla-DMZ/cursors/left_ptr 128 &disown
       if test -e $HOME/.Xresources; then
@@ -389,6 +384,7 @@ load-module module-switch-on-connect
     hack-font
     iosevka
     symbola
+    inconsolata
   ];
 
   programs.ssh.startAgent = true;
@@ -404,8 +400,8 @@ load-module module-switch-on-connect
   };  
 
   services.avahi = {
+    enable = false;
     nssmdns = true;
-    enable = true;
     ipv4 = true;
     ipv6 = true;
     publish = {
@@ -416,7 +412,7 @@ load-module module-switch-on-connect
   };
 
   services.postgresql = {
-    enable = true;
+    enable = false;
     package = pkgs.postgresql_12;
     enableTCPIP = true;
     authentication = pkgs.lib.mkOverride 10 ''
@@ -499,17 +495,6 @@ delete.topic.enable = true
     ## serviceConfig.ExecStart = "${pkgs.picom}/bin/picom -b --config /home/alvatar/.picom.conf";
   };
   
-   #systemd.user.services."autocutsel" = {
-    #enable = true;
-    #description = "AutoCutSel";
-    #wantedBy = [ "default.target" ];
-    #serviceConfig.Type = "forking";
-    #serviceConfig.Restart = "always";
-    #serviceConfig.RestartSec = 2;
-    #serviceConfig.ExecStartPre = "${pkgs.autocutsel}/bin/autocutsel -fork";
-    #serviceConfig.ExecStart = "${pkgs.autocutsel}/bin/autocutsel -selection PRIMARY -fork";
-  #};
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
