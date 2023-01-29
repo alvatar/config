@@ -180,6 +180,7 @@
 
 ;; Completion
 (use-package company
+  :diminish
   :bind (:map company-mode-map
 	      ("<tab>". tab-indent-or-complete)
 	      ("TAB". tab-indent-or-complete)))
@@ -228,6 +229,7 @@
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 (use-package flycheck) ; (setq-default flycheck-disabled-checkers '(go-golint))
 (use-package yasnippet
+  :diminish
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook 'yas-minor-mode)
@@ -292,17 +294,21 @@
 (use-package rustic
   :bind
   (:map rustic-mode-map
-	      ("C-c C-c l" . flycheck-list-errors)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename)
-              ("C-c C-c q" . lsp-workspace-restart)
-              ("C-c C-c Q" . lsp-workspace-shutdown)
-              ("C-c C-c s" . lsp-rust-analyzer-status)
-              ("C-c C-c e" . lsp-rust-analyzer-expand-macro)
-              ("C-c C-c d" . dap-hydra)
-              ("C-c C-c h" . lsp-ui-doc-glance)
-	      ("C-c 9" . 'flycheck-next-error)
-	      ("C-c 0" . 'next-error))
+	("C-c C-c l" . flycheck-list-errors)
+        ("C-c C-c a" . lsp-execute-code-action)
+        ("C-c C-c r" . lsp-rename)
+        ("C-c C-c q" . lsp-workspace-restart)
+        ("C-c C-c Q" . lsp-workspace-shutdown)
+        ("C-c C-c s" . lsp-rust-analyzer-status)
+        ("C-c C-c e" . lsp-rust-analyzer-expand-macro)
+        ("C-c C-c d" . dap-hydra)
+        ("C-c C-c h" . lsp-ui-doc-glance)
+	("C-c 9" . 'flycheck-next-error)
+	("C-c 0" . 'next-error)
+	;; Maintain the "q" binding for closing the compilation mode, since we are using the
+	;; "same" window and otherwise it closes
+	:map rustic-compilation-mode-map
+	("q" . 'kill-this-buffer))
   :config
   (setq rustic-indent-method-chain nil)
   ;; uncomment for less flashiness
@@ -603,7 +609,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef" "830877f4aab227556548dc0a28bf395d0abe0e3a0ab95455731c9ea5ab5fe4e1" "1d89fcf0105dd8778e007239c481643cc5a695f2a029c9f30bd62c9d5df6418d" "41c478598f93d62f46ec0ef9fbf351a02012e8651e2a0786e0f85e6ac598f599" "0dd2666921bd4c651c7f8a724b3416e95228a13fca1aa27dc0022f4e023bf197" "f149d9986497e8877e0bd1981d1bef8c8a6d35be7d82cba193ad7e46f0989f6a" "90a6f96a4665a6a56e36dec873a15cbedf761c51ec08dd993d6604e32dd45940" "fa49766f2acb82e0097e7512ae4a1d6f4af4d6f4655a48170d0a00bcb7183970" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "51ec7bfa54adf5fff5d466248ea6431097f5a18224788d0bd7eb1257a4f7b773" "57a29645c35ae5ce1660d5987d3da5869b048477a7801ce7ab57bfb25ce12d3e" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "4c56af497ddf0e30f65a7232a8ee21b3d62a8c332c6b268c81e9ea99b11da0d3" "f5b6be56c9de9fd8bdd42e0c05fecb002dedb8f48a5f00e769370e4517dde0e8" "47e6f8c23eaea064b89ed1361b5824ee4f9562a8c4a30774ee9ee69f9b9d4f69" "19a2c0b92a6aa1580f1be2deb7b8a8e3a4857b6c6ccf522d00547878837267e7" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
+   '("b73a23e836b3122637563ad37ae8c7533121c2ac2c8f7c87b381dd7322714cd0" "833ddce3314a4e28411edf3c6efde468f6f2616fc31e17a62587d6a9255f4633" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef" "830877f4aab227556548dc0a28bf395d0abe0e3a0ab95455731c9ea5ab5fe4e1" "1d89fcf0105dd8778e007239c481643cc5a695f2a029c9f30bd62c9d5df6418d" "41c478598f93d62f46ec0ef9fbf351a02012e8651e2a0786e0f85e6ac598f599" "0dd2666921bd4c651c7f8a724b3416e95228a13fca1aa27dc0022f4e023bf197" "f149d9986497e8877e0bd1981d1bef8c8a6d35be7d82cba193ad7e46f0989f6a" "90a6f96a4665a6a56e36dec873a15cbedf761c51ec08dd993d6604e32dd45940" "fa49766f2acb82e0097e7512ae4a1d6f4af4d6f4655a48170d0a00bcb7183970" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "51ec7bfa54adf5fff5d466248ea6431097f5a18224788d0bd7eb1257a4f7b773" "57a29645c35ae5ce1660d5987d3da5869b048477a7801ce7ab57bfb25ce12d3e" "fee7287586b17efbfda432f05539b58e86e059e78006ce9237b8732fde991b4c" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "4c56af497ddf0e30f65a7232a8ee21b3d62a8c332c6b268c81e9ea99b11da0d3" "f5b6be56c9de9fd8bdd42e0c05fecb002dedb8f48a5f00e769370e4517dde0e8" "47e6f8c23eaea064b89ed1361b5824ee4f9562a8c4a30774ee9ee69f9b9d4f69" "19a2c0b92a6aa1580f1be2deb7b8a8e3a4857b6c6ccf522d00547878837267e7" "d80952c58cf1b06d936b1392c38230b74ae1a2a6729594770762dc0779ac66b7" "f028e1985041fd072fa9063221ee9c9368a570d26bd6660edbd00052d112e8bb" "969a67341a68becdccc9101dc87f5071b2767b75c0b199e0ded35bd8359ecd69" "511a437aad4bcf848317753f26f35b5a7cd416667122c00e3d8e62a8944bb2c7" "147fcba1e6277e4b9a3d07ba90d822dabc0510d6576514967a55afd71393000d" "8ca8fbaeaeff06ac803d7c42de1430b9765d22a439efc45b5ac572c2d9d09b16" "2679db166117d5b26b22a8f12a940f5ac415d76b004de03fcd34483505705f62" "f99318b4b4d8267a3ee447539ba18380ad788c22d0173fc0986a9b71fd866100" "30b14930bec4ada72f48417158155bc38dd35451e0f75b900febd355cda75c3e" "78c4238956c3000f977300c8a079a3a8a8d4d9fee2e68bad91123b58a4aa8588" "6b5c518d1c250a8ce17463b7e435e9e20faa84f3f7defba8b579d4f5925f60c1" default))
  '(global-company-mode t)
  '(global-emojify-mode t)
  '(package-selected-packages
@@ -618,4 +624,6 @@
 (put 'scroll-left 'disabled nil)
 (put 'upcase-region 'disabled nil)
 
-(load-theme 'gruvbox-dark-hard)
+;;(load-theme 'gruvbox-dark-hard)
+(load-theme 'one-dark)
+

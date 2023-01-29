@@ -1,4 +1,5 @@
 audio.play_bitrate_non_metered_migrated=true
+ui.hide_hpto=true
 ui.track_notifications_enabled=false
 ui.show_friend_feed=false
 app.player.volume=61439
