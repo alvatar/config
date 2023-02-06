@@ -118,6 +118,7 @@ alias enable-screen-off="xset dpms && xset s on"
 alias telegram="flatpak run org.telegram.desktop &disown"
 alias nixsearch="nix --extra-experimental-features \"nix-command flakes\" search nixpkgs"
 alias synchd="rsync -ah --acls --delete --stats --progress"
+alias 7z-encrypt="7z a -p -mhe=on"
 
 function countdown(){
    date1=$((`date +%s` + $1)); 

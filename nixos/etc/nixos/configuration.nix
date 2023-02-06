@@ -79,6 +79,11 @@
     ] ++ [ config.boot.kernelPackages.cpupower ];
   };
 
+  ## Temp
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-18.1.0"
+  ];
+
   ## Overlays
   nixpkgs.overlays = [
   (self: super:
