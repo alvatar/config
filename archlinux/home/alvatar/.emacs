@@ -1,321 +1,499 @@
-;; el-get
+;;------------------------------------------------------------------------------
+;; Package Management
+;;------------------------------------------------------------------------------
 
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
+(require 'package)
+
+(add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-;(setq user-emacs-directory "~/.emacs.d")
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(unless (require 'el-get nil t)
-(url-retrieve
- "https://github.com/dimitri/el-get/raw/master/el-get-install.el"
- (lambda (s)
-   (end-of-buffer)
-   (eval-print-last-sexp))))
+(eval-and-compile
+  (require 'use-package)
+  (setq use-package-always-ensure t
+        use-package-expand-minimally t))
 
-;; now either el-get is `require'd already, or have been `load'ed by the
-;; el-get installer.
+;; Suppress cl deprecation warnings from old packages
+(setq byte-compile-warnings '(cl-functions))
 
-;; set local recipes, el-get-sources should only accept PLIST element
-(setq
- el-get-sources
- '((:name buffer-move                   ; have to add your own keys
-          :after (progn
-                   (global-set-key (kbd "<C-S-up>")     'buf-move-up)
-                   (global-set-key (kbd "<C-S-down>")   'buf-move-down)
-                   (global-set-key (kbd "<C-S-left>")   'buf-move-left)
-                   (global-set-key (kbd "<C-S-right>")  'buf-move-right)))
-   (:name smex                          ; a better (ido like) M-x
-          :after (progn
-                   (setq smex-save-file "~/.emacs.d/.smex-items")
-                   (global-set-key (kbd "M-x") 'smex)
-                   (global-set-key (kbd "M-X") 'smex-major-mode-commands)))
-   (:name magit                        ; git meet emacs, and a binding
-          :after (progn
-                   (global-set-key (kbd "C-x C-z") 'magit-status)
-                   (setq with-editor-file-name-history-exclude 1)))
-   ;; (:name switch-window                 ; takes over C-x o
-   ;;        :after (progn
-   ;;                 (global-set-key (kbd "C-x o") 'switch-window)))
-   (:name goto-last-change          ; move pointer back to last change
-          :after (progn
-                   (global-set-key (kbd "C-x C-/") 'goto-last-change)))
-   (:name paredit
-          :after (progn
-                   (add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'scheme-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'clojure-mode-hook (lambda () (paredit-mode +1)))
-                   (add-hook 'scheme-interaction-mode-hook (lambda () (paredit-mode +1)))))
-   (:name linum-ex
-          :after (global-linum-mode 1))
-   ;; search capable of interactive string replace
-   (:name phi-search
-          :after (setq phi-search-case-sensitive  t))
-   ;; fast navigation
-   (:name avy
-          :after (progn
-                   (global-set-key (kbd "C-'") 'avy-goto-char-timer)
-                   (global-set-key (kbd "C-:") 'avy-goto-char)
-                   (global-set-key (kbd "C-\"") 'avy-goto-char-2)))
-   (:name ace-window
-          :after (global-set-key (kbd "C-x o") 'ace-window))
-   (:name js2-mode
-          :after (setq js-indent-level 2))
-   ;; (:name go-mode
-   ;;        :after (progn
-   ;;                 (setq gofmt-command "goimports")
-   ;;                 (add-hook 'before-save-hook 'gofmt-before-save)
-   ;;                 ;; C-? global binding
-   ;;                 (global-set-key (kbd "C-?") 'godef-jump)))
-   (:name cider
-          :after (progn
-                   (setq cider-show-error-buffer nil)
-                   (setq cider-show-error-buffer 'only-in-repl)
-                   (setq cider-repl-display-help-banner nil)))
-   (:name helm
-          :after (progn
-                   (global-set-key (kbd "C-x M-f") 'helm-find-files)))
-   (:name helm-projectile
-          :after (progn
-                   (helm-projectile-on)
-                   (global-set-key (kbd "C-x C-f") 'helm-projectile-find-file)
-                   (global-set-key (kbd "C-x C-g") 'helm-projectile-grep)))
-   (:name helm-gtags
-          :after (progn
-                   (global-set-key (kbd "C-x C-t") 'helm-gtags-tags-in-this-function)))))
+;; Refresh package contents on first run if needed
+(when (not package-archive-contents)
+  (package-refresh-contents))
 
-(setq
- my:el-get-packages
- (append
-  '(
-    ;elpy
-    jedi
-    sublime-themes
-    auto-complete ; complete as you type with overlays
-    ac-cider
-    color-theme-solarized
-    color-theme-sanityinc
-    color-theme-sanityinc-tomorrow
-    company-mode
-    ;;cscope
-    dockerfile-mode
-    el-get ; el-get is self-hosting
-    emmet-mode ; zencoding evolved
-    flx ; Fuzzy IDO
-    go-autocomplete ; go get -u github.com/nsf/gocode
-    go-errcheck
-    go-flymake
-    go-imports
-    go-projectile
-    go-lint
-    livedown ; npm install -g livedown
-    lua-mode
-    markdown-mode
-    projectile ; Project navigation
-    yaml-mode
-    ;solidity-mode
-    less-css-mode
-    git-timemachine
-    helm-cider
-    )
+;; Move custom-set-variables to separate file
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
-  (mapcar 'el-get-source-name el-get-sources)))
+;; Manually loaded packages
+(add-to-list 'load-path "~/.emacs.d/external/")
 
-;; install new packages and init already installed packages
-(el-get 'sync my:el-get-packages)
+;;------------------------------------------------------------------------------
+;; Core Packages
+;;------------------------------------------------------------------------------
 
-;;-----------------
+(use-package diminish)
 
-;; General Config
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))
 
-(setq backup-inhibited t)
-(setq auto-save-default nil)
-(setq-default indent-tabs-mode nil)
-(setq make-backup-files nil)
-(setq browse-url-generic-program (executable-find "firefox")
-      browse-url-browser-function 'browse-url-generic)
-(fset 'yes-or-no-p 'y-or-n-p)
-(setq inhibit-startup-buffer-menu t)
-(add-hook 'find-file-hook
-          (lambda ()
-            (setf show-trailing-whitespace t)))
-(if (eq system-type 'darwin)
-    (setq browse-url-generic-program "~/.emacs.d/run-firefox.sh"))
+;; Which-key - shows available keybindings
+(use-package which-key
+  :diminish
+  :config
+  (which-key-mode)
+  (setq which-key-idle-delay 0.3
+        which-key-prefix-prefix "◉ "
+        which-key-sort-order 'which-key-key-order-alpha))
 
-;;; Look & feel
+;; Helpful - better help buffers
+(use-package helpful
+  :bind (("C-h f" . helpful-callable)
+         ("C-h v" . helpful-variable)
+         ("C-h k" . helpful-key)
+         ("C-h x" . helpful-command)))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default bold shadow italic underline bold bold-italic bold])
- '(ansi-color-names-vector
-   (vector "#cccccc" "#f2777a" "#99cc99" "#ffcc66" "#6699cc" "#cc99cc" "#66cccc" "#2d2d2d"))
- '(custom-enabled-themes (quote (sanityinc-tomorrow-day)))
- '(custom-safe-themes
-   (quote
-    ("9b59e147dbbde5e638ea1cde5ec0a358d5f269d27bd2b893a0947c4a867e14c1" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "46fd293ff6e2f6b74a5edf1063c32f2a758ec24a5f63d13b07a20255c074d399" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "3cd28471e80be3bd2657ca3f03fbb2884ab669662271794360866ab60b6cb6e6" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "1e7e097ec8cb1f8c3a912d7e1e0331caeed49fef6cff220be63bd2a6ba4cc365" default)))
- '(fci-rule-color "#515151")
- '(frame-background-mode (quote light))
- '(inhibit-startup-screen t)
- '(load-home-init-file t t)
- '(org-agenda-files nil)
- '(package-selected-packages (quote (queue)))
- '(vc-annotate-background nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#f2777a")
-     (40 . "#f99157")
-     (60 . "#ffcc66")
-     (80 . "#99cc99")
-     (100 . "#66cccc")
-     (120 . "#6699cc")
-     (140 . "#cc99cc")
-     (160 . "#f2777a")
-     (180 . "#f99157")
-     (200 . "#ffcc66")
-     (220 . "#99cc99")
-     (240 . "#66cccc")
-     (260 . "#6699cc")
-     (280 . "#cc99cc")
-     (300 . "#f2777a")
-     (320 . "#f99157")
-     (340 . "#ffcc66")
-     (360 . "#99cc99"))))
- '(vc-annotate-very-old-color nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-(menu-bar-mode 0)
+;;------------------------------------------------------------------------------
+;; Completion Framework - Ivy/Counsel/Swiper
+;;------------------------------------------------------------------------------
+
+(use-package ivy
+  :diminish
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t
+        ivy-count-format "(%d/%d) "
+        enable-recursive-minibuffers t))
+
+(use-package counsel
+  :diminish
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-x b" . counsel-switch-buffer)
+         ("C-c C-r" . counsel-recentf)
+         ("C-c g" . counsel-git)
+         ("C-c j" . counsel-git-grep)
+         ("C-c k" . counsel-ag)
+         ("C-x l" . counsel-locate))
+  :config
+  (setq counsel-find-file-ignore-regexp
+        (concat "\\(?:\\`[#.]\\)\\|\\(?:[#~]\\'\\)"
+                "\\|\\(?:\\(?:\\.\\(?:aux\\|bbl\\|blg\\|fdb_latexmk\\|fls\\|log\\|synctex\\.gz\\|toc\\)\\)\\)\\'")))
+
+(use-package swiper
+  :bind (("C-s" . swiper)
+         ("C-r" . swiper-backward)))
+
+;;------------------------------------------------------------------------------
+;; Navigation & Editing
+;;------------------------------------------------------------------------------
+
+(use-package magit
+  :bind ("C-x C-z" . magit-status))
+
+(use-package git-timemachine)
+
+(use-package goto-last-change
+  :bind ("C-x C-/" . goto-last-change))
+
+(use-package avy
+  :bind ("M-p" . avy-goto-char-timer))
+
+(use-package ace-window
+  :bind ("C-x o" . ace-window))
+
+(use-package goto-last-point
+  :ensure nil  ;; Loaded from external
+  :if (locate-library "goto-last-point")
+  :bind (("C-x w" . goto-last-point-record)
+         ("C-x e" . goto-last-point)))
+
+(use-package multiple-cursors
+  :bind ("C-S-<mouse-1>" . mc/add-cursor-on-click))
+
+(use-package bm
+  :demand t
+  :config
+  (setq bm-cycle-all-buffers t
+        temporary-bookmark-p t)
+  :bind (("C-c C-h C-h" . bm-next)
+         ("C-c C-j C-j" . bm-previous)
+         ("C-c C-g C-g" . bm-toggle)))
+
+;;------------------------------------------------------------------------------
+;; Project Management
+;;------------------------------------------------------------------------------
+
+(use-package projectile
+  :diminish
+  :init (setq projectile-indexing-method 'hybrid)
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :config (projectile-mode +1))
+
+(use-package counsel-projectile
+  :after (counsel projectile)
+  :config (counsel-projectile-mode))
+
+(use-package treemacs
+  :defer t
+  :bind ("C-x t" . treemacs))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+;;------------------------------------------------------------------------------
+;; Window Management
+;;------------------------------------------------------------------------------
+
+(use-package window-purpose
+  :config (purpose-mode))
+
+;; Custom window toggle
+(defun toggle-maximize-buffer ()
+  "Maximize buffer."
+  (interactive)
+  (if (= 1 (length (window-list)))
+      (jump-to-register '_)
+    (progn
+      (set-register '_ (list (current-window-configuration)))
+      (delete-other-windows))))
+
+;;------------------------------------------------------------------------------
+;; UI & Appearance
+;;------------------------------------------------------------------------------
+
+;; Theme
+(use-package gruvbox-theme)
+(load-theme 'gruvbox-dark-hard t)
+
+;; Modern modeline
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :config
+  (setq doom-modeline-height 25
+        doom-modeline-bar-width 3
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t
+        doom-modeline-buffer-file-name-style 'truncate-upto-project))
+
+;; Beacon - highlight cursor on jump
+(use-package beacon
+  :config (beacon-mode))
+
+;; Rainbow delimiters
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;; Highlight current line
+(use-package hl-line
+  :ensure nil
+  :config (global-hl-line-mode 1))
+
+;; Font configuration
 (if (display-graphic-p)
-    ;; GUI
     (progn
       (scroll-bar-mode 0)
       (tool-bar-mode 0)
-      (color-theme-sanityinc-tomorrow-day)
-      ;; Fonts
       (if (eq system-type 'darwin)
-          ;; OSX
+          ;; macOS
           (progn
-            ;; default Latin font (e.g. Consolas)
-            (set-face-attribute 'default nil :family "Courier")
-            ;; default font size (point * 10)
-            ;; WARNING!  Depending on the default font,
-            ;; if the size is not supported very well, the frame will be clipped
-            ;; so that the beginning of the buffer may not be visible correctly.
-            (set-face-attribute 'default nil :height 110)
-            ;; Prevent opening a dialog on OSX (buggy)
-            (defadvice yes-or-no-p (around prevent-dialog activate)
-              "Prevent yes-or-no-p from activating a dialog"
-              (let ((use-dialog-box nil))
-                ad-do-it))
-            (defadvice y-or-n-p (around prevent-dialog-yorn activate)
-              "Prevent y-or-n-p from activating a dialog"
-              (let ((use-dialog-box nil))
-                ad-do-it)))
+            (set-face-attribute 'default nil :font "Fira Code" :height 140))
         ;; Linux
         (progn
-          (set-default-font "Hack")
-          (set-face-attribute 'default nil :height 85))))
-  ;; Console
-  (progn
-    (color-theme-sanityinc-tomorrow-bright)))
+          (set-face-attribute 'default nil :font "JetBrains Mono" :height 100)))))
+
+;; UI Settings
+(global-display-line-numbers-mode)
+(menu-bar-mode 0)
 (column-number-mode 1)
 (line-number-mode 1)
 (set-default 'truncate-lines t)
 (blink-cursor-mode 0)
 (global-font-lock-mode 1)
-(transient-mark-mode 1)
 (setq show-paren-delay 0
       show-paren-style 'parenthesis)
 (show-paren-mode 1)
 (setq ns-right-alternate-modifier nil)
+(set-fringe-mode '(1 . 1))
 
-;; Aspell
+;;------------------------------------------------------------------------------
+;; General Settings
+;;------------------------------------------------------------------------------
 
-(setq ispell-program-name "aspell")
-(setq exec-path (cons "/usr/local/bin/" exec-path))
+;; No backups
+(setq backup-inhibited t
+      auto-save-default nil
+      make-backup-files nil)
 
-;; Etags
+;; Silent bell
+(setq ring-bell-function 'ignore)
 
-(defun create-tags (dir-name)
-  "Create tags file."
-  (interactive
-   "Directory:")
-  (shell-command
-   (format "cd %s && find . -type f | grep \".*\\.\\(c\\|h\\|cpp\\|hpp\\|scm\\|sld\\|ss\\)$\" | xargs etags"
-           (directory-file-name dir-name))))
+;; Indentation
+(setq-default indent-tabs-mode nil)
 
-;; Shell
+;; Startup
+(setq inhibit-startup-buffer-menu t
+      inhibit-splash-screen t)
 
-(add-hook 'shell-mode-hook (lambda ()
-                             (compilation-shell-minor-mode 1)
-                             (setq compilation-auto-jump-to-first-error 1)))
+;; UTF-8
+(set-language-environment "UTF-8")
 
-;; Clojure (Cider)
+;; Show trailing whitespace
+(add-hook 'find-file-hook (lambda () (setf show-trailing-whitespace t)))
 
-(add-hook 'cider-repl-mode-hook #'company-mode)
-(add-hook 'cider-mode-hook #'company-mode)
+;; Confirmation
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; Misc
+(transient-mark-mode 1)
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'scroll-left 'disabled nil)
+
+;;------------------------------------------------------------------------------
+;; AI Tools
+;;------------------------------------------------------------------------------
+
+;; Copilot
+(use-package copilot
+  :ensure nil  ;; Loaded from external directory
+  :if (locate-library "copilot")
+  :hook (prog-mode . copilot-mode)
+  :config
+  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "S-<tab>") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "S-TAB") 'copilot-accept-completion)
+  :bind (:map company-mode-map
+              ("C-<tab>" . copilot-accept-completion)
+              ("C-TAB" . copilot-accept-completion)))
+
+;; Aider (commented - configure as needed)
+;; (use-package aider
+;;   :ensure t
+;;   :config
+;;   ;; Configure with your preferred model and API key via environment
+;;   ;; export ANTHROPIC_API_KEY=your-key
+;;   ;; export GEMINI_API_KEY=your-key
+;;   (setq aider-args '("--model" "sonnet"))
+;;   (global-set-key (kbd "C-c a") 'aider-transient-menu))
+
+;;------------------------------------------------------------------------------
+;; Development Tools
+;;------------------------------------------------------------------------------
+
+;; Tree-sitter grammars
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+;; Company - code completion
+(use-package company
+  :diminish
+  :hook (after-init . global-company-mode)
+  :config
+  (setq company-idle-delay 0.2
+        company-minimum-prefix-length 2
+        company-tooltip-align-annotations t))
+
+;; Flycheck - syntax checking
+(use-package flycheck
+  :init (global-flycheck-mode)
+  :config
+  (setq flycheck-check-syntax-automatically '(save mode-enabled)))
+
+;; Yasnippet
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :hook ((prog-mode . yas-minor-mode)
+         (text-mode . yas-minor-mode))
+  :config
+  (yas-reload-all))
+
+(use-package yasnippet-snippets
+  :after yasnippet)
+
+;; LSP Mode
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook ((python-mode . lsp-deferred)
+         (rust-mode . lsp-deferred)
+         (rustic-mode . lsp-deferred)
+         (go-mode . lsp-deferred)
+         (typescript-mode . lsp-deferred)
+         (js-mode . lsp-deferred)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :custom
+  ;; General LSP settings
+  (lsp-keymap-prefix "C-c l")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  (lsp-enable-snippet t)
+  (lsp-prefer-flymake nil)
+  ;; Rust-specific settings
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
+  (lsp-rust-analyzer-display-parameter-hints t)
+  (lsp-rust-analyzer-display-reborrow-hints t)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :bind (("C-c 1" . lsp-ui-peek-find-definitions)
+         ("C-c 2" . lsp-ui-peek-find-references)
+         ("C-c 6" . lsp-ui-imenu))
+  :custom
+  (lsp-ui-peek-enable t)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-imenu-enable t)
+  (lsp-ui-flycheck-enable t)
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-delay 1)
+  (lsp-ui-doc-enable t))
+
+;; DAP Mode (Debugger)
+(use-package dap-mode
+  :after lsp-mode
+  :config
+  (dap-ui-mode 1)
+  (dap-tooltip-mode 1)
+  (tooltip-mode 1)
+  (dap-ui-controls-mode 1)
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  (dap-gdb-lldb-setup))
+
+;; Exec path from shell (macOS/GUI only)
+(use-package exec-path-from-shell
+  :if (memq window-system '(mac ns x))
+  :config (exec-path-from-shell-initialize))
+
+;;------------------------------------------------------------------------------
+;; Language Modes
+;;------------------------------------------------------------------------------
+
+;; Python
+(use-package python
+  :ensure nil
+  :mode ("\\.py\\'" . python-mode)
+  :config
+  (setq python-shell-interpreter "python3"))
+
+(use-package python-black
+  :after python
+  :hook (python-mode . python-black-on-save-mode))
+
+;; Rust
+(use-package rustic
+  :bind (:map rustic-mode-map
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status)
+              ("C-c C-c e" . lsp-rust-analyzer-expand-macro)
+              ("C-c C-c d" . dap-hydra)
+              ("C-c C-c h" . lsp-ui-doc-glance)
+              ("C-c 9" . flycheck-next-error)
+              ("C-c 0" . next-error)
+              :map rustic-compilation-mode-map
+              ("q" . kill-this-buffer))
+  :config
+  (setq rustic-indent-method-chain nil
+        rustic-lsp-server 'rust-analyzer)
+  (add-hook 'rustic-mode-hook
+            (lambda ()
+              (when buffer-file-name
+                (setq-local buffer-save-without-query t))
+              (add-hook 'before-save-hook 'lsp-format-buffer nil t))))
+
+(use-package cargo
+  :defer t
+  :hook (rust-mode . cargo-minor-mode))
 
 ;; C
-
 (setq c-default-style "linux"
       c-basic-offset 4)
 
-;; Go
+;; HTML
+(use-package emmet-mode
+  :hook ((html-mode . emmet-mode)
+         (css-mode . emmet-mode)))
 
-(let ((go-path "/Users/alvatar/go"))
-  (setenv "GOPATH" go-path)
-  (setenv "PATH" (concat go-path "/bin:"
-                         (getenv "PATH")))
-  (setq exec-path (cons (concat go-path "/bin")
-                        exec-path)))
+;; Markdown
+(use-package markdown-mode
+  :mode ("\\.md\\'" . markdown-mode)
+  :config
+  (setq markdown-command "pandoc"))
+
+;; YAML
+(use-package yaml-mode
+  :mode "\\.ya?ml\\'")
+
+;; TOML
+(use-package toml-mode
+  :mode "\\.toml\\'")
+
+;; Dockerfile
+(use-package dockerfile-mode
+  :mode "Dockerfile\\'")
+
+;; Solidity
+(use-package solidity-mode
+  :mode "\\.sol\\'")
+
+;; WGSL
+(use-package wgsl-mode
+  :mode "\\.wgsl\\'")
+
+;; Paredit for Lisp/Scheme
+(use-package paredit
+  :hook ((emacs-lisp-mode . paredit-mode)
+         (lisp-mode . paredit-mode)
+         (scheme-mode . paredit-mode)
+         (clojure-mode . paredit-mode)))
 
 ;; Scheme
+;; (add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
+;; (setq scheme-program-name "gsi")  ;; Adjust for your Gambit installation
+;; (font-lock-add-keywords 'scheme-mode
+;;   '(("(\\(lambda\\)\\>" (0 (prog1 ()
+;;                             (compose-region (match-beginning 1)
+;;                                           (match-end 1) ?λ))))))
 
-(add-to-list 'auto-mode-alist '("\\.sld\\'" . scheme-mode))
-(add-hook 'scheme-mode-hook (lambda () (setq scheme-program-name "/usr/local/Gambit/bin/gsc")))
-(font-lock-add-keywords 'scheme-mode
-                        '(("(\\(lambda\\)\\>" (0 (prog1 ()
-                                                   (compose-region (match-beginning 1)
-                                                                    (match-end 1)
-                                                                   ?λ))))))
-(global-set-key "\C-c\C-qr" 'run-scheme)
-(global-set-key "\C-c\C-c" 'comment-region)
-(global-set-key "\C-c\M-c" 'uncomment-region)
-(add-hook 'scheme-mode-hook
-          (lambda ()
-            (define-key scheme-mode-map "\C-c\C-i" 'scheme-import-file)))
-(add-hook 'inferior-scheme-mode-hook
-          (lambda ()
-            (linum-mode 0)))
-(add-hook 'inferior-scheme-mode-hook
-          (lambda ()
-            (define-key scheme-mode-map "\C-c\C-c" 'comment-region)
-            (define-key scheme-mode-map "\C-c\M-c" 'uncomment-region)))
-
-;; Load remote SchemeSpheres remote debugging if installed
-(let ((sense-emacs "~/Dropbox/projects/sphere-energy/src/remote/sense-emacs.el"
-       ;;"/usr/local/Gambit/spheres/energy/src/remote/sense-emacs.el"
-       ))
-  (message "Emacs Sense loaded")
-  (if (file-exists-p sense-emacs)
-      (load-file sense-emacs)))
-
-;;-----------------
-
-;; Custom functions
+;;------------------------------------------------------------------------------
+;; Custom Functions
+;;------------------------------------------------------------------------------
 
 (defun rm-trailing-spaces ()
-  "Remove spaces at ends of all lines"
+  "Remove spaces at ends of all lines."
   (interactive)
   (save-excursion
     (let ((current (point)))
@@ -324,25 +502,32 @@
         (replace-match "" nil nil))
       (goto-char current))))
 
-(put 'downcase-region 'disabled nil)
-
 (defun filter-with-shell-command (command arg)
-  "Run a command with the buffer as input and replace it"
+  "Run COMMAND with the buffer as input and replace it."
   (interactive (list (read-from-minibuffer "Shell command: " nil nil nil 'shell-command-history)
                      current-prefix-arg))
   (shell-command-on-region (point-min) (point-max) command t t))
 
-(defun toggle-maximize-buffer () "Maximize buffer"
-       (interactive)
-       (if (= 1 (length (window-list)))
-           (jump-to-register '_)
-         (progn
-           (set-register '_ (list (current-window-configuration)))
-           (delete-other-windows))))
+;;------------------------------------------------------------------------------
+;; Global Keybindings
+;;------------------------------------------------------------------------------
+
+(global-unset-key (kbd "C-x C-c"))  ;; Prevent accidental quit
 
 (global-set-key (kbd "<C-up>") 'toggle-maximize-buffer)
-
-;; Custom Key bindings
-
 (global-set-key (kbd "C-x C-b") 'buffer-menu)
-(global-set-key (kbd "C-S-k") 'delete-region)
+(global-set-key (kbd "C-x C-c") 'comment-or-uncomment-region)
+(global-set-key (kbd "C-x K") (lambda () (interactive) (kill-this-buffer) (delete-window)))
+
+;;------------------------------------------------------------------------------
+;; Installation Notes
+;;------------------------------------------------------------------------------
+
+;; Install language servers and tools:
+;;
+;; Python: pip install python-lsp-server black
+;; Rust:   rustup component add rust-analyzer
+;;
+;; Tree-sitter grammars: M-x treesit-install-language-grammar
+
+;;; .emacs ends here

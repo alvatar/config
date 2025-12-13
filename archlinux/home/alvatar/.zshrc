@@ -94,9 +94,10 @@ source $ZSH/oh-my-zsh.sh
 
 eval "$(starship init zsh)"
 
-
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+
+export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 
 alias ls='eza'
 alias ll='eza -l'
