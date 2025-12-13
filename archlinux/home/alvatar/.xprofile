@@ -1,0 +1,14 @@
+xrdb -merge ~/.Xresources
+
+# Keyboard layout with accents
+setxkbmap -layout us -variant altgr-intl
+
+# Caps lock swapping script
+~/.bin/keyboard_swap_caps.sh
+
+# Turn off screen after 5 minutes
+xset s 300 300 # Blank screen at 5 minutes
+xset dpms 0 600 1200 # skip standby (0), skip suspend (600), turn off display at 20 minutes (1200 seconds)
+
+# Lock screen after 5 minutes of inactivity
+xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock &
