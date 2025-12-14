@@ -17,6 +17,8 @@ import XMonad.Layout.Tabbed
 import XMonad.Actions.GridSelect
 import XMonad.Hooks.EwmhDesktops -- REQUIRED for modern fullscreen support
 import XMonad.Layout.NoBorders
+import XMonad.Layout.IndependentScreens
+import XMonad.Util.WorkspaceCompare (getSortByIndex)
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map as M
@@ -49,7 +51,10 @@ myModMask       = mod4Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
+-- IndependentScreens: each physical screen gets its own set of workspaces
+-- This means screen 0 has workspaces 0_1, 0_2, ... 0_9
+-- and screen 1 has workspaces 1_1, 1_2, ... 1_9
+myWorkspaces    = withScreens 2 ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -69,6 +74,17 @@ myFocusedBorderColor = "#cb4b16"
 -- Fields are: top, bottom, left, right.
 --
 myDefaultGaps   = [(0,0,0,0)]
+
+------------------------------------------------------------------------
+-- Helper function for IndependentScreens
+-- Filters workspaces to only include those on the current physical screen
+myScreenWorkspaces :: X (WindowSpace -> Bool)
+myScreenWorkspaces = do
+    ws <- gets windowset
+    -- Get the current physical screen (0, 1, etc.)
+    let currentScreen = W.screen (W.current ws)
+    -- Filter workspaces that belong to this screen
+    return $ \w -> unmarshallS (W.tag w) == fromIntegral currentScreen
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -94,14 +110,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- , ((0, 0x1008ff14), spawn "glxgears")
     
     -- WORKSPACE
-    -- Go to previous workspace
-    , ((modMask,                    xK_d),    prevWS)
-    -- Go to next workspace
-    , ((modMask,                    xK_f),    nextWS)
-    -- Shift to previous workspace
-    , ((modMask .|. shiftMask, xK_d),  shiftToPrev)
-    -- Shift to next workspace
-    , ((modMask .|. shiftMask, xK_f),    shiftToNext)
+    -- Go to previous workspace (on current screen only)
+    , ((modMask,                    xK_d),    moveTo Prev (WSIs myScreenWorkspaces))
+    -- Go to next workspace (on current screen only)
+    , ((modMask,                    xK_f),    moveTo Next (WSIs myScreenWorkspaces))
+    -- Shift to previous workspace (on current screen only)
+    , ((modMask .|. shiftMask, xK_d),  shiftTo Prev (WSIs myScreenWorkspaces))
+    -- Shift to next workspace (on current screen only)
+    , ((modMask .|. shiftMask, xK_f),    shiftTo Next (WSIs myScreenWorkspaces))
       -- close focused window 
     , ((modMask .|. shiftMask,      xK_t     ), kill)
     -- Move focus to the previous window
@@ -127,6 +143,12 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     --  Reset the layouts on the current workspace to default
     , ((mod4Mask .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
 
+    -- MULTI-SCREEN SUPPORT
+    -- Move window to other screen (keeps window on the active workspace of that screen)
+    , ((modMask,                    xK_w     ), shiftNextScreen >> nextScreen)
+    -- Switch focus to other screen
+    , ((modMask,                    xK_e     ), nextScreen)
+
     -- Xmonad
     -- Restart xmonad
     , ((modMask .|. shiftMask, xK_z ), restart "xmonad" True)
@@ -137,8 +159,9 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
-    [((m .|. mod4Mask, k), windows $ f i)
-    | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
+    -- With IndependentScreens, these operate on the current screen's workspaces
+    [((m .|. mod4Mask, k), windows $ onCurrentScreen f i)
+    | (i, k) <- zip (workspaces' conf) [xK_1 .. xK_9]
     , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
 
 
@@ -234,18 +257,24 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+-- Monitor setup is handled here to detect and configure DP-2 if connected
+myStartupHook = do
+    spawn "~/.bin/setup-monitors.sh"
+    return ()
 
 ------------------------------------------------------------------------
 -- Run xmonad with the settings you specify. No need to modify this.
 -- 
 -- The 'ewmh' function is essential for modern fullscreen support (ewmhFullscreen)
 -- and proper window management communication with other applications (like status bars).
-main = xmonad . ewmh $ defaults
+main = do
+    -- Count the number of screens for IndependentScreens
+    -- This allows xmonad to adapt when screens are added/removed
+    xmonad . ewmh $ defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will 
--- use the defaults defined in xmonad/XMonad/Config.hs
+-- use the defaults defined in xmonad/XConfig.hs
 defaults = def {
       -- simple stuff
         terminal                 = myTerminal,
