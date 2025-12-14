@@ -20,37 +20,23 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.IndependentScreens
 import XMonad.Util.WorkspaceCompare (getSortByIndex)
 
+import Graphics.X11.ExtraTypes.XF86
+
 import qualified XMonad.StackSet as W
 import qualified Data.Map as M
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
--- myTerminal      = "urxvt -is +tr -si -sw +sb -fg '#ffffff' -bg '#111111' -fn 'xft:Andale Mono:pixelsize=28:antialias=true:autohinting=true'"
--- myTerminal      = "urxvtc -sw +sb -fn 'xft:Hack:size=18:antialias=true:autohinting=true'"
--- myTerminal = "xterm -fs 14" -- Set to xterm with slightly larger font
 myTerminal = "kitty" -- Set to xterm with slightly larger font
 
 -- Width of the window border in pixels.
 --
 myBorderWidth   = 1
 
--- modMask lets you specify which modkey you want to use. The default
--- is mod1Mask ("left alt").  You may also consider using mod3Mask
--- ("right alt"), which does not conflict with emacs keybindings. The
--- "windows key" is usually mod4Mask.
---
+-- "windows key" is mod4Mask.
 myModMask       = mod4Mask
 
--- The default number of workspaces (virtual screens) and their names.
--- By default we use numeric strings, but any string may be used as a
--- workspace name. The number of workspaces is determined by the length
--- of this list.
---
--- A tagging example:
---
--- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
---
 -- IndependentScreens: each physical screen gets its own set of workspaces
 -- This means screen 0 has workspaces 0_1, 0_2, ... 0_9
 -- and screen 1 has workspaces 1_1, 1_2, ... 1_9
@@ -65,14 +51,7 @@ myFocusedBorderColor = "#cb4b16"
 -- screen. Anything non-zero here will leave a gap of that many pixels
 -- on the given edge, on the that screen. A useful gap at top of screen
 -- for a menu bar (e.g. 15)
---
--- An example, to set a top gap on monitor 1, and a gap on the bottom of
--- monitor 2, you'd use a list of geometries like so:
---
--- > defaultGaps = [(18,0,0,0),(0,18,0,0)] -- 2 gaps on 2 monitors
---
 -- Fields are: top, bottom, left, right.
---
 myDefaultGaps   = [(0,0,0,0)]
 
 ------------------------------------------------------------------------
@@ -98,17 +77,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask,      xK_Return), spawn "thunar" )
     -- launch dmenu
     , ((modMask,                    xK_m     ), spawn "dmenu_run -fn 'xft:Monoid:size=10'")
-    -- launch internet browser (Chromium)
-    , ((modMask,                    xK_b     ), spawn "chromium --force-device-scale-factor=1.5")
     
     -- MULTIMEDIA KEYS
-    , ((0, 0x1008ff12), spawn "amixer set Master toggle") -- Mute
-    , ((0, 0x1008ff11), spawn "amixer set Master 5%- && amixer set PCM 5%- -c 1") -- Volume Down
-    , ((0, 0x1008ff13), spawn "amixer set Master 5%+ && amixer set PCM 5%+ -c 1") -- Volume Up
-    , ((0, 0x1008ff02), spawn "light -A 5") -- Brightness Up
-    , ((0, 0x1008ff03), spawn "light -U 5") -- Brightness Down
-    -- , ((0, 0x1008ff14), spawn "glxgears")
-    
+    , ((0, xF86XK_MonBrightnessUp), spawn "brightnessctl --class=backlight set +5%")
+    , ((0, xF86XK_MonBrightnessDown), spawn "brightnessctl --class=backlight set 5%-")
+    --, ((0, xF86XK_AudioRaiseVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    --, ((0, xF86XK_AudioLowerVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    --, ((0, xF86XK_AudioMute), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+
     -- WORKSPACE
     -- Go to previous workspace (on current screen only)
     , ((modMask,                    xK_d),    moveTo Prev (WSIs myScreenWorkspaces))

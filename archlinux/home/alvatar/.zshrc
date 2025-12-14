@@ -102,3 +102,5 @@ export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
 alias ls='eza'
 alias ll='eza -l'
 alias la='eza -la'
+
+alias gammastep-toggle='pkill -USR1 gammastep'
