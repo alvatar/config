@@ -16,7 +16,4 @@ xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock &
 # Intercept Audio media keys
 sxhkd &
 
-# Screen temperature control
-gammastep -l 0:0 -t 6500:3000 -d :10:00-08:00: &
-
 exec xmonad

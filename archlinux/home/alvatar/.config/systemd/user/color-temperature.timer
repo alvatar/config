@@ -1,0 +1,9 @@
+[Unit]
+Description=Update color temperature at 8am and 10pm
+
+[Timer]
+OnCalendar=08:00,22:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
