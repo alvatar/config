@@ -4,7 +4,7 @@ xrdb -merge ~/.Xresources
 setxkbmap -layout us -variant altgr-intl
 
 # Caps lock swapping script
-~/.bin/keyboard_swap_caps.sh
+~/.local/bin/keyboard_swap_caps.sh
 
 # Turn off screen after 5 minutes
 xset s 300 300 # Blank screen at 5 minutes
