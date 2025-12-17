@@ -104,3 +104,6 @@ alias ll='eza -l'
 alias la='eza -la'
 
 alias gammastep-toggle='pkill -USR1 gammastep'
+
+export PATH="$HOME/.local/bin:$PATH"
+

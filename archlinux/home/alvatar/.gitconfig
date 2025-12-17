@@ -1,6 +1,6 @@
 [user]
 	name = Álvaro Castro Castilla
-	email = a@fourthbit.com
+	email = alvatar@proton.me
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -9,3 +9,9 @@
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 	insteadOf = https://github.com/
+	insteadOf = https://github.com/
+	insteadOf = https://github.com/
+	insteadOf = https://github.com/
+	insteadOf = https://github.com/
+[core]
+	editor = vim
