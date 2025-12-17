@@ -235,7 +235,7 @@ myLogHook = return ()
 -- By default, do nothing.
 -- Monitor setup is handled here to detect and configure DP-2 if connected
 myStartupHook = do
-    spawn "~/.bin/setup-monitors.sh"
+    spawn "~/.local/bin/setup-monitors.sh"
     return ()
 
 ------------------------------------------------------------------------
