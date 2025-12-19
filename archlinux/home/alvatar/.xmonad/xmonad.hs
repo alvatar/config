@@ -81,6 +81,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- MULTIMEDIA KEYS
     , ((0, xF86XK_MonBrightnessUp), spawn "brightnessctl --class=backlight set +5%")
     , ((0, xF86XK_MonBrightnessDown), spawn "brightnessctl --class=backlight set 5%-")
+    , ((0, xF86XK_Display), spawn "~/.local/bin/toggle-color-temperature.sh")
     --, ((0, xF86XK_AudioRaiseVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
     --, ((0, xF86XK_AudioLowerVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
     --, ((0, xF86XK_AudioMute), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
