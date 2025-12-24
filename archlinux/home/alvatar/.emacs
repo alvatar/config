@@ -1,4 +1,19 @@
 ;;------------------------------------------------------------------------------
+;; Startup Suppression - MUST BE FIRST
+;;------------------------------------------------------------------------------
+
+;; Suppress all startup messages and screens
+(setq inhibit-startup-message t
+      inhibit-startup-screen t
+      inhibit-splash-screen t
+      inhibit-startup-buffer-menu t
+      initial-scratch-message nil
+      initial-buffer-choice nil)
+
+;; Disable menu bar immediately
+(menu-bar-mode 0)
+
+;;------------------------------------------------------------------------------
 ;; Package Management
 ;;------------------------------------------------------------------------------
 
@@ -168,7 +183,10 @@
 
 ;; Theme
 (use-package gruvbox-theme)
-(load-theme 'gruvbox-dark-hard t)
+;;(load-theme 'gruvbox-dark-hard t)
+(add-to-list 'custom-theme-load-path
+             "~/.emacs-themes/")
+(load-theme 'naga-blue t)
 
 ;; Modern modeline
 (use-package doom-modeline
@@ -207,8 +225,7 @@
           (set-face-attribute 'default nil :font "JetBrains Mono" :height 100)))))
 
 ;; UI Settings
-(global-display-line-numbers-mode)
-(menu-bar-mode 0)
+;; (global-display-line-numbers-mode)
 (column-number-mode 1)
 (line-number-mode 1)
 (set-default 'truncate-lines t)
@@ -234,10 +251,6 @@
 
 ;; Indentation
 (setq-default indent-tabs-mode nil)
-
-;; Startup
-(setq inhibit-startup-buffer-menu t
-      inhibit-splash-screen t)
 
 ;; UTF-8
 (set-language-environment "UTF-8")
@@ -334,7 +347,9 @@
 ;; LSP Mode
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
-  :hook ((python-mode . lsp-deferred)
+  :hook ((python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp-deferred)))
          (rust-mode . lsp-deferred)
          (rustic-mode . lsp-deferred)
          (go-mode . lsp-deferred)
@@ -357,6 +372,8 @@
   (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
   (lsp-rust-analyzer-display-parameter-hints t)
   (lsp-rust-analyzer-display-reborrow-hints t)
+  ;; Python-specific settings
+  (lsp-pyright-typechecking-mode "basic")
   :config
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 

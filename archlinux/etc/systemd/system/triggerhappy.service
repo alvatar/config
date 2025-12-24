@@ -1,0 +1,13 @@
+[Unit]
+Description=Triggerhappy global hotkey daemon
+After=local-fs.target
+
+[Service]
+Type=simple
+Environment="DISPLAY=:0"
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+ExecStart=/usr/bin/thd --triggers /home/alvatar/.config/triggerhappy/triggers.conf --deviceglob /dev/input/event* --user alvatar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

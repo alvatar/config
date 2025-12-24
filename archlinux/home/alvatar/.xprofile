@@ -13,7 +13,4 @@ xset dpms 0 600 1200 # skip standby (0), skip suspend (600), turn off display at
 # Lock screen after 5 minutes of inactivity
 xss-lock -n /usr/lib/xsecurelock/dimmer -l -- xsecurelock &
 
-# Intercept Audio media keys
-sxhkd &
-
 exec xmonad
