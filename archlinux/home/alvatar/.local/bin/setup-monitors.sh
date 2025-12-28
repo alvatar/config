@@ -1,11 +1,11 @@
 #!/bin/bash
-
-# Check if DP-2 is connected
-if xrandr | grep "^DP-2 connected"; then
-    # DP-2 is connected, set it up with scaling
-    xrandr --output DP-2 --mode 2880x1800 --scale 1.30x1.30 --pos 0x0
-    xrandr --output eDP-1 --mode 3840x2400 --pos 3840x0
+# Get the connected external display (anything that's not eDP-1)
+EXTERNAL=$(xrandr | grep " connected" | grep -v "eDP-1" | awk '{print $1}')
+if [ -n "$EXTERNAL" ]; then
+    # External display found, set up external on left, laptop on right
+    xrandr --output "$EXTERNAL" --mode 2880x1800 --scale 1.30x1.30 --pos 0x0 \
+           --output eDP-1 --mode 3840x2400 --pos 3744x0
 else
-    # DP-2 not connected, just use eDP-1
+    # No external display, just use laptop
     xrandr --output eDP-1 --mode 3840x2400 --pos 0x0
 fi
