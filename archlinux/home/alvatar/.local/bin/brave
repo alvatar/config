@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /usr/bin/brave --disable-gpu-vsync --enable-features=VaapiVideoDecoder --use-gl=desktop "$@"
